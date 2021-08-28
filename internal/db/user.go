@@ -115,3 +115,18 @@ func UserGroupDelete(db *gorm.DB, uuid string, group string) error {
 
 	return db.Save(&user).Error
 }
+
+// UserResetPassword resets a User's password
+func UserResetPassword(db *gorm.DB, uuid string, password string) error {
+	var user User
+	if err := db.First(&user, "id = ?", uuid).Error; err != nil {
+		return err
+	}
+
+	passwordHash, err := auth.Hash(password)
+	if err != nil {
+		return err
+	}
+	user.PasswordHash = passwordHash
+	return db.Save(&user).Error
+}

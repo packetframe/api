@@ -88,3 +88,24 @@ func TestDbUserGroupAddDelete(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotContains(t, user1.Groups, GroupAdmin)
 }
+
+func TestDbUserResetPassword(t *testing.T) {
+	db, err := dbSetup()
+	assert.Nil(t, err)
+
+	// Find user1
+	user1, err := UserFind(db, "user1@example.com")
+	assert.Nil(t, err)
+
+	oldPassword := user1.PasswordHash
+
+	err = UserResetPassword(db, user1.ID, "new-password")
+	assert.Nil(t, err)
+
+	// Find user1
+	user1, err = UserFind(db, "user1@example.com")
+	assert.Nil(t, err)
+
+	// Assert that there are 3 users
+	assert.NotEqual(t, oldPassword, user1.PasswordHash)
+}
