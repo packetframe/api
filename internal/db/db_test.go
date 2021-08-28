@@ -14,16 +14,12 @@ func dbSetup() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	// Drop users
-	err = db.Exec("DELETE FROM users;").Error
-	if err != nil {
-		return nil, err
-	}
-
-	// Add user1
-	err = UserAdd(db, "user1@example.com", "password1")
-	if err != nil {
-		return nil, err
+	// Drop tables
+	for _, table := range []string{"users", "zones", "records"} {
+		err = db.Exec("DELETE FROM " + table).Error
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return db, nil

@@ -10,7 +10,9 @@ func TestDbUserList(t *testing.T) {
 	db, err := dbSetup()
 	assert.Nil(t, err)
 
-	// Add 2 more users
+	// Add 3 users
+	err = UserAdd(db, "user1@example.com", "password1")
+	assert.Nil(t, err)
 	err = UserAdd(db, "user2@example.com", "password2")
 	assert.Nil(t, err)
 	err = UserAdd(db, "user3@example.com", "password3")
@@ -24,6 +26,10 @@ func TestDbUserList(t *testing.T) {
 
 func TestDbUserAddDelete(t *testing.T) {
 	db, err := dbSetup()
+	assert.Nil(t, err)
+
+	// Add user1
+	err = UserAdd(db, "user1@example.com", "password1")
 	assert.Nil(t, err)
 
 	// Find user1
@@ -42,6 +48,10 @@ func TestDbUserAddDelete(t *testing.T) {
 
 func TestDbUserGroupAddDelete(t *testing.T) {
 	db, err := dbSetup()
+	assert.Nil(t, err)
+
+	// Add user1
+	err = UserAdd(db, "user1@example.com", "password1")
 	assert.Nil(t, err)
 
 	// Find user1
@@ -68,6 +78,10 @@ func TestDbUserGroupAddDelete(t *testing.T) {
 
 func TestDbUserResetPassword(t *testing.T) {
 	db, err := dbSetup()
+	assert.Nil(t, err)
+
+	// Add user1
+	err = UserAdd(db, "user1@example.com", "password1")
 	assert.Nil(t, err)
 
 	// Find user1
