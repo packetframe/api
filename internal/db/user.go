@@ -26,12 +26,6 @@ type User struct {
 	DeletedAt    gorm.DeletedAt
 }
 
-func (u *User) BeforeCreate(_ *gorm.DB) (err error) {
-	// Set a UUID before user creation
-	u.ID = uuid.New().String()
-	return
-}
-
 // UserAdd creates a new User
 func UserAdd(db *gorm.DB, email string, password string) error {
 	passwordHash, err := auth.Hash(password)
@@ -43,6 +37,7 @@ func UserAdd(db *gorm.DB, email string, password string) error {
 		return err
 	}
 	return db.Create(&User{
+		ID:           uuid.New().String(),
 		Email:        email,
 		PasswordHash: passwordHash,
 		APIKey:       apiKey,
