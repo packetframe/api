@@ -17,14 +17,11 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
-      - name: Get dependencies
-        run: go get -v -t -d ./...
-
-      - run: go generate -x
-      - run: go build -v .
-
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
+
+      - name: Get dependencies
+        run: go get -v -t -d ./...
 
       - name: Start postgres container
         run: docker run --rm -e POSTGRES_PASSWORD=api -e POSTGRES_USER=api -e POSTGRES_DB=api -p 5432:5432 -d postgres && sleep 2
