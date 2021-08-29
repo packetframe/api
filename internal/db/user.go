@@ -1,9 +1,8 @@
 package db
 
 import (
-	"time"
+	"errors"
 
-	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"gorm.io/gorm"
 
@@ -16,17 +15,15 @@ var (
 )
 
 type User struct {
-	ID           string         `gorm:"primaryKey"`
+	gorm.Model
+	ID           string         `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()"`
 	Email        string         `gorm:"uniqueIndex"`
 	Groups       pq.StringArray `gorm:"type:text[]"`
 	PasswordHash []byte
 	APIKey       string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	DeletedAt    gorm.DeletedAt
 }
 
-// UserAdd creates a new User
+// UserAdd creates a new user
 func UserAdd(db *gorm.DB, email string, password string) error {
 	passwordHash, err := auth.Hash(password)
 	if err != nil {
@@ -37,7 +34,6 @@ func UserAdd(db *gorm.DB, email string, password string) error {
 		return err
 	}
 	return db.Create(&User{
-		ID:           uuid.New().String(),
 		Email:        email,
 		PasswordHash: passwordHash,
 		APIKey:       apiKey,
@@ -48,12 +44,12 @@ func UserAdd(db *gorm.DB, email string, password string) error {
 // UserFind finds a user by email and returns nil if no user exists
 func UserFind(db *gorm.DB, email string) (*User, error) {
 	var user User
-	err := db.Limit(1).Find(&user, "email = ?", email).Error
-	if err != nil {
-		return nil, err
-	}
-	if user.ID == "" {
+	res := db.First(&user, "email = ?", email)
+	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
+	}
+	if res.Error != nil {
+		return nil, res.Error
 	}
 
 	return &user, nil
@@ -66,12 +62,12 @@ func UserDelete(db *gorm.DB, uuid string) error {
 
 // UserList gets a list of all users
 func UserList(db *gorm.DB) ([]User, error) {
-	var records []User
-	res := db.Find(&records)
+	var users []User
+	res := db.Find(&users)
 	if res.Error != nil {
 		return nil, res.Error
 	}
-	return records, nil
+	return users, nil
 }
 
 // UserGroupAdd adds a role to a Group
