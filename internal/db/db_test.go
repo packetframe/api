@@ -15,7 +15,7 @@ func dbSetup() (*gorm.DB, error) {
 	}
 
 	// Drop tables
-	for _, table := range []string{"users", "zones", "records"} {
+	for _, table := range []string{"records", "users", "zones"} {
 		err = db.Exec("DELETE FROM " + table).Error
 		if err != nil {
 			return nil, err
