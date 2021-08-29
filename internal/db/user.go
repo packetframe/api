@@ -2,6 +2,7 @@ package db
 
 import (
 	"errors"
+	"time"
 
 	"github.com/lib/pq"
 	"gorm.io/gorm"
@@ -15,12 +16,15 @@ var (
 )
 
 type User struct {
-	gorm.Model
-	ID           string         `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()"`
-	Email        string         `gorm:"uniqueIndex"`
-	Groups       pq.StringArray `gorm:"type:text[]"`
-	PasswordHash []byte
-	APIKey       string
+	ID           string         `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()" json:"-"`
+	Email        string         `gorm:"uniqueIndex" json:"email" validate:"required,email,min=6,max=32"`
+	Password     string         `gorm:"-" json:"password" validate:"required,min=8,max=128"`
+	Groups       pq.StringArray `gorm:"type:text[]" json:"-"`
+	PasswordHash []byte         `json:"-"`
+	APIKey       string         `json:"-"`
+	CreatedAt    time.Time      `json:"-"`
+	UpdatedAt    time.Time      `json:"-"`
+	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // UserAdd creates a new user

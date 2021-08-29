@@ -2,11 +2,11 @@ package db
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
 // Record stores a DNS record
 type Record struct {
-	gorm.Model
 	ID    string `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()"`
 	Type  string
 	Label string
@@ -14,8 +14,11 @@ type Record struct {
 	TTL   uint32
 	Proxy bool
 
-	ZoneID string
-	Zone   Zone
+	ZoneID    string
+	Zone      Zone
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // RecordAdd adds a new record to a zone

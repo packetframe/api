@@ -16,12 +16,14 @@ var (
 
 // Zone stores a DNS zone
 type Zone struct {
-	gorm.Model
-	ID     string `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()"`
-	Zone   string `gorm:"uniqueIndex"`
-	Serial uint64
-	DNSSEC DNSSECKey      `gorm:"embedded"`
-	Users  pq.StringArray `gorm:"type:text[]"`
+	ID        string `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()"`
+	Zone      string `gorm:"uniqueIndex"`
+	Serial    uint64
+	DNSSEC    DNSSECKey      `gorm:"embedded"`
+	Users     pq.StringArray `gorm:"type:text[]"`
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // DNSSECKey stores a DNSSEC signing key
