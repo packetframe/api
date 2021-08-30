@@ -45,10 +45,24 @@ func UserAdd(db *gorm.DB, email string, password string) error {
 	}).Error
 }
 
-// UserFind finds a user by email and returns nil if no user exists
-func UserFind(db *gorm.DB, email string) (*User, error) {
+// UserFindByEmail finds a user by email and returns nil if no user exists
+func UserFindByEmail(db *gorm.DB, email string) (*User, error) {
 	var user User
 	res := db.First(&user, "email = ?", email)
+	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	return &user, nil
+}
+
+// UserFindByAPIKey finds a user by API key and returns nil if no user exists
+func UserFindByAPIKey(db *gorm.DB, apiKey string) (*User, error) {
+	var user User
+	res := db.First(&user, "api_key = ?", apiKey)
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}

@@ -33,7 +33,7 @@ func TestDbUserAddDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Find user1
-	user1, err := UserFind(db, "user1@example.com")
+	user1, err := UserFindByEmail(db, "user1@example.com")
 	assert.Nil(t, err)
 
 	// Delete user1
@@ -41,7 +41,7 @@ func TestDbUserAddDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Assert that user1 no longer exists
-	user1, err = UserFind(db, "user1@example.com")
+	user1, err = UserFindByEmail(db, "user1@example.com")
 	assert.Nil(t, err)
 	assert.Nil(t, user1)
 }
@@ -55,7 +55,7 @@ func TestDbUserGroupAddDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Find user1
-	user1, err := UserFind(db, "user1@example.com")
+	user1, err := UserFindByEmail(db, "user1@example.com")
 	assert.Nil(t, err)
 
 	// Add admin group to user1
@@ -63,7 +63,7 @@ func TestDbUserGroupAddDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Find user1
-	user1, err = UserFind(db, "user1@example.com")
+	user1, err = UserFindByEmail(db, "user1@example.com")
 	assert.Nil(t, err)
 
 	// Remove the admin group from user1
@@ -71,7 +71,7 @@ func TestDbUserGroupAddDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Assert that user1 is no longer part of the admin group
-	user1, err = UserFind(db, "user1@example.com")
+	user1, err = UserFindByEmail(db, "user1@example.com")
 	assert.Nil(t, err)
 	assert.NotContains(t, user1.Groups, GroupAdmin)
 }
@@ -85,7 +85,7 @@ func TestDbUserResetPassword(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Find user1
-	user1, err := UserFind(db, "user1@example.com")
+	user1, err := UserFindByEmail(db, "user1@example.com")
 	assert.Nil(t, err)
 
 	oldPassword := user1.PasswordHash
@@ -94,9 +94,28 @@ func TestDbUserResetPassword(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Find user1
-	user1, err = UserFind(db, "user1@example.com")
+	user1, err = UserFindByEmail(db, "user1@example.com")
 	assert.Nil(t, err)
 
 	// Assert that there are 3 users
 	assert.NotEqual(t, oldPassword, user1.PasswordHash)
+}
+
+func TestDbUserFindByAPIKey(t *testing.T) {
+	db, err := TestSetup()
+	assert.Nil(t, err)
+
+	// Add user1
+	err = UserAdd(db, "user1@example.com", "password1")
+	assert.Nil(t, err)
+
+	// Find user1
+	user1, err := UserFindByEmail(db, "user1@example.com")
+	assert.Nil(t, err)
+
+	// Find user1 by API key
+	user1ByKey, err := UserFindByAPIKey(db, user1.APIKey)
+	assert.Nil(t, err)
+
+	assert.Equal(t, user1, user1ByKey)
 }

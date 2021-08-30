@@ -84,7 +84,7 @@ func TestZoneUserAdd(t *testing.T) {
 	// Create and add user1 to example1.com
 	err = UserAdd(db, "user1@example.com", "password1")
 	assert.Nil(t, err)
-	user1, err := UserFind(db, "user1@example.com")
+	user1, err := UserFindByEmail(db, "user1@example.com")
 	assert.Nil(t, err)
 	err = ZoneUserAdd(db, example1.ID, user1.ID)
 	assert.Nil(t, err)
@@ -146,7 +146,7 @@ func TestZoneUserGetZones(t *testing.T) {
 	// Create and add user1 to example1.com
 	err = UserAdd(db, "user1@example.com", "password1")
 	assert.Nil(t, err)
-	user1, err := UserFind(db, "user1@example.com")
+	user1, err := UserFindByEmail(db, "user1@example.com")
 	assert.Nil(t, err)
 	err = ZoneUserAdd(db, example1.ID, user1.ID)
 	assert.Nil(t, err)
