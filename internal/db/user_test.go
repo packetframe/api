@@ -7,7 +7,7 @@ import (
 )
 
 func TestDbUserList(t *testing.T) {
-	db, err := dbSetup()
+	db, err := TestSetup()
 	assert.Nil(t, err)
 
 	// Add 3 users
@@ -25,7 +25,7 @@ func TestDbUserList(t *testing.T) {
 }
 
 func TestDbUserAddDelete(t *testing.T) {
-	db, err := dbSetup()
+	db, err := TestSetup()
 	assert.Nil(t, err)
 
 	// Add user1
@@ -47,7 +47,7 @@ func TestDbUserAddDelete(t *testing.T) {
 }
 
 func TestDbUserGroupAddDelete(t *testing.T) {
-	db, err := dbSetup()
+	db, err := TestSetup()
 	assert.Nil(t, err)
 
 	// Add user1
@@ -77,7 +77,7 @@ func TestDbUserGroupAddDelete(t *testing.T) {
 }
 
 func TestDbUserResetPassword(t *testing.T) {
-	db, err := dbSetup()
+	db, err := TestSetup()
 	assert.Nil(t, err)
 
 	// Add user1

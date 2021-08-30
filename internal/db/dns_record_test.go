@@ -7,7 +7,7 @@ import (
 )
 
 func TestRecordAddListDelete(t *testing.T) {
-	db, err := dbSetup()
+	db, err := TestSetup()
 	assert.Nil(t, err)
 
 	err = ZoneAdd(db, "example1.com")

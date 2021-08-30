@@ -3,7 +3,26 @@ package db
 import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"os"
 )
+
+// TestSetup sets up the test environment by opening a database connection, dropping all tables, and inserting test data
+func TestSetup() (*gorm.DB, error) {
+	db, err := Connect(os.Getenv("PACKETFRAME_API_TEST_DB"))
+	if err != nil {
+		return nil, err
+	}
+
+	// Drop tables
+	for _, table := range []string{"records", "users", "zones"} {
+		err = db.Exec("DELETE FROM " + table).Error
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return db, nil
+}
 
 // Connect opens a connection to the database and runs migrations
 func Connect(dsn string) (*gorm.DB, error) {

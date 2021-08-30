@@ -8,7 +8,7 @@ import (
 )
 
 func TestZoneAddListFindDelete(t *testing.T) {
-	db, err := dbSetup()
+	db, err := TestSetup()
 	assert.Nil(t, err)
 
 	err = ZoneAdd(db, "example1.com")
@@ -35,7 +35,7 @@ func TestZoneAddListFindDelete(t *testing.T) {
 }
 
 func TestZoneRotateDNSSECKey(t *testing.T) {
-	db, err := dbSetup()
+	db, err := TestSetup()
 	assert.Nil(t, err)
 
 	err = ZoneAdd(db, "example1.com")
@@ -59,7 +59,7 @@ func TestZoneRotateDNSSECKey(t *testing.T) {
 
 // TestZoneAddDuplicate tests that adding a duplicate zone fails
 func TestZoneAddDuplicate(t *testing.T) {
-	db, err := dbSetup()
+	db, err := TestSetup()
 	assert.Nil(t, err)
 
 	err = ZoneAdd(db, "example1.com")
@@ -71,7 +71,7 @@ func TestZoneAddDuplicate(t *testing.T) {
 
 // TestZoneUserAdd tests adding a user to a zone
 func TestZoneUserAdd(t *testing.T) {
-	db, err := dbSetup()
+	db, err := TestSetup()
 	assert.Nil(t, err)
 
 	// Add and find example1.com
@@ -106,7 +106,7 @@ func TestZoneUserAdd(t *testing.T) {
 
 // TestZoneSetSerial tests setting the serial of a zone
 func TestZoneSetSerial(t *testing.T) {
-	db, err := dbSetup()
+	db, err := TestSetup()
 	assert.Nil(t, err)
 
 	// Add and find example1.com
@@ -133,7 +133,7 @@ func TestZoneSetSerial(t *testing.T) {
 
 // TestZoneUserGetZones tests getting the zones of a user
 func TestZoneUserGetZones(t *testing.T) {
-	db, err := dbSetup()
+	db, err := TestSetup()
 	assert.Nil(t, err)
 
 	// Add and find example1.com
