@@ -29,7 +29,7 @@ jobs:
       - name: go test
         run: |
           export PACKETFRAME_API_TEST_DB="host=localhost user=api password=api dbname=api port=5432 sslmode=disable"
-          go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+          go test -p 1 -v -race -coverprofile=coverage.txt -covermode=atomic ./...
 
       - name: Stop Postgres container
         run: docker kill $(docker ps -aq)
