@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"errors"
 	"net/http"
 	"time"
 
@@ -14,32 +13,55 @@ import (
 )
 
 var (
-	ErrInvalidCredentials = errors.New("invalid username and/or password")
-	ErrServerAuth         = errors.New("unable to process authentication request")
+	errInvalidCredentials = "invalid username and/or password"
 )
+
+// AuthSignup handles a signup POST request
+func AuthSignup(c *fiber.Ctx) error {
+	var u db.User
+	if err := c.BodyParser(&u); err != nil {
+		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
+	}
+	if err := validation.Validate(u); err != nil {
+		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
+	}
+
+	user, err := db.UserFind(database, u.Email)
+	if err != nil {
+		return internalServerError(c, err)
+	}
+	if user != nil { // User already exists
+		return response(c, http.StatusConflict, "User already exists", nil)
+	}
+
+	if err := db.UserAdd(database, u.Email, u.Password); err != nil {
+		return internalServerError(c, err)
+	}
+
+	return response(c, http.StatusOK, "User created successfully", nil)
+}
 
 // AuthLogin handles a login POST request
 func AuthLogin(c *fiber.Ctx) error {
 	var u db.User
 	if err := c.BodyParser(&u); err != nil {
-		return c.Status(http.StatusUnprocessableEntity).SendString("Invalid request")
+		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
 	}
 	if err := validation.Validate(u); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(err)
+		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
 	}
 
 	user, err := db.UserFind(database, u.Email)
 	if err != nil {
-		// TODO: Sentry
-		return c.Status(http.StatusInternalServerError).SendString(ErrServerAuth.Error())
+		return internalServerError(c, err)
 	}
 	if user == nil {
-		return c.Status(http.StatusUnprocessableEntity).SendString(ErrInvalidCredentials.Error())
+		return response(c, http.StatusUnauthorized, errInvalidCredentials, nil)
 	}
 
 	// Validate password hash
 	if !auth.ValidHash(user.PasswordHash, u.Password) {
-		return c.Status(http.StatusUnprocessableEntity).SendString(ErrInvalidCredentials.Error())
+		return response(c, http.StatusUnauthorized, errInvalidCredentials, nil)
 	}
 
 	claims := jwt.MapClaims{}
@@ -49,8 +71,7 @@ func AuthLogin(c *fiber.Ctx) error {
 	at := jwt.NewWithClaims(jwt.SigningMethodES512, claims)
 	token, err := at.SignedString([]byte("MY_RANDOM_JWT_SECRET"))
 	if err != nil {
-		// TODO: Sentry
-		return c.Status(http.StatusInternalServerError).SendString(ErrServerAuth.Error())
+		return internalServerError(c, err)
 	}
-	return c.Status(http.StatusOK).SendString(token)
+	return response(c, http.StatusOK, "Authentication succeeded", fiber.Map{"token": token})
 }
