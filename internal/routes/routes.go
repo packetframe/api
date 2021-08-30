@@ -12,8 +12,8 @@ var database *gorm.DB
 
 // routes stores a map of route to handler
 var routes = []*route{
-	{Path: "/auth/login", Method: "POST", Handler: AuthLogin},
-	{Path: "/auth/signup", Method: "POST", Handler: AuthSignup},
+	{Path: "/auth/login", Method: "POST", Handler: RouteAuthLogin},
+	{Path: "/auth/signup", Method: "POST", Handler: RouteAuthSignup},
 }
 
 type route struct {
