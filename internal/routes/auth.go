@@ -2,10 +2,9 @@ package routes
 
 import (
 	"net/http"
-	"time"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt"
 
 	"github.com/packetframe/api/internal/auth"
 	"github.com/packetframe/api/internal/db"
@@ -15,6 +14,22 @@ import (
 var (
 	errInvalidCredentials = "invalid username and/or password"
 )
+
+// findUser finds a user by Authorization header or JWT cookie and returns nil if a user isn't found
+func findUser(c *fiber.Ctx) (*db.User, error) {
+	// Get the Authorization header as string and trim the "Token " prefix
+	token := strings.TrimPrefix(string(c.Request().Header.Peek("Authorization")), "Token ")
+	if token == "" {
+		return nil, nil
+	}
+
+	user, err := db.UserFindByIdentifier(database, token)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
 
 // AuthSignup handles a signup POST request
 func AuthSignup(c *fiber.Ctx) error {
@@ -26,7 +41,7 @@ func AuthSignup(c *fiber.Ctx) error {
 		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
 	}
 
-	user, err := db.UserFind(database, u.Email)
+	user, err := db.UserFindByEmail(database, u.Email)
 	if err != nil {
 		return internalServerError(c, err)
 	}
@@ -51,7 +66,7 @@ func AuthLogin(c *fiber.Ctx) error {
 		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
 	}
 
-	user, err := db.UserFind(database, u.Email)
+	user, err := db.UserFindByEmail(database, u.Email)
 	if err != nil {
 		return internalServerError(c, err)
 	}
@@ -64,14 +79,6 @@ func AuthLogin(c *fiber.Ctx) error {
 		return response(c, http.StatusUnauthorized, errInvalidCredentials, nil)
 	}
 
-	claims := jwt.MapClaims{}
-	claims["authorized"] = true
-	claims["api_key"] = u.APIKey
-	claims["exp"] = time.Now().Add(time.Minute * 15).Unix()
-	at := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
-	token, err := at.SignedString([]byte("MY_RANDOM_JWT_SECRET"))
-	if err != nil {
-		return internalServerError(c, err)
-	}
-	return response(c, http.StatusOK, "Authentication succeeded", fiber.Map{"token": token})
+	// TODO: Set Token in HTTPONLY cookie
+	return response(c, http.StatusOK, "Authentication success", fiber.Map{"token": user.Token})
 }

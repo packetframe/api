@@ -3,9 +3,12 @@ package auth
 import (
 	"crypto/rand"
 	"crypto/subtle"
-	"math/big"
-
 	"golang.org/x/crypto/argon2"
+	"math/big"
+)
+
+var (
+	JWTSecret = "TEST_JWT_SECRET" // TODO
 )
 
 // RandomString returns a securely generated random string of specified length
