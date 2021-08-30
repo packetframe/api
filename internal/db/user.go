@@ -21,7 +21,8 @@ type User struct {
 	Password     string         `gorm:"-" json:"password" validate:"required,min=8,max=128"`
 	Groups       pq.StringArray `gorm:"type:text[]" json:"-"`
 	PasswordHash []byte         `json:"-"`
-	APIKey       string         `json:"-"`
+	APIKey       string         `json:"-"` // Rotated manually by user if needed
+	Token        string         `json:"-"` // Rotated every n minutes (TODO: autorotate this)
 	CreatedAt    time.Time      `json:"-"`
 	UpdatedAt    time.Time      `json:"-"`
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
@@ -59,10 +60,10 @@ func UserFindByEmail(db *gorm.DB, email string) (*User, error) {
 	return &user, nil
 }
 
-// UserFindByAPIKey finds a user by API key and returns nil if no user exists
-func UserFindByAPIKey(db *gorm.DB, apiKey string) (*User, error) {
+// UserFindByIdentifier finds a user by API key and returns nil if no user exists
+func UserFindByIdentifier(db *gorm.DB, id string) (*User, error) {
 	var user User
-	res := db.First(&user, "api_key = ?", apiKey)
+	res := db.Where("api_key = ?", id).Or("token = ?", id).First(&user)
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}

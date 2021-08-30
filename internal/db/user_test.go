@@ -114,7 +114,7 @@ func TestDbUserFindByAPIKey(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Find user1 by API key
-	user1ByKey, err := UserFindByAPIKey(db, user1.APIKey)
+	user1ByKey, err := UserFindByIdentifier(db, user1.APIKey)
 	assert.Nil(t, err)
 
 	assert.Equal(t, user1, user1ByKey)
