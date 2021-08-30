@@ -68,5 +68,5 @@ func TestRoutesAuthSignupLogin(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
-	t.Log(apiResp.Message)
+	assert.Greater(t, len(apiResp.Data["token"].(string)), 100)
 }
