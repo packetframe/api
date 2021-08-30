@@ -16,8 +16,8 @@ var (
 	errInvalidCredentials = "invalid username and/or password"
 )
 
-// RouteAuthSignup handles a signup POST request
-func RouteAuthSignup(c *fiber.Ctx) error {
+// AuthSignup handles a signup POST request
+func AuthSignup(c *fiber.Ctx) error {
 	var u db.User
 	if err := c.BodyParser(&u); err != nil {
 		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
@@ -41,8 +41,8 @@ func RouteAuthSignup(c *fiber.Ctx) error {
 	return response(c, http.StatusOK, "User created successfully", nil)
 }
 
-// RouteAuthLogin handles a login POST request
-func RouteAuthLogin(c *fiber.Ctx) error {
+// AuthLogin handles a login POST request
+func AuthLogin(c *fiber.Ctx) error {
 	var u db.User
 	if err := c.BodyParser(&u); err != nil {
 		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
