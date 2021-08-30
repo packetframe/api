@@ -26,11 +26,10 @@ jobs:
       - name: Start postgres container
         run: docker run --rm -e POSTGRES_PASSWORD=api -e POSTGRES_USER=api -e POSTGRES_DB=api -p 5432:5432 -d postgres && sleep 2
 
-      - name: Set test DSN
-        run: export PACKETFRAME_API_TEST_DB="host=localhost user=api password=api dbname=api port=5432 sslmode=disable"
-
       - name: go test
-        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+        run: |
+          export PACKETFRAME_API_TEST_DB="host=localhost user=api password=api dbname=api port=5432 sslmode=disable"
+          go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
 
       - name: Stop Postgres container
         run: docker kill $(docker ps -aq)
