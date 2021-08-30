@@ -68,7 +68,7 @@ func AuthLogin(c *fiber.Ctx) error {
 	claims["authorized"] = true
 	claims["api_key"] = u.APIKey
 	claims["exp"] = time.Now().Add(time.Minute * 15).Unix()
-	at := jwt.NewWithClaims(jwt.SigningMethodES512, claims)
+	at := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
 	token, err := at.SignedString([]byte("MY_RANDOM_JWT_SECRET"))
 	if err != nil {
 		return internalServerError(c, err)

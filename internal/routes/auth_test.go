@@ -2,7 +2,6 @@ package routes
 
 import (
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
@@ -43,18 +42,31 @@ func TestRoutesAuthInvalidUserPass(t *testing.T) {
 
 func TestRoutesAuthSignupLogin(t *testing.T) {
 	var err error
-	database, err = db.Connect(os.Getenv("PACKETFRAME_API_TEST_DB"))
-	assert.Nil(t, err)
-
-	err = database.Exec("DELETE FROM users").Error
+	database, err = db.TestSetup()
 	assert.Nil(t, err)
 
 	app := fiber.New()
 	Register(app)
 
+	// Sign up user1@example.com
 	content := `{"email":"user1@example.com", "password":"example-users-password'"}`
 	httpResp, apiResp, err := testReq(app, http.MethodPost, "/auth/signup", content)
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
+
+	// Sign up user1@example.com again to check for conflict validation
+	content = `{"email":"user1@example.com", "password":"example-users-password'"}`
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/auth/signup", content)
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusConflict, httpResp.StatusCode)
+	assert.False(t, apiResp.Success)
+
+	// Log in user1@example.com
+	content = `{"email":"user1@example.com", "password":"example-users-password'"}`
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/auth/login", content)
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
+	assert.True(t, apiResp.Success)
+	t.Log(apiResp.Message)
 }
