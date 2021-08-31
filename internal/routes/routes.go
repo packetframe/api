@@ -12,14 +12,14 @@ import (
 var Database *gorm.DB
 
 // routes stores a map of route to handler
-var routes = []*route{ // TODO: descriptions and markdown route table generator
-	{Path: "/auth/login", Method: "POST", Handler: AuthLogin, Description: ""},
-	{Path: "/auth/signup", Method: "POST", Handler: AuthSignup, Description: ""},
-	{Path: "/dns/zones", Method: "GET", Handler: ZoneList, Description: ""},
-	{Path: "/dns/zones", Method: "POST", Handler: ZoneAdd, Description: ""},
-	{Path: "/dns/zones", Method: "DELETE", Handler: ZoneDelete, Description: ""},
-	{Path: "/dns/zones/user", Method: "PUT", Handler: ZoneUserAdd, Description: ""},
-	{Path: "/dns/zones/user", Method: "DELETE", Handler: ZoneUserDelete, Description: ""},
+var routes = []*route{
+	{Path: "/auth/login", Method: "POST", Handler: AuthLogin, Description: "Log a user in"},
+	{Path: "/auth/signup", Method: "POST", Handler: AuthSignup, Description: "Create a new user account"},
+	{Path: "/dns/zones", Method: "GET", Handler: ZoneList, Description: "List all DNS zones authorized for a user"},
+	{Path: "/dns/zones", Method: "POST", Handler: ZoneAdd, Description: "Add a new DNS zone"},
+	{Path: "/dns/zones", Method: "DELETE", Handler: ZoneDelete, Description: "Delete a DNS zone"},
+	{Path: "/dns/zones/user", Method: "PUT", Handler: ZoneUserAdd, Description: "Add a user to a DNS zone"},
+	{Path: "/dns/zones/user", Method: "DELETE", Handler: ZoneUserDelete, Description: "Remove a user from a DNS zone"},
 }
 
 type route struct {
@@ -61,4 +61,16 @@ func internalServerError(c *fiber.Ctx, err error) error {
 	// TODO: Sentry log err
 	fmt.Printf("503 Internal Server Error ---------------------- %s ----------------------\n", err)
 	return response(c, http.StatusInternalServerError, "Internal Server Error", nil)
+}
+
+// Document generates a markdown table of API routes
+func Document() string {
+	table := `| Route | Method | Description |
+| :---- | :----- | :---------- |
+`
+	for _, route := range routes {
+		table += fmt.Sprintf("| %s | %s | %s |\n", route.Path, route.Method, route.Description)
+	}
+
+	return table
 }
