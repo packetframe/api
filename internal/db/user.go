@@ -38,10 +38,15 @@ func UserAdd(db *gorm.DB, email string, password string) error {
 	if err != nil {
 		return err
 	}
+	token, err := auth.RandomString(64)
+	if err != nil {
+		return err
+	}
 	return db.Create(&User{
 		Email:        email,
 		PasswordHash: passwordHash,
 		APIKey:       apiKey,
+		Token:        token,
 		Groups:       []string{GroupEnabled},
 	}).Error
 }

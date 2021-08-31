@@ -16,11 +16,11 @@ var (
 
 // Zone stores a DNS zone
 type Zone struct {
-	ID        string `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()"`
-	Zone      string `gorm:"uniqueIndex"`
-	Serial    uint64
-	DNSSEC    DNSSECKey      `gorm:"embedded"`
-	Users     pq.StringArray `gorm:"type:text[]"`
+	ID        string         `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()" json:"id"`
+	Zone      string         `gorm:"uniqueIndex" json:"zone"`
+	Serial    uint64         `json:"-"`
+	DNSSEC    DNSSECKey      `gorm:"embedded" json:"-"`
+	Users     pq.StringArray `gorm:"type:text[]" json:"users"`
 	CreatedAt time.Time      `json:"-"`
 	UpdatedAt time.Time      `json:"-"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`

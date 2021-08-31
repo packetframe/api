@@ -68,6 +68,5 @@ func TestRoutesAuthSignupLogin(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
-	t.Logf("%+v", apiResp)
-	assert.Equal(t, len(apiResp.Data["token"].(string)), 64) // 64 is the user token length
+	assert.Equal(t, 64, len(apiResp.Data["token"].(string))) // 64 is the user token length
 }
