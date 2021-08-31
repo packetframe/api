@@ -55,7 +55,7 @@ func TestRoutesAuthSignupLogin(t *testing.T) {
 
 	// Sign up user1@example.com again to check for conflict validation
 	content = `{"email":"user1@example.com", "password":"example-users-password'"}`
-	httpResp, apiResp, err = testReq(app, http.MethodPost, "/auth/signup", content, map[string]string{})
+	httpResp, _, err = testReq(app, http.MethodPost, "/auth/signup", content, map[string]string{})
 	assert.NotNil(t, err)
 	assert.Equal(t, http.StatusConflict, httpResp.StatusCode)
 

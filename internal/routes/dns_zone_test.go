@@ -61,7 +61,7 @@ func TestRoutesZoneAddListDelete(t *testing.T) {
 	assert.Truef(t, apiResp.Success, apiResp.Message)
 
 	// Delete example.com again
-	httpResp, apiResp, err = testReq(app, http.MethodDelete, "/dns/zones", `{"zone":"example.com"}`, map[string]string{"Authorization": "Token " + userToken})
+	httpResp, _, err = testReq(app, http.MethodDelete, "/dns/zones", `{"zone":"example.com"}`, map[string]string{"Authorization": "Token " + userToken})
 	assert.NotNil(t, err)
 	assert.Equal(t, http.StatusNotFound, httpResp.StatusCode)
 
