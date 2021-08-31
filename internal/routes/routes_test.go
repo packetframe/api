@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/packetframe/api/internal/db"
 	"github.com/stretchr/testify/assert"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -35,7 +36,9 @@ func testReq(app *fiber.App, method string, path string, jsonContent string, hea
 		return nil, nil, err
 	}
 	if (resp.StatusCode > 200) || (resp.StatusCode < 200) {
-		return resp, nil, fmt.Errorf("unexpected status code %d", resp.StatusCode)
+		var respBytes []byte
+		respBytes, _ = io.ReadAll(resp.Body)
+		return resp, nil, fmt.Errorf("unexpected status code %d %s", resp.StatusCode, string(respBytes))
 	}
 
 	var apiResp apiResponse

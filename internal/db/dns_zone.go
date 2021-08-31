@@ -190,3 +190,17 @@ func ZoneUserGetZones(db *gorm.DB, user string) ([]Zone, error) {
 	}
 	return zones, nil
 }
+
+// ZoneUserAuthorized checks if a user is authorized for a zone
+func ZoneUserAuthorized(db *gorm.DB, zone string, user string) (bool, error) {
+	var z Zone
+	res := db.Model(&Zone{}).Where("id = ? AND ? = ANY(users)", zone, user).Find(&z)
+	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+		return false, nil
+	}
+	if res.Error != nil {
+		return false, res.Error
+	}
+
+	return z.Zone != "", nil
+}

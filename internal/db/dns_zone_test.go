@@ -153,3 +153,32 @@ func TestZoneUserGetZones(t *testing.T) {
 	assert.Equal(t, 1, len(zones))
 	assert.Equal(t, example1.ID, zones[0].ID)
 }
+
+// TestZoneUserAuthorized tests checking if a user is authorized for a zone
+func TestZoneUserAuthorized(t *testing.T) {
+	db, err := TestSetup()
+	assert.Nil(t, err)
+
+	// Create and add user1 to example1.com
+	err = UserAdd(db, "user1@example.com", "password1")
+	assert.Nil(t, err)
+	user1, err := UserFindByEmail(db, "user1@example.com")
+	assert.Nil(t, err)
+
+	// Add and find example1.com
+	err = ZoneAdd(db, "example1.com", user1.ID)
+	assert.Nil(t, err)
+	example1, err := ZoneFind(db, "example1.com")
+	assert.Nil(t, err)
+	assert.NotNil(t, example1)
+
+	// Test zone authorization
+	authorized, err := ZoneUserAuthorized(db, example1.ID, user1.ID)
+	assert.Nil(t, err)
+	assert.True(t, authorized)
+
+	// Test zone authorization on random ID
+	authorized, err = ZoneUserAuthorized(db, "not-a-real-zone", user1.ID)
+	assert.Nil(t, err)
+	assert.False(t, authorized)
+}

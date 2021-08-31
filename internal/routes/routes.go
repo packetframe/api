@@ -16,6 +16,7 @@ var routes = []*route{
 	{Path: "/auth/signup", Method: "POST", Handler: AuthSignup},
 	{Path: "/dns/zones", Method: "GET", Handler: ZoneList},
 	{Path: "/dns/zones", Method: "POST", Handler: ZoneAdd},
+	{Path: "/dns/zones", Method: "DELETE", Handler: ZoneDelete},
 }
 
 type route struct {
