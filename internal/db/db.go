@@ -3,12 +3,11 @@ package db
 import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"os"
 )
 
 // TestSetup sets up the test environment by opening a database connection, dropping all tables, and inserting test data
 func TestSetup() (*gorm.DB, error) {
-	db, err := Connect(os.Getenv("PACKETFRAME_API_TEST_DB"))
+	db, err := Connect("host=localhost user=api password=api dbname=api port=5432 sslmode=disable")
 	if err != nil {
 		return nil, err
 	}
