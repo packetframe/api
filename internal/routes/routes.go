@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -18,7 +19,7 @@ var routes = []*route{
 	{Path: "/dns/zones", Method: "POST", Handler: ZoneAdd},
 	{Path: "/dns/zones", Method: "DELETE", Handler: ZoneDelete},
 	{Path: "/dns/zones/user", Method: "PUT", Handler: ZoneUserAdd},
-	//{Path: "/dns/zones/user", Method: "DELETE", Handler: ZoneUserDelete},
+	{Path: "/dns/zones/user", Method: "DELETE", Handler: ZoneUserDelete},
 }
 
 type route struct {
@@ -57,5 +58,6 @@ func response(c *fiber.Ctx, status int, message string, data map[string]interfac
 // internalServerError logs and returns a 503 Internal Server Error
 func internalServerError(c *fiber.Ctx, err error) error {
 	// TODO: Sentry log err
+	fmt.Printf("503 Internal Server Error ---------------------- %s ----------------------\n", err)
 	return response(c, http.StatusInternalServerError, "Internal Server Error", nil)
 }
