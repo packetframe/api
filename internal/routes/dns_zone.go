@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -28,8 +29,11 @@ func ZoneAdd(c *fiber.Ctx) error {
 	}
 
 	if err := db.ZoneAdd(Database, z.Zone); err != nil {
-		// TODO: handle duplicate zone
-		return internalServerError(c, err)
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			return response(c, http.StatusConflict, "Zone already exists", nil)
+		} else {
+			return internalServerError(c, err)
+		}
 	}
 
 	return response(c, http.StatusOK, "Zone added", nil)

@@ -11,7 +11,7 @@ import (
 )
 
 func TestRoutesInvalidJSON(t *testing.T) {
-	database = nil
+	Database = nil
 
 	app := fiber.New()
 	Register(app)
@@ -26,7 +26,7 @@ func TestRoutesInvalidJSON(t *testing.T) {
 }
 
 func TestRoutesAuthInvalidUserPass(t *testing.T) {
-	database = nil
+	Database = nil
 
 	app := fiber.New()
 	Register(app)
@@ -42,7 +42,7 @@ func TestRoutesAuthInvalidUserPass(t *testing.T) {
 
 func TestRoutesAuthSignupLogin(t *testing.T) {
 	var err error
-	database, err = db.TestSetup()
+	Database, err = db.TestSetup()
 	assert.Nil(t, err)
 
 	app := fiber.New()
