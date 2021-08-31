@@ -12,6 +12,37 @@ import (
 	"github.com/packetframe/api/internal/validation"
 )
 
+// checkUserAuthorization checks if a user is authorized for a zone
+func checkUserAuthorization(c *fiber.Ctx, zone string) error {
+	// Find user
+	user, err := findUser(c)
+	if err != nil {
+		return internalServerError(c, err)
+	}
+	if user == nil {
+		return response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
+	}
+
+	// Find zone
+	zDb, err := db.ZoneFind(Database, dns.Fqdn(zone))
+	if err != nil {
+		return internalServerError(c, err)
+	}
+	if zDb == nil {
+		return response(c, http.StatusNotFound, "Zone doesn't exist", nil)
+	}
+
+	// Check if user is authorized for zone
+	authorized, err := db.ZoneUserAuthorized(Database, zDb.ID, user.ID)
+	if err != nil {
+		return internalServerError(c, err)
+	}
+	if !authorized {
+		return response(c, http.StatusForbidden, "Forbidden", nil)
+	}
+	return nil
+}
+
 // ZoneAdd handles a POST request to add a zone
 func ZoneAdd(c *fiber.Ctx) error {
 	var z db.Zone
@@ -69,13 +100,9 @@ func ZoneDelete(c *fiber.Ctx) error {
 		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
 	}
 
-	// Find user
-	user, err := findUser(c)
-	if err != nil {
-		return internalServerError(c, err)
-	}
-	if user == nil {
-		return response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
+	// Check if user is authorized for zone
+	if err := checkUserAuthorization(c, z.Zone); err != nil {
+		return err
 	}
 
 	// Find zone
@@ -85,15 +112,6 @@ func ZoneDelete(c *fiber.Ctx) error {
 	}
 	if zDb == nil {
 		return response(c, http.StatusNotFound, "Zone doesn't exist", nil)
-	}
-
-	// Check if user is authorized for zone
-	authorized, err := db.ZoneUserAuthorized(Database, zDb.ID, user.ID)
-	if err != nil {
-		return internalServerError(c, err)
-	}
-	if !authorized {
-		return response(c, http.StatusForbidden, "Forbidden", nil)
 	}
 
 	if err := db.ZoneDelete(Database, zDb.ID); err != nil {
@@ -114,14 +132,9 @@ func ZoneUserAdd(c *fiber.Ctx) error {
 		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
 	}
 
-	// TODO extract user/zone membership validation to function
-	// Find user
-	user, err := findUser(c)
-	if err != nil {
-		return internalServerError(c, err)
-	}
-	if user == nil {
-		return response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
+	// Check if user is authorized for zone
+	if err := checkUserAuthorization(c, z.Zone); err != nil {
+		return err
 	}
 
 	// Find zone
@@ -131,15 +144,6 @@ func ZoneUserAdd(c *fiber.Ctx) error {
 	}
 	if zDb == nil {
 		return response(c, http.StatusNotFound, "Zone doesn't exist", nil)
-	}
-
-	// Check if user is authorized for zone
-	authorized, err := db.ZoneUserAuthorized(Database, zDb.ID, user.ID)
-	if err != nil {
-		return internalServerError(c, err)
-	}
-	if !authorized {
-		return response(c, http.StatusForbidden, "Forbidden", nil)
 	}
 
 	for _, user := range z.Users {
