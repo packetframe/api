@@ -23,7 +23,7 @@ func findUser(c *fiber.Ctx) (*db.User, error) {
 		return nil, nil
 	}
 
-	user, err := db.UserFindByIdentifier(database, token)
+	user, err := db.UserFindByIdentifier(Database, token)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func AuthSignup(c *fiber.Ctx) error {
 		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
 	}
 
-	user, err := db.UserFindByEmail(database, u.Email)
+	user, err := db.UserFindByEmail(Database, u.Email)
 	if err != nil {
 		return internalServerError(c, err)
 	}
@@ -49,7 +49,7 @@ func AuthSignup(c *fiber.Ctx) error {
 		return response(c, http.StatusConflict, "User already exists", nil)
 	}
 
-	if err := db.UserAdd(database, u.Email, u.Password); err != nil {
+	if err := db.UserAdd(Database, u.Email, u.Password); err != nil {
 		return internalServerError(c, err)
 	}
 
@@ -66,7 +66,7 @@ func AuthLogin(c *fiber.Ctx) error {
 		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
 	}
 
-	user, err := db.UserFindByEmail(database, u.Email)
+	user, err := db.UserFindByEmail(Database, u.Email)
 	if err != nil {
 		return internalServerError(c, err)
 	}

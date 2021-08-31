@@ -7,13 +7,14 @@ import (
 	"gorm.io/gorm"
 )
 
-// database stores the global database for the API
-var database *gorm.DB
+// Database stores the global database for the API
+var Database *gorm.DB
 
 // routes stores a map of route to handler
 var routes = []*route{
 	{Path: "/auth/login", Method: "POST", Handler: AuthLogin},
 	{Path: "/auth/signup", Method: "POST", Handler: AuthSignup},
+	{Path: "/dns/zones", Method: "POST", Handler: ZoneAdd},
 }
 
 type route struct {

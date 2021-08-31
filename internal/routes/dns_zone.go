@@ -27,7 +27,7 @@ func ZoneAdd(c *fiber.Ctx) error {
 		return response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
 	}
 
-	if err := db.ZoneAdd(database, z.Zone); err != nil {
+	if err := db.ZoneAdd(Database, z.Zone); err != nil {
 		// TODO: handle duplicate zone
 		return internalServerError(c, err)
 	}
