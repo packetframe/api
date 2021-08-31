@@ -11,11 +11,11 @@ func TestZoneAddListFindDelete(t *testing.T) {
 	db, err := TestSetup()
 	assert.Nil(t, err)
 
-	err = ZoneAdd(db, "example1.com")
+	err = ZoneAdd(db, "example1.com", "testuser")
 	assert.Nil(t, err)
-	err = ZoneAdd(db, "example2.com")
+	err = ZoneAdd(db, "example2.com", "testuser")
 	assert.Nil(t, err)
-	err = ZoneAdd(db, "example3.com")
+	err = ZoneAdd(db, "example3.com", "testuser")
 	assert.Nil(t, err)
 
 	zones, err := ZoneList(db)
@@ -38,7 +38,7 @@ func TestZoneRotateDNSSECKey(t *testing.T) {
 	db, err := TestSetup()
 	assert.Nil(t, err)
 
-	err = ZoneAdd(db, "example1.com")
+	err = ZoneAdd(db, "example1.com", "testuser")
 	assert.Nil(t, err)
 
 	example1, err := ZoneFind(db, "example1.com")
@@ -62,10 +62,10 @@ func TestZoneAddDuplicate(t *testing.T) {
 	db, err := TestSetup()
 	assert.Nil(t, err)
 
-	err = ZoneAdd(db, "example1.com")
+	err = ZoneAdd(db, "example1.com", "testuser")
 	assert.Nil(t, err)
 
-	err = ZoneAdd(db, "example1.com")
+	err = ZoneAdd(db, "example1.com", "testuser")
 	assert.NotNil(t, err)
 }
 
@@ -74,20 +74,18 @@ func TestZoneUserAdd(t *testing.T) {
 	db, err := TestSetup()
 	assert.Nil(t, err)
 
-	// Add and find example1.com
-	err = ZoneAdd(db, "example1.com")
-	assert.Nil(t, err)
-	example1, err := ZoneFind(db, "example1.com")
-	assert.Nil(t, err)
-	assert.NotNil(t, example1)
-
-	// Create and add user1 to example1.com
+	// Create user1@example.com
 	err = UserAdd(db, "user1@example.com", "password1")
 	assert.Nil(t, err)
 	user1, err := UserFindByEmail(db, "user1@example.com")
 	assert.Nil(t, err)
-	err = ZoneUserAdd(db, example1.ID, user1.ID)
+
+	// Add and find example1.com
+	err = ZoneAdd(db, "example1.com", user1.ID)
 	assert.Nil(t, err)
+	example1, err := ZoneFind(db, "example1.com")
+	assert.Nil(t, err)
+	assert.NotNil(t, example1)
 
 	// Add user1 again
 	err = ZoneUserAdd(db, example1.ID, user1.ID)
@@ -110,7 +108,7 @@ func TestZoneSetSerial(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Add and find example1.com
-	err = ZoneAdd(db, "example1.com")
+	err = ZoneAdd(db, "example1.com", "test-user-id")
 	assert.Nil(t, err)
 	example1, err := ZoneFind(db, "example1.com")
 	assert.Nil(t, err)
@@ -136,20 +134,18 @@ func TestZoneUserGetZones(t *testing.T) {
 	db, err := TestSetup()
 	assert.Nil(t, err)
 
-	// Add and find example1.com
-	err = ZoneAdd(db, "example1.com")
-	assert.Nil(t, err)
-	example1, err := ZoneFind(db, "example1.com")
-	assert.Nil(t, err)
-	assert.NotNil(t, example1)
-
 	// Create and add user1 to example1.com
 	err = UserAdd(db, "user1@example.com", "password1")
 	assert.Nil(t, err)
 	user1, err := UserFindByEmail(db, "user1@example.com")
 	assert.Nil(t, err)
-	err = ZoneUserAdd(db, example1.ID, user1.ID)
+
+	// Add and find example1.com
+	err = ZoneAdd(db, "example1.com", user1.ID)
 	assert.Nil(t, err)
+	example1, err := ZoneFind(db, "example1.com")
+	assert.Nil(t, err)
+	assert.NotNil(t, example1)
 
 	// Find zones for user
 	zones, err := ZoneUserGetZones(db, user1.ID)

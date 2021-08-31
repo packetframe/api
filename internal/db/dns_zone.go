@@ -80,7 +80,7 @@ func ZoneSetSerial(db *gorm.DB, uuid string) error {
 }
 
 // ZoneAdd adds a DNS zone
-func ZoneAdd(db *gorm.DB, zone string) error {
+func ZoneAdd(db *gorm.DB, zone string, user string) error {
 	zone = dns.Fqdn(zone)
 	dnssecKey, err := NewKey(zone)
 	if err != nil {
@@ -90,6 +90,7 @@ func ZoneAdd(db *gorm.DB, zone string) error {
 		Zone:   zone,
 		Serial: uint64(time.Now().Unix()),
 		DNSSEC: *dnssecKey,
+		Users:  []string{user},
 	}).Error
 }
 

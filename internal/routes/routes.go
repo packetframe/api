@@ -14,6 +14,7 @@ var Database *gorm.DB
 var routes = []*route{
 	{Path: "/auth/login", Method: "POST", Handler: AuthLogin},
 	{Path: "/auth/signup", Method: "POST", Handler: AuthSignup},
+	{Path: "/dns/zones", Method: "GET", Handler: ZoneList},
 	{Path: "/dns/zones", Method: "POST", Handler: ZoneAdd},
 }
 
