@@ -132,22 +132,22 @@ func TestRoutesZoneUserAddDelete(t *testing.T) {
 	assert.Equal(t, 1, len(zones))
 	assert.Equal(t, 2, len(zones[0].Users))
 
-	//// Remove user2 from zone
-	//httpResp, apiResp, err = testReq(app, http.MethodDelete, "/dns/zones/user", `{"zone":"example.com", "users": ["user2@example.com"]}`, map[string]string{"Authorization": "Token " + userToken})
-	//assert.Nil(t, err)
-	//assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
-	//assert.Truef(t, apiResp.Success, apiResp.Message)
-	//
-	//// List zones for user
-	//httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/zones", "", map[string]string{"Authorization": "Token " + userToken})
-	//assert.Nil(t, err)
-	//assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
-	//assert.Truef(t, apiResp.Success, apiResp.Message)
-	//respJSON, err = json.Marshal(apiResp.Data["zones"])
-	//assert.Nil(t, err)
-	//zones = []db.Zone{}
-	//err = json.Unmarshal(respJSON, &zones)
-	//assert.Nil(t, err)
-	//assert.Equal(t, 1, len(zones))
-	//assert.Equal(t, 1, len(zones[0].Users))
+	// Remove user2 from zone
+	httpResp, apiResp, err = testReq(app, http.MethodDelete, "/dns/zones/user", `{"zone":"example.com", "users": ["user2@example.com"]}`, map[string]string{"Authorization": "Token " + userToken})
+	assert.Nil(t, err)
+	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
+	assert.Truef(t, apiResp.Success, apiResp.Message)
+
+	// List zones for user
+	httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/zones", "", map[string]string{"Authorization": "Token " + userToken})
+	assert.Nil(t, err)
+	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
+	assert.Truef(t, apiResp.Success, apiResp.Message)
+	respJSON, err = json.Marshal(apiResp.Data["zones"])
+	assert.Nil(t, err)
+	zones = []db.Zone{}
+	err = json.Unmarshal(respJSON, &zones)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(zones))
+	assert.Equal(t, 1, len(zones[0].Users))
 }

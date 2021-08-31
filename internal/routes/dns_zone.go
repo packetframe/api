@@ -160,3 +160,46 @@ func ZoneUserAdd(c *fiber.Ctx) error {
 
 	return response(c, http.StatusOK, "User added to zone", nil)
 }
+
+// ZoneUserDelete handles a DELETE request to remove a user from a zone
+func ZoneUserDelete(c *fiber.Ctx) error {
+	var z db.Zone
+	if err := c.BodyParser(&z); err != nil {
+		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
+	}
+	if err := validation.Validate(z); err != nil {
+		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
+	}
+
+	// Check if user is authorized for zone
+	if err := checkUserAuthorization(c, z.Zone); err != nil {
+		return err
+	}
+
+	// Find zone
+	zDb, err := db.ZoneFind(Database, dns.Fqdn(z.Zone))
+	if err != nil {
+		return internalServerError(c, err)
+	}
+	if zDb == nil {
+		return response(c, http.StatusNotFound, "Zone doesn't exist", nil)
+	}
+
+	for _, user := range z.Users {
+		uDoc, err := db.UserFindByEmail(Database, user)
+		if err != nil {
+			return response(c, http.StatusNotFound, "User doesn't exist", nil)
+		}
+		if err := db.ZoneUserDelete(Database, zDb.ID, uDoc.ID); err != nil {
+			if errors.Is(err, db.ErrUserExistingZoneMember) {
+				return response(c, http.StatusBadRequest, err.Error(), nil)
+			} else if errors.Is(err, db.ErrUserNotFound) {
+				return response(c, http.StatusBadRequest, err.Error(), nil)
+			} else {
+				return internalServerError(c, err)
+			}
+		}
+	}
+
+	return response(c, http.StatusOK, "User removed from zone", nil)
+}

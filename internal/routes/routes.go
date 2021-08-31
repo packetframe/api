@@ -12,20 +12,21 @@ import (
 var Database *gorm.DB
 
 // routes stores a map of route to handler
-var routes = []*route{
-	{Path: "/auth/login", Method: "POST", Handler: AuthLogin},
-	{Path: "/auth/signup", Method: "POST", Handler: AuthSignup},
-	{Path: "/dns/zones", Method: "GET", Handler: ZoneList},
-	{Path: "/dns/zones", Method: "POST", Handler: ZoneAdd},
-	{Path: "/dns/zones", Method: "DELETE", Handler: ZoneDelete},
-	{Path: "/dns/zones/user", Method: "PUT", Handler: ZoneUserAdd},
-	{Path: "/dns/zones/user", Method: "DELETE", Handler: ZoneUserDelete},
+var routes = []*route{ // TODO: descriptions and markdown route table generator
+	{Path: "/auth/login", Method: "POST", Handler: AuthLogin, Description: ""},
+	{Path: "/auth/signup", Method: "POST", Handler: AuthSignup, Description: ""},
+	{Path: "/dns/zones", Method: "GET", Handler: ZoneList, Description: ""},
+	{Path: "/dns/zones", Method: "POST", Handler: ZoneAdd, Description: ""},
+	{Path: "/dns/zones", Method: "DELETE", Handler: ZoneDelete, Description: ""},
+	{Path: "/dns/zones/user", Method: "PUT", Handler: ZoneUserAdd, Description: ""},
+	{Path: "/dns/zones/user", Method: "DELETE", Handler: ZoneUserDelete, Description: ""},
 }
 
 type route struct {
-	Path    string
-	Method  string
-	Handler func(c *fiber.Ctx) error
+	Description string
+	Path        string
+	Method      string
+	Handler     func(c *fiber.Ctx) error
 }
 
 // Register registers route handlers

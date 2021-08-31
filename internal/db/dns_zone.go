@@ -175,14 +175,14 @@ func ZoneUserAdd(db *gorm.DB, zone string, user string) error {
 }
 
 // ZoneUserDelete deletes a user from a zone
-func ZoneUserDelete(db *gorm.DB, zone string, user string) error {
+func ZoneUserDelete(db *gorm.DB, zoneUuid string, userUuid string) error {
 	var z Zone
-	if err := db.First(&z, "id = ?", zone).Error; err != nil {
+	if err := db.First(&z, "id = ?", zoneUuid).Error; err != nil {
 		return err
 	}
 
-	for i, u := range z.Users {
-		if u == user {
+	for i, existingUserId := range z.Users {
+		if existingUserId == userUuid {
 			z.Users = append(z.Users[:i], z.Users[i+1:]...)
 		}
 	}
@@ -191,18 +191,18 @@ func ZoneUserDelete(db *gorm.DB, zone string, user string) error {
 }
 
 // ZoneGet gets a zone by UUID
-func ZoneGet(db *gorm.DB, zone string) (*Zone, error) {
+func ZoneGet(db *gorm.DB, zoneUuid string) (*Zone, error) {
 	var z Zone
-	if err := db.First(&z, "id = ?", zone).Error; err != nil {
+	if err := db.First(&z, "id = ?", zoneUuid).Error; err != nil {
 		return nil, err
 	}
 	return &z, nil
 }
 
 // ZoneUserGetZones gets all zones a user is a member of
-func ZoneUserGetZones(db *gorm.DB, user string) ([]Zone, error) {
+func ZoneUserGetZones(db *gorm.DB, userUuid string) ([]Zone, error) {
 	var zones []Zone
-	res := db.Model(&Zone{}).Where("? = ANY(users)", user).Find(&zones)
+	res := db.Model(&Zone{}).Where("? = ANY(users)", userUuid).Find(&zones)
 	if res.Error != nil {
 		return nil, res.Error
 	}
@@ -210,9 +210,9 @@ func ZoneUserGetZones(db *gorm.DB, user string) ([]Zone, error) {
 }
 
 // ZoneUserAuthorized checks if a user is authorized for a zone
-func ZoneUserAuthorized(db *gorm.DB, zone string, user string) (bool, error) {
+func ZoneUserAuthorized(db *gorm.DB, zoneUuid string, userUuid string) (bool, error) {
 	var z Zone
-	res := db.Model(&Zone{}).Where("id = ? AND ? = ANY(users)", zone, user).Find(&z)
+	res := db.Model(&Zone{}).Where("id = ? AND ? = ANY(users)", zoneUuid, userUuid).Find(&z)
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		return false, nil
 	}
