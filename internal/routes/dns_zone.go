@@ -158,5 +158,5 @@ func ZoneUserAdd(c *fiber.Ctx) error {
 		}
 	}
 
-	return response(c, http.StatusOK, "Zone added", nil)
+	return response(c, http.StatusOK, "User added to zone", nil)
 }
