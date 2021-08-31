@@ -5,7 +5,6 @@ go 1.16
 require (
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/gofiber/fiber/v2 v2.18.0
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/lib/pq v1.3.0
 	github.com/miekg/dns v1.0.14
 	github.com/pkg/errors v0.9.1 // indirect
