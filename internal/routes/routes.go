@@ -17,6 +17,8 @@ var routes = []*route{
 	{Path: "/dns/zones", Method: "GET", Handler: ZoneList},
 	{Path: "/dns/zones", Method: "POST", Handler: ZoneAdd},
 	{Path: "/dns/zones", Method: "DELETE", Handler: ZoneDelete},
+	{Path: "/dns/zones/user", Method: "PUT", Handler: ZoneUserAdd},
+	//{Path: "/dns/zones/user", Method: "DELETE", Handler: ZoneUserDelete},
 }
 
 type route struct {
@@ -33,6 +35,8 @@ func Register(app *fiber.App) {
 			app.Get(route.Path, route.Handler)
 		case "POST":
 			app.Post(route.Path, route.Handler)
+		case "PUT":
+			app.Put(route.Path, route.Handler)
 		case "DELETE":
 			app.Delete(route.Path, route.Handler)
 		default:

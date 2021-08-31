@@ -12,6 +12,7 @@ import (
 
 var (
 	ErrUserExistingZoneMember = errors.New("user is already a member of this zone")
+	ErrUserNotFound           = errors.New("user not found")
 )
 
 // Zone stores a DNS zone
@@ -79,8 +80,16 @@ func ZoneSetSerial(db *gorm.DB, uuid string) error {
 	return db.Save(&zone).Error
 }
 
-// ZoneAdd adds a DNS zone
+// ZoneAdd adds a DNS zone by zone name and user email
 func ZoneAdd(db *gorm.DB, zone string, user string) error {
+	u, err := UserFindByEmail(db, user)
+	if err != nil {
+		return err
+	}
+	if u == nil {
+		return ErrUserNotFound
+	}
+
 	zone = dns.Fqdn(zone)
 	dnssecKey, err := NewKey(zone)
 	if err != nil {
@@ -90,7 +99,7 @@ func ZoneAdd(db *gorm.DB, zone string, user string) error {
 		Zone:   zone,
 		Serial: uint64(time.Now().Unix()),
 		DNSSEC: *dnssecKey,
-		Users:  []string{user},
+		Users:  []string{u.ID},
 	}).Error
 }
 
@@ -141,18 +150,27 @@ func ZoneRotateDNSSECKey(db *gorm.DB, uuid string) error {
 // ZoneUserAdd adds a user to a zone
 func ZoneUserAdd(db *gorm.DB, zone string, user string) error {
 	var z Zone
-	if err := db.First(&z, "id = ?", zone).Error; err != nil {
+	if err := db.First(&z, "zone = ?", dns.Fqdn(zone)).Error; err != nil {
 		return err
 	}
 
+	// Make sure user exists before adding it to the zone
+	u, err := UserFindByEmail(db, user)
+	if err != nil {
+		return err
+	}
+	if u == nil {
+		return ErrUserNotFound
+	}
+
 	// Check if user is already added to this zone
-	for _, u := range z.Users {
-		if u == user {
+	for _, existingUserID := range z.Users {
+		if existingUserID == u.ID {
 			return ErrUserExistingZoneMember
 		}
 	}
 
-	z.Users = append(z.Users, user)
+	z.Users = append(z.Users, u.ID)
 	return db.Save(&z).Error
 }
 

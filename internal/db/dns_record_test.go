@@ -10,7 +10,11 @@ func TestRecordAddListDelete(t *testing.T) {
 	db, err := TestSetup()
 	assert.Nil(t, err)
 
-	err = ZoneAdd(db, "example1.com", "test-user1-id")
+	// Add user1
+	err = UserAdd(db, "user1@example.com", "password1")
+	assert.Nil(t, err)
+
+	err = ZoneAdd(db, "example1.com", "user1@example.com")
 	assert.Nil(t, err)
 	example1, err := ZoneFind(db, "example1.com")
 	assert.Nil(t, err)

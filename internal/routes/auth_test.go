@@ -18,9 +18,11 @@ func TestRoutesInvalidJSON(t *testing.T) {
 
 	content := "invalid json"
 	for _, route := range routes {
-		httpResp, _, err := testReq(app, http.MethodPost, route.Path, content, map[string]string{})
-		assert.NotNilf(t, err, route.Path)
-		assert.Equalf(t, http.StatusUnprocessableEntity, httpResp.StatusCode, route.Path)
+		if route.Method != "GET" {
+			httpResp, _, err := testReq(app, route.Method, route.Path, content, map[string]string{})
+			assert.NotNilf(t, err, route.Path)
+			assert.Equalf(t, http.StatusUnprocessableEntity, httpResp.StatusCode, route.Method+" "+route.Path)
+		}
 	}
 }
 
