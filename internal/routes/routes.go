@@ -15,13 +15,14 @@ var Database *gorm.DB
 
 // routes stores a map of route to handler
 var routes = []*route{
-	{Path: "/auth/login", Method: "POST", Handler: AuthLogin, Description: "Log a user in"},
-	{Path: "/auth/signup", Method: "POST", Handler: AuthSignup, Description: "Create a new user account"},
-	{Path: "/dns/zones", Method: "GET", Handler: ZoneList, Description: "List all DNS zones authorized for a user"},
-	{Path: "/dns/zones", Method: "POST", Handler: ZoneAdd, Description: "Add a new DNS zone"},
-	{Path: "/dns/zones", Method: "DELETE", Handler: ZoneDelete, Description: "Delete a DNS zone"},
-	{Path: "/dns/zones/user", Method: "PUT", Handler: ZoneUserAdd, Description: "Add a user to a DNS zone"},
-	{Path: "/dns/zones/user", Method: "DELETE", Handler: ZoneUserDelete, Description: "Remove a user from a DNS zone"},
+	{Path: "/auth/login", Method: http.MethodPost, Handler: AuthLogin, Description: "Log a user in"},
+	{Path: "/auth/signup", Method: http.MethodPost, Handler: AuthSignup, Description: "Create a new user account"},
+	{Path: "/dns/zones", Method: http.MethodGet, Handler: ZoneList, Description: "List all DNS zones authorized for a user"},
+	{Path: "/dns/zones", Method: http.MethodPost, Handler: ZoneAdd, Description: "Add a new DNS zone"},
+	{Path: "/dns/zones", Method: http.MethodDelete, Handler: ZoneDelete, Description: "Delete a DNS zone"},
+	{Path: "/dns/zones/user", Method: http.MethodPut, Handler: ZoneUserAdd, Description: "Add a user to a DNS zone"},
+	{Path: "/dns/zones/user", Method: http.MethodDelete, Handler: ZoneUserDelete, Description: "Remove a user from a DNS zone"},
+	{Path: "/dns/records", Method: http.MethodPost, Handler: RecordAdd, Description: "Add a DNS record to a zone"},
 }
 
 type route struct {
@@ -35,13 +36,13 @@ type route struct {
 func Register(app *fiber.App) {
 	for _, route := range routes {
 		switch route.Method {
-		case "GET":
+		case http.MethodGet:
 			app.Get(route.Path, route.Handler)
-		case "POST":
+		case http.MethodPost:
 			app.Post(route.Path, route.Handler)
-		case "PUT":
+		case http.MethodPut:
 			app.Put(route.Path, route.Handler)
-		case "DELETE":
+		case http.MethodDelete:
 			app.Delete(route.Path, route.Handler)
 		default:
 			panic("invalid HTTP method " + route.Method)
@@ -78,7 +79,7 @@ func Document() string {
 }
 
 // checkUserAuthorization checks if a user is authorized for a zone
-func checkUserAuthorization(c *fiber.Ctx, zone string) error {
+func checkUserAuthorization(c *fiber.Ctx, zoneFqdn string) error {
 	// Find user
 	user, err := findUser(c)
 	if err != nil {
@@ -89,7 +90,7 @@ func checkUserAuthorization(c *fiber.Ctx, zone string) error {
 	}
 
 	// Find zone
-	zDb, err := db.ZoneFind(Database, dns.Fqdn(zone))
+	zDb, err := db.ZoneFind(Database, dns.Fqdn(zoneFqdn))
 	if err != nil {
 		return internalServerError(c, err)
 	}
