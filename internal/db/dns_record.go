@@ -1,8 +1,9 @@
 package db
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // Record stores a DNS record
@@ -36,4 +37,14 @@ func RecordList(db *gorm.DB, zone string) ([]Record, error) {
 // RecordDelete deletes a DNS record from a zone
 func RecordDelete(db *gorm.DB, record string) error {
 	return db.Where("id = ?", record).Delete(&Record{}).Error
+}
+
+// RecordUpdate updates a DNS record
+func RecordUpdate(db *gorm.DB, recordId string, updates *Record) error {
+	var currentRecord Record
+	if err := db.Find(&currentRecord, "id = ?", recordId).Error; err != nil {
+		return err
+	}
+
+	return db.Model(&currentRecord).Updates(updates).Error
 }
