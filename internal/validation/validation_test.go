@@ -9,6 +9,9 @@ import (
 )
 
 func TestValidate(t *testing.T) {
+	err := Register()
+	assert.Nil(t, err)
+
 	u := &db.User{Email: "invalidemail"}
 	errors := Validate(u)
 	assert.Equal(t, 2, len(errors))

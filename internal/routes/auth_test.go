@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/packetframe/api/internal/db"
+	"github.com/packetframe/api/internal/validation"
 )
 
 func TestRoutesInvalidJSON(t *testing.T) {
@@ -31,6 +32,8 @@ func TestRoutesAuthInvalidUserPass(t *testing.T) {
 
 	app := fiber.New()
 	Register(app)
+	err := validation.Register()
+	assert.Nil(t, err)
 
 	content := `{"email":"invalidemail", "password":"x"}` // Invalid email and password too short
 	for _, route := range []string{"/auth/signup", "/auth/login"} {

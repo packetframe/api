@@ -8,15 +8,15 @@ import (
 
 // Record stores a DNS record
 type Record struct {
-	ID    string `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()"`
-	Type  string
-	Label string
-	Value string
-	TTL   uint32
-	Proxy bool
+	ID     string `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()" json:"-"`
+	Type   string `json:"type" validate:"required,dns-rrtype"`
+	Label  string `json:"label" validate:"required"`
+	Value  string `json:"value"`
+	TTL    uint32 `json:"ttl"`
+	Proxy  bool   `json:"proxy"`
+	ZoneID string `json:"zone"`
 
-	ZoneID    string
-	Zone      Zone
+	Zone      Zone           `json:"-" validate:"-"` // Zone is populated by the database so will be zero value at record creation time
 	CreatedAt time.Time      `json:"-"`
 	UpdatedAt time.Time      `json:"-"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`

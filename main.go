@@ -9,6 +9,7 @@ import (
 
 	"github.com/packetframe/api/internal/db"
 	"github.com/packetframe/api/internal/routes"
+	"github.com/packetframe/api/internal/validation"
 )
 
 var (
@@ -30,6 +31,10 @@ func main() {
 
 		app := fiber.New(fiber.Config{DisableStartupMessage: true})
 		routes.Register(app)
+
+		if err := validation.Register(); err != nil {
+			log.Fatal(err)
+		}
 
 		log.Printf("Starting API on %s", *listenAddr)
 		log.Fatal(app.Listen(*listenAddr))
