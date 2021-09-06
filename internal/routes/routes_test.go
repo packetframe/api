@@ -3,8 +3,6 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/packetframe/api/internal/db"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"strconv"
@@ -12,6 +10,9 @@ import (
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/packetframe/api/internal/db"
 )
 
 type apiResponse struct {
