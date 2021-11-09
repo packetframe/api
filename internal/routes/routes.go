@@ -2,12 +2,13 @@ package routes
 
 import (
 	"fmt"
-	"github.com/miekg/dns"
-	"github.com/packetframe/api/internal/db"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/miekg/dns"
 	"gorm.io/gorm"
+
+	"github.com/packetframe/api/internal/db"
 )
 
 // Database stores the global database for the API
