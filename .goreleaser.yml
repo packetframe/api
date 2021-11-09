@@ -14,20 +14,6 @@ changelog:
       - "^docs:"
       - "^test:"
 
-nfpms:
-  - id: api
-    package_name: api
-    file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    vendor: Packetframe
-    homepage: https://packetframe.com
-    maintainer: Nate Sales <nate@packetframe.com>
-    description: Packetframe API v4
-    license: AGPL-3.0-only
-    section: utils
-    priority: extra
-    formats:
-      - deb
-
 dockers:
   - image_templates: ["ghcr.io/packetframe/api:{{ .Version }}-amd64"]
     dockerfile: Dockerfile
