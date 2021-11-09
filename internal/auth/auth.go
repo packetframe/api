@@ -3,8 +3,9 @@ package auth
 import (
 	"crypto/rand"
 	"crypto/subtle"
-	"golang.org/x/crypto/argon2"
 	"math/big"
+
+	"golang.org/x/crypto/argon2"
 )
 
 var (
