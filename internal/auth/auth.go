@@ -8,10 +8,6 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-var (
-	JWTSecret = "TEST_JWT_SECRET" // TODO
-)
-
 // RandomString returns a securely generated random string of specified length
 func RandomString(length int) (string, error) {
 	const letters = "0123456789abcdef"
