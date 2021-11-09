@@ -19,6 +19,7 @@ type User struct {
 	ID           string         `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()" json:"-"`
 	Email        string         `gorm:"uniqueIndex" json:"email" validate:"required,email,min=6,max=32"`
 	Password     string         `gorm:"-" json:"password" validate:"required,min=8,max=128"`
+	Refer        string         `json:"refer"` // Where did you hear about Packetframe?
 	Groups       pq.StringArray `gorm:"type:text[]" json:"-"`
 	PasswordHash []byte         `json:"-"`
 	APIKey       string         `json:"-"` // Rotated manually by user if needed
