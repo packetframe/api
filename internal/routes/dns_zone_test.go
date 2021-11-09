@@ -9,10 +9,13 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/packetframe/api/internal/db"
+	"github.com/packetframe/api/internal/validation"
 )
 
 func TestRoutesZoneAddListDelete(t *testing.T) {
-	var err error
+	err := validation.Register()
+	assert.Nil(t, err)
+
 	Database, err = db.TestSetup()
 	assert.Nil(t, err)
 
@@ -34,7 +37,12 @@ func TestRoutesZoneAddListDelete(t *testing.T) {
 	assert.Truef(t, apiResp.Success, apiResp.Message)
 	userToken := apiResp.Data["token"].(string)
 
-	// Add the zone
+	// Add an invalid domain (ex^mple.com)
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/dns/zones", `{"zone":"ex^mple.com"}`, map[string]string{"Authorization": "Token " + userToken})
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusBadRequest, httpResp.StatusCode)
+
+	// Add example.com
 	httpResp, apiResp, err = testReq(app, http.MethodPost, "/dns/zones", `{"zone":"example.com"}`, map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
