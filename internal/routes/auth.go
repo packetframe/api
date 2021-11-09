@@ -3,6 +3,7 @@ package routes
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -79,6 +80,13 @@ func AuthLogin(c *fiber.Ctx) error {
 		return response(c, http.StatusUnauthorized, errInvalidCredentials, nil)
 	}
 
-	// TODO: Set Token in HTTPONLY cookie
+	// Set Token in HTTPONLY cookie
+	c.Cookie(&fiber.Cookie{
+		Name:     "token",
+		Value:    user.Token,
+		Expires:  time.Now().Add(30 * 24 * time.Hour), // 30 days
+		HTTPOnly: true,
+	})
+
 	return response(c, http.StatusOK, "Authentication success", fiber.Map{"token": user.Token})
 }
