@@ -113,7 +113,7 @@ func ZoneList(db *gorm.DB) ([]Zone, error) {
 	return zones, nil
 }
 
-// ZoneFind finds a user by zone and returns nil if no zone exists
+// ZoneFind finds a zone by FQDN and returns nil if no zone exists
 func ZoneFind(db *gorm.DB, zone string) (*Zone, error) {
 	zone = dns.Fqdn(zone)
 	var z Zone
