@@ -1,0 +1,51 @@
+builds:
+  - id: api
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+nfpms:
+  - id: api
+    package_name: api
+    file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    vendor: Packetframe
+    homepage: https://packetframe.com
+    maintainer: Nate Sales <nate@packetframe.com>
+    description: Packetframe API v4
+    license: AGPL-3.0-only
+    section: utils
+    priority: extra
+    formats:
+      - deb
+
+dockers:
+  - image_templates: ["ghcr.io/packetframe/api:{{ .Version }}-amd64"]
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/amd64
+      - --label=org.opencontainers.image.title=api
+      - --label=org.opencontainers.image.description=Packetframe API v4
+      - --label=org.opencontainers.image.url=https://github.com/packetframe/api
+      - --label=org.opencontainers.image.source=https://github.com/packetframe/api
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=AGPL-3.0-only
+
+docker_manifests:
+  - name_template: ghcr.io/packetframe/api:{{ .Version }}
+    image_templates:
+      - ghcr.io/packetframe/api:{{ .Version }}-amd64
+  - name_template: ghcr.io/packetframe/api:latest
+    image_templates:
+      - ghcr.io/packetframe/api:{{ .Version }}-amd64
