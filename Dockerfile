@@ -1,3 +1,3 @@
 FROM alpine
-COPY doqd /usr/bin/api
+COPY api /usr/bin/api
 ENTRYPOINT ["/usr/bin/api"]
