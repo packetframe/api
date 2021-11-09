@@ -38,7 +38,7 @@ func TestRoutesZoneAddListDelete(t *testing.T) {
 	userToken := apiResp.Data["token"].(string)
 
 	// Add an invalid domain (ex^mple.com)
-	httpResp, apiResp, err = testReq(app, http.MethodPost, "/dns/zones", `{"zone":"ex^mple.com"}`, map[string]string{"Authorization": "Token " + userToken})
+	httpResp, _, err = testReq(app, http.MethodPost, "/dns/zones", `{"zone":"ex^mple.com"}`, map[string]string{"Authorization": "Token " + userToken})
 	assert.NotNil(t, err)
 	assert.Equal(t, http.StatusBadRequest, httpResp.StatusCode)
 

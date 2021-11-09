@@ -72,7 +72,7 @@ func TestRoutesRecordAdd(t *testing.T) { // TODO: Make this AddListDelete
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 
 	// Add an invalid record to example.com
-	httpResp, apiResp, err = testReq(app, http.MethodPost, "/dns/records", fmt.Sprintf(`{"zone": "%s", "label": "@", "type": "A", "value": "not a valid ip address"}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
+	httpResp, _, err = testReq(app, http.MethodPost, "/dns/records", fmt.Sprintf(`{"zone": "%s", "label": "@", "type": "A", "value": "not a valid ip address"}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
 	assert.NotNil(t, err)
 	assert.Equal(t, http.StatusBadRequest, httpResp.StatusCode)
 
