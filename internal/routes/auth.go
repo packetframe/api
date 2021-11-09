@@ -50,7 +50,7 @@ func AuthSignup(c *fiber.Ctx) error {
 		return response(c, http.StatusConflict, "User already exists", nil)
 	}
 
-	if err := db.UserAdd(Database, u.Email, u.Password); err != nil {
+	if err := db.UserAdd(Database, u.Email, u.Password, u.Refer); err != nil {
 		return internalServerError(c, err)
 	}
 

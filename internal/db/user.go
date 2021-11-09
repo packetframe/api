@@ -30,7 +30,7 @@ type User struct {
 }
 
 // UserAdd creates a new user
-func UserAdd(db *gorm.DB, email string, password string) error {
+func UserAdd(db *gorm.DB, email string, password string, refer string) error {
 	passwordHash, err := auth.Hash(password)
 	if err != nil {
 		return err
@@ -49,6 +49,7 @@ func UserAdd(db *gorm.DB, email string, password string) error {
 		APIKey:       apiKey,
 		Token:        token,
 		Groups:       []string{GroupEnabled},
+		Refer:        refer,
 	}).Error
 }
 
