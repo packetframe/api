@@ -12,7 +12,7 @@ func TestZoneAddListFindDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Add user1
-	err = UserAdd(db, "user1@example.com", "password1")
+	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
 
 	err = ZoneAdd(db, "example1.com", "user1@example.com")
@@ -43,7 +43,7 @@ func TestZoneRotateDNSSECKey(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Add user1
-	err = UserAdd(db, "user1@example.com", "password1")
+	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
 
 	err = ZoneAdd(db, "example1.com", "user1@example.com")
@@ -71,7 +71,7 @@ func TestZoneAddDuplicate(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Add user1
-	err = UserAdd(db, "user1@example.com", "password1")
+	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
 
 	err = ZoneAdd(db, "example1.com", "user1@example.com")
@@ -87,7 +87,7 @@ func TestZoneUserAdd(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Create user1@example.com
-	err = UserAdd(db, "user1@example.com", "password1")
+	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
 	user1, err := UserFindByEmail(db, "user1@example.com")
 	assert.Nil(t, err)
@@ -120,7 +120,7 @@ func TestZoneSetSerial(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Add user1
-	err = UserAdd(db, "user1@example.com", "password1")
+	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
 
 	// Add and find example1.com
@@ -151,7 +151,7 @@ func TestZoneUserGetZones(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Create and add user1 to example1.com
-	err = UserAdd(db, "user1@example.com", "password1")
+	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
 	user1, err := UserFindByEmail(db, "user1@example.com")
 	assert.Nil(t, err)
@@ -176,7 +176,7 @@ func TestZoneUserAuthorized(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Create and add user1 to example1.com
-	err = UserAdd(db, "user1@example.com", "password1")
+	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
 	user1, err := UserFindByEmail(db, "user1@example.com")
 	assert.Nil(t, err)

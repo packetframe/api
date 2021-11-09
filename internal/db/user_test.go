@@ -11,11 +11,11 @@ func TestDbUserList(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Add 3 users
-	err = UserAdd(db, "user1@example.com", "password1")
+	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
-	err = UserAdd(db, "user2@example.com", "password2")
+	err = UserAdd(db, "user2@example.com", "password2", "example referrer")
 	assert.Nil(t, err)
-	err = UserAdd(db, "user3@example.com", "password3")
+	err = UserAdd(db, "user3@example.com", "password3", "example referrer")
 	assert.Nil(t, err)
 
 	// Assert that there are 3 users
@@ -29,7 +29,7 @@ func TestDbUserAddDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Add user1
-	err = UserAdd(db, "user1@example.com", "password1")
+	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
 
 	// Find user1
@@ -51,7 +51,7 @@ func TestDbUserGroupAddDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Add user1
-	err = UserAdd(db, "user1@example.com", "password1")
+	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
 
 	// Find user1
@@ -81,7 +81,7 @@ func TestDbUserResetPassword(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Add user1
-	err = UserAdd(db, "user1@example.com", "password1")
+	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
 
 	// Find user1
@@ -106,7 +106,7 @@ func TestDbUserFindByIdentifier(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Add user1
-	err = UserAdd(db, "user1@example.com", "password1")
+	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
 
 	// Find user1

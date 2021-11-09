@@ -11,7 +11,7 @@ func TestRecordAddListDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Add user1
-	err = UserAdd(db, "user1@example.com", "password1")
+	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
 
 	err = ZoneAdd(db, "example1.com", "user1@example.com")
@@ -42,7 +42,7 @@ func TestRecordUpdate(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Add user1
-	err = UserAdd(db, "user1@example.com", "password1")
+	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
 
 	// Add example1.com
