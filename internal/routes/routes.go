@@ -23,6 +23,7 @@ var routes = []*route{
 	{Path: "/dns/zones", Method: http.MethodDelete, Handler: ZoneDelete, Description: "Delete a DNS zone"},
 	{Path: "/dns/zones/user", Method: http.MethodPut, Handler: ZoneUserAdd, Description: "Add a user to a DNS zone"},
 	{Path: "/dns/zones/user", Method: http.MethodDelete, Handler: ZoneUserDelete, Description: "Remove a user from a DNS zone"},
+	{Path: "/dns/records", Method: http.MethodGet, Handler: RecordList, Description: "List DNS records for a zone"},
 	{Path: "/dns/records", Method: http.MethodPost, Handler: RecordAdd, Description: "Add a DNS record to a zone"},
 }
 
@@ -101,6 +102,28 @@ func checkUserAuthorization(c *fiber.Ctx, zoneFqdn string) error {
 
 	// Check if user is authorized for zone
 	authorized, err := db.ZoneUserAuthorized(Database, zDb.ID, user.ID)
+	if err != nil {
+		return internalServerError(c, err)
+	}
+	if !authorized {
+		return response(c, http.StatusForbidden, "Forbidden", nil)
+	}
+	return nil
+}
+
+// checkUserAuthorizationByID checks if a user is authorized for a zone given a zone ID
+func checkUserAuthorizationByID(c *fiber.Ctx, zoneId string) error {
+	// Find user
+	user, err := findUser(c)
+	if err != nil {
+		return internalServerError(c, err)
+	}
+	if user == nil {
+		return response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
+	}
+
+	// Check if user is authorized for zone
+	authorized, err := db.ZoneUserAuthorized(Database, zoneId, user.ID)
 	if err != nil {
 		return internalServerError(c, err)
 	}

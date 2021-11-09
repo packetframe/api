@@ -76,7 +76,18 @@ func TestRoutesRecordAdd(t *testing.T) { // TODO: Make this AddListDelete
 	assert.NotNil(t, err)
 	assert.Equal(t, http.StatusBadRequest, httpResp.StatusCode)
 
-	// TODO: List records
+	// List records
+	httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/records", fmt.Sprintf(`{"zone": "%s"}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
+	assert.Nil(t, err)
+	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
+	assert.Truef(t, apiResp.Success, apiResp.Message)
+	respJSON, err = json.Marshal(apiResp.Data["records"])
+	assert.Nil(t, err)
+	var records []db.Record
+	err = json.Unmarshal(respJSON, &records)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(records))
+
 	// TODO: Add invalid records
 	// TODO: Delete record
 }
