@@ -61,3 +61,24 @@ func TestRoutes404(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, http.StatusNotFound, httpResp.StatusCode)
 }
+
+func TestDocument(t *testing.T) {
+	doc := Document()
+	assert.Greater(t, len(doc), 100)
+}
+
+func TestRoutesInvalidJSON(t *testing.T) {
+	Database = nil
+
+	app := fiber.New()
+	Register(app)
+
+	content := "invalid json"
+	for _, route := range routes {
+		if route.Method != "GET" {
+			httpResp, _, err := testReq(app, route.Method, route.Path, content, map[string]string{})
+			assert.NotNilf(t, err, route.Path)
+			assert.Equalf(t, http.StatusUnprocessableEntity, httpResp.StatusCode, route.Method+" "+route.Path)
+		}
+	}
+}

@@ -11,22 +11,6 @@ import (
 	"github.com/packetframe/api/internal/validation"
 )
 
-func TestRoutesInvalidJSON(t *testing.T) {
-	Database = nil
-
-	app := fiber.New()
-	Register(app)
-
-	content := "invalid json"
-	for _, route := range routes {
-		if route.Method != "GET" {
-			httpResp, _, err := testReq(app, route.Method, route.Path, content, map[string]string{})
-			assert.NotNilf(t, err, route.Path)
-			assert.Equalf(t, http.StatusUnprocessableEntity, httpResp.StatusCode, route.Method+" "+route.Path)
-		}
-	}
-}
-
 func TestRoutesAuthInvalidUserPass(t *testing.T) {
 	Database = nil
 
