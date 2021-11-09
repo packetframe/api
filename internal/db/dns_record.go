@@ -8,7 +8,7 @@ import (
 
 // Record stores a DNS record
 type Record struct {
-	ID     string `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()" json:"-"`
+	ID     string `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()" json:"id"`
 	Type   string `json:"type" validate:"required,dns-rrtype"`
 	Label  string `json:"label" validate:"required"`
 	Value  string `json:"value"`

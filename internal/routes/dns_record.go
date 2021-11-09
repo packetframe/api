@@ -57,3 +57,29 @@ func RecordList(c *fiber.Ctx) error {
 
 	return response(c, http.StatusOK, "Zone added", map[string]interface{}{"records": records})
 }
+
+// RecordDelete handles a DELETE request to delete a DNS record
+func RecordDelete(c *fiber.Ctx) error {
+	var r struct {
+		ZoneID   string `json:"zone"`
+		RecordID string `json:"record"`
+	}
+	if err := c.BodyParser(&r); err != nil {
+		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
+	}
+	if err := validation.Validate(r); err != nil {
+		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
+	}
+
+	// Check if user is authorized for zone
+	if err := checkUserAuthorization(c, r.ZoneID); err != nil {
+		return err
+	}
+
+	// Add the record
+	if err := db.RecordDelete(Database, r.RecordID); err != nil {
+		return internalServerError(c, err)
+	}
+
+	return response(c, http.StatusOK, "Record deleted", nil)
+}

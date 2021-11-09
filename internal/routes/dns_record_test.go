@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/packetframe/api/internal/validation"
 	"net/http"
 	"testing"
 
@@ -12,8 +13,10 @@ import (
 	"github.com/packetframe/api/internal/db"
 )
 
-func TestRoutesRecordAdd(t *testing.T) { // TODO: Make this AddListDelete
-	var err error
+func TestRoutesRecordAddListDelete(t *testing.T) {
+	err := validation.Register()
+	assert.Nil(t, err)
+
 	Database, err = db.TestSetup()
 	assert.Nil(t, err)
 
@@ -88,6 +91,20 @@ func TestRoutesRecordAdd(t *testing.T) { // TODO: Make this AddListDelete
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(records))
 
-	// TODO: Add invalid records
-	// TODO: Delete record
+	// Delete record from example.com
+	httpResp, _, err = testReq(app, http.MethodDelete, "/dns/records", fmt.Sprintf(`{"zone": "%s", "record": "%s"}`, zones[0].ID, records[0].ID), map[string]string{"Authorization": "Token " + userToken})
+	assert.Nil(t, err)
+	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
+
+	// List to make sure there are no more records
+	httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/records", fmt.Sprintf(`{"zone": "%s"}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
+	assert.Nil(t, err)
+	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
+	assert.Truef(t, apiResp.Success, apiResp.Message)
+	respJSON, err = json.Marshal(apiResp.Data["records"])
+	assert.Nil(t, err)
+	records = []db.Record{}
+	err = json.Unmarshal(respJSON, &records)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(records))
 }
