@@ -12,7 +12,7 @@ type Record struct {
 	Type   string `json:"type" validate:"required,dns-rrtype"`
 	Label  string `json:"label" validate:"required"`
 	Value  string `json:"value"`
-	TTL    uint32 `json:"ttl"`
+	TTL    uint32 `json:"ttl" validate:"gte=300,lte=2147483647"`
 	Proxy  bool   `json:"proxy"`
 	ZoneID string `json:"zone"`
 
