@@ -12,6 +12,7 @@ import (
 // RecordAdd handles a POST request to add a DNS record
 func RecordAdd(c *fiber.Ctx) error {
 	var r db.Record
+	r.ID = ""
 	if err := c.BodyParser(&r); err != nil {
 		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
 	}
