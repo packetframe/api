@@ -65,7 +65,7 @@ func RecordDelete(c *fiber.Ctx) error {
 	}
 
 	// Check if user is authorized for zone
-	if err := checkUserAuthorization(c, r.ZoneID); err != nil {
+	if err := checkUserAuthorizationByID(c, r.ZoneID); err != nil {
 		return err
 	}
 
