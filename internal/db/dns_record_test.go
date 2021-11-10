@@ -66,7 +66,7 @@ func TestRecordUpdate(t *testing.T) {
 	assert.Equal(t, 1, len(records))
 	assert.Equal(t, "192.168.2.1", records[0].Value)
 
-	err = RecordUpdate(db, records[0].ID, &Record{Value: "203.0.113.1"})
+	err = RecordUpdate(db, &Record{Value: "203.0.113.1", ID: records[0].ID})
 	assert.Nil(t, err)
 
 	records, err = RecordList(db, example1.ID)

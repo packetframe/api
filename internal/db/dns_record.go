@@ -40,9 +40,9 @@ func RecordDelete(db *gorm.DB, record string) error {
 }
 
 // RecordUpdate updates a DNS record
-func RecordUpdate(db *gorm.DB, recordId string, updates *Record) error {
+func RecordUpdate(db *gorm.DB, updates *Record) error {
 	var currentRecord Record
-	if err := db.Find(&currentRecord, "id = ?", recordId).Error; err != nil {
+	if err := db.Find(&currentRecord, "id = ?", updates.ID).Error; err != nil {
 		return err
 	}
 

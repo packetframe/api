@@ -70,7 +70,7 @@ func TestRoutesRecordAddListDelete(t *testing.T) {
 	assert.Equal(t, 1, len(zones))
 
 	// Add a record to example.com
-	httpResp, apiResp, err = testReq(app, http.MethodPost, "/dns/records", fmt.Sprintf(`{"zone": "%s", "label": "@", "type": "A", "value": "192.0.2.1"}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/dns/records", fmt.Sprintf(`{"zone": "%s", "label": "@", "type": "A", "value": "192.0.2.1", "ttl": 300}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 
@@ -90,6 +90,29 @@ func TestRoutesRecordAddListDelete(t *testing.T) {
 	err = json.Unmarshal(respJSON, &records)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(records))
+	assert.Equal(t, "A", records[0].Type)
+	assert.Equal(t, uint32(300), records[0].TTL)
+	assert.Equal(t, "192.0.2.1", records[0].Value)
+
+	// Update record
+	httpResp, _, err = testReq(app, http.MethodPut, "/dns/records", fmt.Sprintf(`{"zone": "%s", "label": "@", "type": "A", "value": "192.0.2.2", "ttl": 600, "id": "%s"}`, zones[0].ID, records[0].ID), map[string]string{"Authorization": "Token " + userToken})
+	assert.Nil(t, err)
+	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
+
+	// List records and assert that the record was updated
+	httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/records/"+zones[0].ID, "", map[string]string{"Authorization": "Token " + userToken})
+	assert.Nil(t, err)
+	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
+	assert.Truef(t, apiResp.Success, apiResp.Message)
+	respJSON, err = json.Marshal(apiResp.Data["records"])
+	assert.Nil(t, err)
+	records = []db.Record{}
+	err = json.Unmarshal(respJSON, &records)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(records))
+	assert.Equal(t, "A", records[0].Type)
+	assert.Equal(t, uint32(600), records[0].TTL)
+	assert.Equal(t, "192.0.2.2", records[0].Value)
 
 	// Delete record from example.com
 	httpResp, _, err = testReq(app, http.MethodDelete, "/dns/records", fmt.Sprintf(`{"zone": "%s", "record": "%s"}`, zones[0].ID, records[0].ID), map[string]string{"Authorization": "Token " + userToken})
