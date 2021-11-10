@@ -23,7 +23,7 @@ var routes = []*route{
 	{Path: "/dns/zones", Method: http.MethodDelete, Handler: ZoneDelete, Description: "Delete a DNS zone"},
 	{Path: "/dns/zones/user", Method: http.MethodPut, Handler: ZoneUserAdd, Description: "Add a user to a DNS zone"},
 	{Path: "/dns/zones/user", Method: http.MethodDelete, Handler: ZoneUserDelete, Description: "Remove a user from a DNS zone"},
-	{Path: "/dns/records", Method: http.MethodGet, Handler: RecordList, Description: "List DNS records for a zone"},
+	{Path: "/dns/records/:id", Method: http.MethodGet, Handler: RecordList, Description: "List DNS records for a zone"},
 	{Path: "/dns/records", Method: http.MethodPost, Handler: RecordAdd, Description: "Add a DNS record to a zone"},
 	{Path: "/dns/records", Method: http.MethodDelete, Handler: RecordDelete, Description: "Delete a DNS record from a zone"},
 }

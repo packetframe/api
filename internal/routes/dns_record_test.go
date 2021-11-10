@@ -80,7 +80,7 @@ func TestRoutesRecordAddListDelete(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, httpResp.StatusCode)
 
 	// List records
-	httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/records", fmt.Sprintf(`{"zone": "%s"}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
+	httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/records/"+zones[0].ID, "", map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 	assert.Truef(t, apiResp.Success, apiResp.Message)
@@ -97,7 +97,7 @@ func TestRoutesRecordAddListDelete(t *testing.T) {
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 
 	// List to make sure there are no more records
-	httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/records", fmt.Sprintf(`{"zone": "%s"}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
+	httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/records/"+zones[0].ID, "", map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 	assert.Truef(t, apiResp.Success, apiResp.Message)
