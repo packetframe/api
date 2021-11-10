@@ -33,8 +33,9 @@ func TestRecordAddListDelete(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(records))
 
-	err = RecordDelete(db, records[0].ID)
+	deleted, err := RecordDelete(db, records[0].ID)
 	assert.Nil(t, err)
+	assert.True(t, deleted)
 }
 
 func TestRecordUpdate(t *testing.T) {

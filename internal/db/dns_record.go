@@ -35,8 +35,9 @@ func RecordList(db *gorm.DB, zone string) ([]Record, error) {
 }
 
 // RecordDelete deletes a DNS record from a zone
-func RecordDelete(db *gorm.DB, record string) error {
-	return db.Where("id = ?", record).Delete(&Record{}).Error
+func RecordDelete(db *gorm.DB, record string) (bool, error) {
+	req := db.Where("id = ?", record).Delete(&Record{})
+	return req.RowsAffected > 0, req.Error
 }
 
 // RecordUpdate updates a DNS record

@@ -70,8 +70,12 @@ func RecordDelete(c *fiber.Ctx) error {
 	}
 
 	// Add the record
-	if err := db.RecordDelete(Database, r.RecordID); err != nil {
+	deleted, err := db.RecordDelete(Database, r.RecordID)
+	if err != nil {
 		return internalServerError(c, err)
+	}
+	if !deleted {
+		return response(c, http.StatusOK, "Record doesn't exist, nothing to delete", nil)
 	}
 
 	return response(c, http.StatusOK, "Record deleted", nil)
