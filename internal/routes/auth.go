@@ -16,10 +16,16 @@ var (
 	errInvalidCredentials = "invalid username and/or password"
 )
 
-// findUser finds a user by Authorization header or JWT cookie and returns nil if a user isn't found
+// findUser finds a user by Authorization header or cookie and returns nil if a user isn't found
 func findUser(c *fiber.Ctx) (*db.User, error) {
 	// Get the Authorization header as string and trim the "Token " prefix
 	token := strings.TrimPrefix(string(c.Request().Header.Peek("Authorization")), "Token ")
+
+	if token == "" {
+		token = c.Cookies("token")
+	}
+
+	// If the token is still empty (both header and cookie are undefiend), then exit out
 	if token == "" {
 		return nil, nil
 	}
