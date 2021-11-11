@@ -123,12 +123,6 @@ func TestRoutesZoneUserAddDelete(t *testing.T) {
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 	assert.Truef(t, apiResp.Success, apiResp.Message)
 
-	// Add user2 to the zone
-	httpResp, apiResp, err = testReq(app, http.MethodPut, "/dns/zones/user", `{"zone":"example.com", "users": ["user2@example.com"]}`, map[string]string{"Authorization": "Token " + userToken})
-	assert.Nil(t, err)
-	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
-	assert.Truef(t, apiResp.Success, apiResp.Message)
-
 	// List zones for user
 	httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/zones", "", map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
@@ -137,6 +131,25 @@ func TestRoutesZoneUserAddDelete(t *testing.T) {
 	respJSON, err := json.Marshal(apiResp.Data["zones"])
 	assert.Nil(t, err)
 	var zones []db.Zone
+	err = json.Unmarshal(respJSON, &zones)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(zones))
+	assert.Equal(t, 1, len(zones[0].Users))
+
+	// Add user2 to the zone
+	httpResp, apiResp, err = testReq(app, http.MethodPut, "/dns/zones/user", fmt.Sprintf(`{"zone":"%s", "user": "user2@example.com"}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
+	assert.Nil(t, err)
+	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
+	assert.Truef(t, apiResp.Success, apiResp.Message)
+
+	// List zones for user to assert that user2@example.com was added
+	httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/zones", "", map[string]string{"Authorization": "Token " + userToken})
+	assert.Nil(t, err)
+	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
+	assert.Truef(t, apiResp.Success, apiResp.Message)
+	respJSON, err = json.Marshal(apiResp.Data["zones"])
+	assert.Nil(t, err)
+	zones = []db.Zone{}
 	err = json.Unmarshal(respJSON, &zones)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(zones))
