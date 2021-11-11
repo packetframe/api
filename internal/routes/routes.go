@@ -2,7 +2,6 @@ package routes
 
 import (
 	"fmt"
-	"github.com/packetframe/api/internal/util"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -10,6 +9,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/packetframe/api/internal/db"
+	"github.com/packetframe/api/internal/util"
 )
 
 // Database stores the global database for the API
