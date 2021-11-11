@@ -9,11 +9,13 @@ import (
 
 	"github.com/packetframe/api/internal/auth"
 	"github.com/packetframe/api/internal/db"
+	"github.com/packetframe/api/internal/util"
 	"github.com/packetframe/api/internal/validation"
 )
 
 var (
 	errInvalidCredentials = "invalid username and/or password"
+	errUserDisabled       = "this user is disabled"
 )
 
 // findUser finds a user by Authorization header or cookie and returns nil if a user isn't found
@@ -79,6 +81,11 @@ func AuthLogin(c *fiber.Ctx) error {
 	}
 	if user == nil {
 		return response(c, http.StatusUnauthorized, errInvalidCredentials, nil)
+	}
+
+	// Check enabled group
+	if !util.StrSliceContains(user.Groups, db.GroupEnabled) {
+		return response(c, http.StatusForbidden, errUserDisabled, nil)
 	}
 
 	// Validate password hash

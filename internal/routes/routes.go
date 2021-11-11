@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"github.com/packetframe/api/internal/util"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -82,7 +83,7 @@ func Document() string {
 	return table
 }
 
-// checkUserAuthorization checks if a user is authorized for a zone
+// checkUserAuthorization checks if a user is authorized for a zone by FQDN
 func checkUserAuthorization(c *fiber.Ctx, zoneFqdn string) error {
 	// Find zone
 	zDb, err := db.ZoneFind(Database, dns.Fqdn(zoneFqdn))
@@ -105,6 +106,11 @@ func checkUserAuthorizationByID(c *fiber.Ctx, zoneId string) error {
 	}
 	if user == nil {
 		return response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
+	}
+
+	// Check enabled group
+	if !util.StrSliceContains(user.Groups, db.GroupEnabled) {
+		return response(c, http.StatusForbidden, errUserDisabled, nil)
 	}
 
 	// Check if user is authorized for zone
