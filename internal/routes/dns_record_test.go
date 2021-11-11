@@ -3,7 +3,6 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/packetframe/api/internal/validation"
 	"net/http"
 	"testing"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/packetframe/api/internal/db"
+	"github.com/packetframe/api/internal/validation"
 )
 
 func TestRoutesRecordAddListDelete(t *testing.T) {
