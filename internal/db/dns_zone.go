@@ -149,14 +149,14 @@ func ZoneRotateDNSSECKey(db *gorm.DB, uuid string) error {
 }
 
 // ZoneUserAdd adds a user to a zone
-func ZoneUserAdd(db *gorm.DB, zone string, user string) error {
+func ZoneUserAdd(db *gorm.DB, zoneID string, userEmail string) error {
 	var z Zone
-	if err := db.First(&z, "zone = ?", dns.Fqdn(zone)).Error; err != nil {
+	if err := db.First(&z, "id = ?", zoneID).Error; err != nil {
 		return err
 	}
 
 	// Make sure user exists before adding it to the zone
-	u, err := UserFindByEmail(db, user)
+	u, err := UserFindByEmail(db, userEmail)
 	if err != nil {
 		return err
 	}

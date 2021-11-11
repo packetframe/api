@@ -101,7 +101,7 @@ func TestZoneUserAdd(t *testing.T) {
 	assert.NotNil(t, example1)
 
 	// Add user1 again
-	err = ZoneUserAdd(db, example1.Zone, user1.Email)
+	err = ZoneUserAdd(db, example1.ID, user1.Email)
 	assert.NotNil(t, err)
 
 	// List zone users
