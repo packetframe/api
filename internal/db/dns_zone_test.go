@@ -30,8 +30,9 @@ func TestZoneAddListFindDelete(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, example1)
 
-	err = ZoneDelete(db, example1.ID)
+	deleted, err := ZoneDelete(db, example1.ID)
 	assert.Nil(t, err)
+	assert.True(t, deleted)
 
 	zones, err = ZoneList(db)
 	assert.Nil(t, err)

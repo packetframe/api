@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -62,15 +63,16 @@ func TestRoutesZoneAddListDelete(t *testing.T) {
 	assert.Equal(t, "example.com.", zones[0].Zone)
 
 	// Delete example.com
-	httpResp, apiResp, err = testReq(app, http.MethodDelete, "/dns/zones", `{"zone":"example.com"}`, map[string]string{"Authorization": "Token " + userToken})
+	httpResp, apiResp, err = testReq(app, http.MethodDelete, "/dns/zones", fmt.Sprintf(`{"id":"%s"}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 	assert.Truef(t, apiResp.Success, apiResp.Message)
 
 	// Delete example.com again
-	httpResp, _, err = testReq(app, http.MethodDelete, "/dns/zones", `{"zone":"example.com"}`, map[string]string{"Authorization": "Token " + userToken})
-	assert.NotNil(t, err)
-	assert.Equal(t, http.StatusNotFound, httpResp.StatusCode)
+	httpResp, _, err = testReq(app, http.MethodDelete, "/dns/zones", fmt.Sprintf(`{"id":"%s"}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
+	assert.Nil(t, err)
+	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
+	assert.Truef(t, apiResp.Success, apiResp.Message)
 
 	// List zones for user
 	httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/zones", "", map[string]string{"Authorization": "Token " + userToken})

@@ -61,34 +61,27 @@ func ZoneList(c *fiber.Ctx) error {
 
 // ZoneDelete handles a DELETE request to delete a zone
 func ZoneDelete(c *fiber.Ctx) error {
-	var z db.Zone
+	var z struct {
+		ID string `json:"id"`
+	}
 	if err := c.BodyParser(&z); err != nil {
 		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
 	}
-	if err := validation.Validate(z); err != nil {
-		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
-	}
 
 	// Check if user is authorized for zone
-	if err := checkUserAuthorization(c, z.Zone); err != nil {
+	if err := checkUserAuthorizationByID(c, z.ID); err != nil {
 		return err
 	}
 
-	// Find zone
-	zDb, err := db.ZoneFind(Database, dns.Fqdn(z.Zone))
+	deleted, err := db.ZoneDelete(Database, z.ID)
+	if !deleted {
+		return response(c, http.StatusOK, "Zone doesn't exist, nothing to delete", nil)
+	}
 	if err != nil {
 		return internalServerError(c, err)
 	}
-	if zDb == nil {
-		return response(c, http.StatusNotFound, "Zone doesn't exist", nil)
-	}
 
-	if err := db.ZoneDelete(Database, zDb.ID); err != nil {
-		// TODO: zone already deleted?
-		return internalServerError(c, err)
-	}
-
-	return response(c, http.StatusOK, "Zone added", nil)
+	return response(c, http.StatusOK, "Zone deleted", nil)
 }
 
 // ZoneUserAdd handles a PUT request to add a user to a zone

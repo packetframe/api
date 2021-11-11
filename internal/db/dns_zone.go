@@ -129,8 +129,9 @@ func ZoneFind(db *gorm.DB, zone string) (*Zone, error) {
 }
 
 // ZoneDelete deletes a DNS zone
-func ZoneDelete(db *gorm.DB, zone string) error {
-	return db.Delete(&Zone{}, "id = ?", zone).Error
+func ZoneDelete(db *gorm.DB, zone string) (bool, error) {
+	r := db.Delete(&Zone{}, "id = ?", zone)
+	return r.RowsAffected > 0, r.Error
 }
 
 // ZoneRotateDNSSECKey rotates a zone's DNSSEC key
