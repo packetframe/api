@@ -8,16 +8,17 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
+const hexLetters = "0123456789abcdef"
+
 // RandomString returns a securely generated random string of specified length
 func RandomString(length int) (string, error) {
-	const letters = "0123456789abcdef"
 	ret := make([]byte, length)
 	for i := 0; i < length; i++ {
-		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(hexLetters))))
 		if err != nil {
 			return "", err
 		}
-		ret[i] = letters[num.Int64()]
+		ret[i] = hexLetters[num.Int64()]
 	}
 
 	return string(ret), nil

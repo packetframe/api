@@ -25,7 +25,7 @@ func findUser(c *fiber.Ctx) (*db.User, error) {
 		token = c.Cookies("token")
 	}
 
-	// If the token is still empty (both header and cookie are undefiend), then exit out
+	// If the token is still empty (both header and cookie are undefined), then exit out
 	if token == "" {
 		return nil, nil
 	}
