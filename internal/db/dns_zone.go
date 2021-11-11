@@ -177,6 +177,7 @@ func ZoneUserAdd(db *gorm.DB, zoneID string, userEmail string) error {
 
 // ZoneUserDelete deletes a user from a zone
 func ZoneUserDelete(db *gorm.DB, zoneUuid string, userUuid string) error {
+	// TODO: Modify this so it takes a zoneID and userEmail
 	var z Zone
 	if err := db.First(&z, "id = ?", zoneUuid).Error; err != nil {
 		return err
