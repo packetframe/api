@@ -117,9 +117,7 @@ func ZoneUserAdd(c *fiber.Ctx) error {
 
 	for _, user := range z.Users {
 		if err := db.ZoneUserAdd(Database, z.Zone, user); err != nil {
-			if errors.Is(err, db.ErrUserExistingZoneMember) {
-				return response(c, http.StatusBadRequest, err.Error(), nil)
-			} else if errors.Is(err, db.ErrUserNotFound) {
+			if errors.Is(err, db.ErrUserExistingZoneMember) || errors.Is(err, db.ErrUserNotFound) {
 				return response(c, http.StatusBadRequest, err.Error(), nil)
 			} else {
 				return internalServerError(c, err)
@@ -159,10 +157,8 @@ func ZoneUserDelete(c *fiber.Ctx) error {
 		if err != nil {
 			return response(c, http.StatusNotFound, "User doesn't exist", nil)
 		}
-		if err := db.ZoneUserDelete(Database, zDb.ID, uDoc.ID); err != nil {
-			if errors.Is(err, db.ErrUserExistingZoneMember) {
-				return response(c, http.StatusBadRequest, err.Error(), nil)
-			} else if errors.Is(err, db.ErrUserNotFound) {
+		if err := db.ZoneUserDelete(Database, z.ID, uDoc.ID); err != nil {
+			if errors.Is(err, db.ErrUserExistingZoneMember) || errors.Is(err, db.ErrUserNotFound) {
 				return response(c, http.StatusBadRequest, err.Error(), nil)
 			} else {
 				return internalServerError(c, err)
