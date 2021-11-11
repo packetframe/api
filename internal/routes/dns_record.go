@@ -69,7 +69,7 @@ func RecordDelete(c *fiber.Ctx) error {
 		return err
 	}
 
-	// Add the record
+	// Delete the record
 	deleted, err := db.RecordDelete(Database, r.RecordID)
 	if err != nil {
 		return internalServerError(c, err)
@@ -96,7 +96,7 @@ func RecordUpdate(c *fiber.Ctx) error {
 		return err
 	}
 
-	// Add the record
+	// Update the record
 	if err := db.RecordUpdate(Database, &r); err != nil {
 		return internalServerError(c, err)
 	}
