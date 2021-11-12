@@ -3,6 +3,10 @@ package db
 import (
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/lib/pq"
@@ -37,6 +41,29 @@ type DNSSECKey struct {
 	DSDigestType   int    // DS digest type
 	DSDigest       string // DS digest
 	DSRecordString string // Full DS record in zone file format
+}
+
+// SuffixList gets the public suffix list
+func SuffixList() ([]string, error) {
+	resp, err := http.Get("https://publicsuffix.org/list/public_suffix_list.dat")
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	rBodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// Remove comments and newlines
+	suffixes := string(rBodyBytes)
+	commentRegex := regexp.MustCompile("(?m)[\r\n]*^//.*$")
+	suffixes = commentRegex.ReplaceAllString(suffixes, "")
+	newlineRegex := regexp.MustCompile("\n\n")
+	suffixes = newlineRegex.ReplaceAllString(suffixes, "\n")
+
+	return strings.Split(suffixes, "\n")[1:], nil // [1:] to remove first (blank) element
 }
 
 // NewKey generates a new DNSSEC signing key for a zone

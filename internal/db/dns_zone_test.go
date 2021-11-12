@@ -199,3 +199,11 @@ func TestZoneUserAuthorized(t *testing.T) {
 	assert.Nil(t, err)
 	assert.False(t, authorized)
 }
+
+func TestSuffixList(t *testing.T) {
+	suffixes, err := SuffixList()
+	assert.Nil(t, err)
+	assert.Greater(t, len(suffixes), 9000)
+	assert.Contains(t, suffixes, "com")
+	assert.Contains(t, suffixes, "workers.dev")
+}

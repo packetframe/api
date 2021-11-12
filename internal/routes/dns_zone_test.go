@@ -49,6 +49,15 @@ func TestRoutesZoneAddListDelete(t *testing.T) {
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 	assert.Truef(t, apiResp.Success, apiResp.Message)
 
+	// Populate suffixes slice. This normally happens in a go routine, but this is required for testing
+	Suffixes, err = db.SuffixList()
+	assert.Nil(t, err)
+
+	// Add com (known public suffix)
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/dns/zones", `{"zone":"pages.dev"}`, map[string]string{"Authorization": "Token " + userToken})
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusBadRequest, httpResp.StatusCode)
+
 	// List zones for user
 	httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/zones", "", map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)

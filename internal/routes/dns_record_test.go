@@ -38,6 +38,10 @@ func TestRoutesRecordAddListDelete(t *testing.T) {
 	assert.Truef(t, apiResp.Success, apiResp.Message)
 	userToken := apiResp.Data["token"].(string)
 
+	// Populate suffixes slice. This normally happens in a go routine, but this is required for testing
+	Suffixes, err = db.SuffixList()
+	assert.Nil(t, err)
+
 	// Add example.com
 	httpResp, apiResp, err = testReq(app, http.MethodPost, "/dns/zones", `{"zone":"example.com"}`, map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)

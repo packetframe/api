@@ -8,8 +8,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/packetframe/api/internal/db"
+	"github.com/packetframe/api/internal/util"
 	"github.com/packetframe/api/internal/validation"
 )
+
+var Suffixes []string
 
 // ZoneAdd handles a POST request to add a zone
 func ZoneAdd(c *fiber.Ctx) error {
@@ -27,6 +30,16 @@ func ZoneAdd(c *fiber.Ctx) error {
 	}
 	if user == nil {
 		return response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
+	}
+
+	// Suffixes should never be empty because a go routine is updating it
+	if len(Suffixes) == 0 {
+		return internalServerError(c, errors.New("public suffix list is empty"))
+	}
+
+	// Check if the domain is a suffix
+	if util.StrSliceContains(Suffixes, strings.TrimSuffix(z.Zone, ".")) {
+		return response(c, http.StatusBadRequest, "This zone is a public suffix and requires additional verification. Contact Packetframe for more information.", nil)
 	}
 
 	if err := db.ZoneAdd(Database, z.Zone, user.Email); err != nil {
