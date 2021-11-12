@@ -88,7 +88,9 @@ func TestRoutesZoneAddListDelete(t *testing.T) {
 }
 
 func TestRoutesZoneUserAddDelete(t *testing.T) {
-	var err error
+	err := validation.Register()
+	assert.Nil(t, err)
+
 	Database, err = db.TestSetup()
 	assert.Nil(t, err)
 
@@ -118,7 +120,8 @@ func TestRoutesZoneUserAddDelete(t *testing.T) {
 	userToken := apiResp.Data["token"].(string)
 
 	// Add the zone
-	httpResp, apiResp, err = testReq(app, http.MethodPost, "/dns/zones", `{"zone":"example.com"}`, map[string]string{"Authorization": "Token " + userToken})
+	content = `{"zone":"example.com"}`
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/dns/zones", content, map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 	assert.Truef(t, apiResp.Success, apiResp.Message)
@@ -137,7 +140,8 @@ func TestRoutesZoneUserAddDelete(t *testing.T) {
 	assert.Equal(t, 1, len(zones[0].Users))
 
 	// Add user2 to the zone
-	httpResp, apiResp, err = testReq(app, http.MethodPut, "/dns/zones/user", fmt.Sprintf(`{"zone":"%s", "user": "user2@example.com"}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
+	content = fmt.Sprintf(`{"zone":"%s", "user": "user2@example.com"}`, zones[0].ID)
+	httpResp, apiResp, err = testReq(app, http.MethodPut, "/dns/zones/user", content, map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 	assert.Truef(t, apiResp.Success, apiResp.Message)
@@ -156,7 +160,8 @@ func TestRoutesZoneUserAddDelete(t *testing.T) {
 	assert.Equal(t, 2, len(zones[0].Users))
 
 	// Remove user2 from zone
-	httpResp, apiResp, err = testReq(app, http.MethodDelete, "/dns/zones/user", `{"zone":"example.com", "users": ["user2@example.com"]}`, map[string]string{"Authorization": "Token " + userToken})
+	content = fmt.Sprintf(`{"zone":"%s", "user": "user2@example.com"}`, zones[0].ID)
+	httpResp, apiResp, err = testReq(app, http.MethodDelete, "/dns/zones/user", content, map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 	assert.Truef(t, apiResp.Success, apiResp.Message)

@@ -111,7 +111,7 @@ func TestZoneUserAdd(t *testing.T) {
 	assert.Equal(t, user1.ID, example1.Users[0])
 
 	// Delete user
-	err = ZoneUserDelete(db, example1.ID, user1.ID)
+	err = ZoneUserDelete(db, example1.ID, user1.Email)
 	assert.Nil(t, err)
 }
 

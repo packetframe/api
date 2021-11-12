@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/miekg/dns"
 
 	"github.com/packetframe/api/internal/db"
 	"github.com/packetframe/api/internal/validation"
@@ -114,41 +113,27 @@ func ZoneUserAdd(c *fiber.Ctx) error {
 
 // ZoneUserDelete handles a DELETE request to remove a user from a zone
 func ZoneUserDelete(c *fiber.Ctx) error {
-	var z db.Zone
+	var z struct {
+		ZoneID    string `json:"zone"`
+		UserEmail string `json:"user"`
+	}
 	if err := c.BodyParser(&z); err != nil {
 		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
 	}
-	if err := validation.Validate(z); err != nil {
-		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
-	}
 
 	// Check if user is authorized for zone
-	if err := checkUserAuthorization(c, z.Zone); err != nil {
+	if err := checkUserAuthorizationByID(c, z.ZoneID); err != nil {
 		return err
 	}
 
-	// Find zone
-	zDb, err := db.ZoneFind(Database, dns.Fqdn(z.Zone))
-	if err != nil {
-		return internalServerError(c, err)
-	}
-	if zDb == nil {
-		return response(c, http.StatusNotFound, "Zone doesn't exist", nil)
-	}
-
-	for _, user := range z.Users {
-		uDoc, err := db.UserFindByEmail(Database, user)
-		if err != nil {
-			return response(c, http.StatusNotFound, "User doesn't exist", nil)
-		}
-		if err := db.ZoneUserDelete(Database, zDb.ID, uDoc.ID); err != nil {
-			if errors.Is(err, db.ErrUserExistingZoneMember) {
-				return response(c, http.StatusBadRequest, err.Error(), nil)
-			} else if errors.Is(err, db.ErrUserNotFound) {
-				return response(c, http.StatusBadRequest, err.Error(), nil)
-			} else {
-				return internalServerError(c, err)
-			}
+	// Delete user
+	if err := db.ZoneUserDelete(Database, z.ZoneID, z.UserEmail); err != nil {
+		if errors.Is(err, db.ErrUserExistingZoneMember) {
+			return response(c, http.StatusBadRequest, err.Error(), nil)
+		} else if errors.Is(err, db.ErrUserNotFound) {
+			return response(c, http.StatusBadRequest, err.Error(), nil)
+		} else {
+			return internalServerError(c, err)
 		}
 	}
 

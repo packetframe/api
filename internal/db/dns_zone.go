@@ -176,15 +176,23 @@ func ZoneUserAdd(db *gorm.DB, zoneID string, userEmail string) error {
 }
 
 // ZoneUserDelete deletes a user from a zone
-func ZoneUserDelete(db *gorm.DB, zoneUuid string, userUuid string) error {
-	// TODO: Modify this so it takes a zoneID and userEmail
+func ZoneUserDelete(db *gorm.DB, zoneUuid string, userEmail string) error {
 	var z Zone
 	if err := db.First(&z, "id = ?", zoneUuid).Error; err != nil {
 		return err
 	}
 
+	// Find the user ID
+	u, err := UserFindByEmail(db, userEmail)
+	if err != nil {
+		return err
+	}
+	if u == nil {
+		return ErrUserNotFound
+	}
+
 	for i, existingUserId := range z.Users {
-		if existingUserId == userUuid {
+		if existingUserId == u.ID {
 			z.Users = append(z.Users[:i], z.Users[i+1:]...)
 		}
 	}
