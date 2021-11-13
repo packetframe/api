@@ -22,7 +22,7 @@ var (
 // Zone stores a DNS zone
 type Zone struct {
 	ID        string         `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()" json:"id"`
-	Zone      string         `gorm:"uniqueIndex" json:"zone" validate:"required,fqdn"` // TODO: Validate against known https://publicsuffix.org/list/public_suffix_list.dat
+	Zone      string         `gorm:"uniqueIndex" json:"zone" validate:"required,fqdn"`
 	Serial    uint64         `json:"-"`
 	DNSSEC    DNSSECKey      `gorm:"embedded" json:"-"`
 	Users     pq.StringArray `gorm:"type:text[]" json:"users"`
