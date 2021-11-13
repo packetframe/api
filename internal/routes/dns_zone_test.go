@@ -55,7 +55,7 @@ func TestRoutesZoneAddListDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Add com (known public suffix)
-	httpResp, apiResp, err = testReq(app, http.MethodPost, "/dns/zones", `{"zone":"pages.dev"}`, map[string]string{"Authorization": "Token " + userToken})
+	httpResp, _, err = testReq(app, http.MethodPost, "/dns/zones", `{"zone":"pages.dev"}`, map[string]string{"Authorization": "Token " + userToken})
 	assert.NotNil(t, err)
 	assert.Equal(t, http.StatusBadRequest, httpResp.StatusCode)
 
