@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/packetframe/api/internal/db"
@@ -106,6 +107,10 @@ func TestRoutesZoneUserAddDelete(t *testing.T) {
 	app := fiber.New()
 	Register(app)
 
+	// Populate suffixes slice. This normally happens in a go routine, but this is required for testing
+	Suffixes, err = db.SuffixList()
+	assert.Nil(t, err)
+
 	// Sign up user1@example.com
 	content := `{"email":"user1@example.com", "password":"example-users-password'"}`
 	httpResp, apiResp, err := testReq(app, http.MethodPost, "/auth/signup", content, map[string]string{})
@@ -167,6 +172,7 @@ func TestRoutesZoneUserAddDelete(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(zones))
 	assert.Equal(t, 2, len(zones[0].Users))
+	assert.Equal(t, pq.StringArray{"user1@example.com", "user2@example.com"}, zones[0].UserEmails)
 
 	// Remove user2 from zone
 	content = fmt.Sprintf(`{"zone":"%s", "user": "user2@example.com"}`, zones[0].ID)

@@ -21,14 +21,15 @@ var (
 
 // Zone stores a DNS zone
 type Zone struct {
-	ID        string         `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()" json:"id"`
-	Zone      string         `gorm:"uniqueIndex" json:"zone" validate:"required,fqdn"`
-	Serial    uint64         `json:"-"`
-	DNSSEC    DNSSECKey      `gorm:"embedded" json:"-"`
-	Users     pq.StringArray `gorm:"type:text[]" json:"users"`
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	ID         string         `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()" json:"id"`
+	Zone       string         `gorm:"uniqueIndex" json:"zone" validate:"required,fqdn"`
+	Serial     uint64         `json:"-"`
+	DNSSEC     DNSSECKey      `gorm:"embedded" json:"-"`
+	Users      pq.StringArray `gorm:"type:text[]" json:"users"`
+	UserEmails pq.StringArray `gorm:"type:text[]" json:"user_emails"` // TODO: readonly?
+	CreatedAt  time.Time      `json:"-"`
+	UpdatedAt  time.Time      `json:"-"`
+	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // DNSSECKey stores a DNSSEC signing key
@@ -239,9 +240,13 @@ func ZoneGet(db *gorm.DB, zoneUuid string) (*Zone, error) {
 // ZoneUserGetZones gets all zones a user is a member of
 func ZoneUserGetZones(db *gorm.DB, userUuid string) ([]Zone, error) {
 	var zones []Zone
-	res := db.Model(&Zone{}).Where("? = ANY(users)", userUuid).Find(&zones)
-	if res.Error != nil {
-		return nil, res.Error
+	tx := db.Raw(`SELECT z.*,array_agg(u.email) user_emails
+			FROM zones z
+			JOIN users u ON u.id = ANY (z.users)
+			AND ? = ANY(z.users)
+			GROUP BY z.id;`, userUuid).Scan(&zones)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 	return zones, nil
 }
