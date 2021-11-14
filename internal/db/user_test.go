@@ -101,7 +101,7 @@ func TestDbUserResetPassword(t *testing.T) {
 	assert.NotEqual(t, oldPassword, user1.PasswordHash)
 }
 
-func TestDbUserFindByIdentifier(t *testing.T) {
+func TestDbUserFindByAuth(t *testing.T) {
 	db, err := TestSetup()
 	assert.Nil(t, err)
 
@@ -114,12 +114,12 @@ func TestDbUserFindByIdentifier(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Find user1 by API key
-	user1ByKey, err := UserFindByIdentifier(db, user1.APIKey)
+	user1ByKey, err := UserFindByAuth(db, user1.APIKey)
 	assert.Nil(t, err)
 	assert.Equal(t, user1, user1ByKey)
 
 	// Find user1 by token
-	user1ByToken, err := UserFindByIdentifier(db, user1.Token)
+	user1ByToken, err := UserFindByAuth(db, user1.Token)
 	assert.Nil(t, err)
 	assert.Equal(t, user1, user1ByToken)
 }

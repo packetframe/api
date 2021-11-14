@@ -32,7 +32,7 @@ func findUser(c *fiber.Ctx) (*db.User, error) {
 		return nil, nil
 	}
 
-	user, err := db.UserFindByIdentifier(Database, token)
+	user, err := db.UserFindByAuth(Database, token)
 	if err != nil {
 		return nil, err
 	}
