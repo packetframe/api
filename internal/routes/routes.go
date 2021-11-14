@@ -17,25 +17,27 @@ var Database *gorm.DB
 
 // routes stores a map of route to handler
 var routes = []*route{
-	{Path: "/auth/login", Method: http.MethodPost, Handler: AuthLogin, Description: "Log a user in"},
-	{Path: "/auth/signup", Method: http.MethodPost, Handler: AuthSignup, Description: "Create a new user account"},
-	{Path: "/auth/delete", Method: http.MethodDelete, Handler: UserDelete, Description: "Delete a user account"},
-	{Path: "/dns/zones", Method: http.MethodGet, Handler: ZoneList, Description: "List all DNS zones authorized for a user"},
-	{Path: "/dns/zones", Method: http.MethodPost, Handler: ZoneAdd, Description: "Add a new DNS zone"},
-	{Path: "/dns/zones", Method: http.MethodDelete, Handler: ZoneDelete, Description: "Delete a DNS zone"},
-	{Path: "/dns/zones/user", Method: http.MethodPut, Handler: ZoneUserAdd, Description: "Add a user to a DNS zone"},
-	{Path: "/dns/zones/user", Method: http.MethodDelete, Handler: ZoneUserDelete, Description: "Remove a user from a DNS zone"},
-	{Path: "/dns/records/:id", Method: http.MethodGet, Handler: RecordList, Description: "List DNS records for a zone"},
-	{Path: "/dns/records", Method: http.MethodPost, Handler: RecordAdd, Description: "Add a DNS record to a zone"},
-	{Path: "/dns/records", Method: http.MethodDelete, Handler: RecordDelete, Description: "Delete a DNS record from a zone"},
-	{Path: "/dns/records", Method: http.MethodPut, Handler: RecordUpdate, Description: "Update a DNS record"},
+	{Path: "/auth/login", Method: http.MethodPost, Handler: AuthLogin, Description: "Log a user in", InvalidJSONTest: true},
+	{Path: "/auth/signup", Method: http.MethodPost, Handler: AuthSignup, Description: "Create a new user account", InvalidJSONTest: true},
+	{Path: "/auth/delete", Method: http.MethodDelete, Handler: UserDelete, Description: "Delete a user account", InvalidJSONTest: false},
+	{Path: "/auth/password", Method: http.MethodPost, Handler: UserChangePassword, Description: "Change a user's password", InvalidJSONTest: true},
+	{Path: "/dns/zones", Method: http.MethodGet, Handler: ZoneList, Description: "List all DNS zones authorized for a user", InvalidJSONTest: false},
+	{Path: "/dns/zones", Method: http.MethodPost, Handler: ZoneAdd, Description: "Add a new DNS zone", InvalidJSONTest: true},
+	{Path: "/dns/zones", Method: http.MethodDelete, Handler: ZoneDelete, Description: "Delete a DNS zone", InvalidJSONTest: true},
+	{Path: "/dns/zones/user", Method: http.MethodPut, Handler: ZoneUserAdd, Description: "Add a user to a DNS zone", InvalidJSONTest: true},
+	{Path: "/dns/zones/user", Method: http.MethodDelete, Handler: ZoneUserDelete, Description: "Remove a user from a DNS zone", InvalidJSONTest: true},
+	{Path: "/dns/records/:id", Method: http.MethodGet, Handler: RecordList, Description: "List DNS records for a zone", InvalidJSONTest: false},
+	{Path: "/dns/records", Method: http.MethodPost, Handler: RecordAdd, Description: "Add a DNS record to a zone", InvalidJSONTest: true},
+	{Path: "/dns/records", Method: http.MethodDelete, Handler: RecordDelete, Description: "Delete a DNS record from a zone", InvalidJSONTest: true},
+	{Path: "/dns/records", Method: http.MethodPut, Handler: RecordUpdate, Description: "Update a DNS record", InvalidJSONTest: true},
 }
 
 type route struct {
-	Description string
-	Path        string
-	Method      string
-	Handler     func(c *fiber.Ctx) error
+	Description     string
+	Path            string
+	Method          string
+	Handler         func(c *fiber.Ctx) error
+	InvalidJSONTest bool
 }
 
 // Register registers route handlers

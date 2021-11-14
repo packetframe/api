@@ -75,7 +75,7 @@ func TestRoutesInvalidJSON(t *testing.T) {
 
 	content := "invalid json"
 	for _, route := range routes {
-		if route.Method != "GET" {
+		if route.InvalidJSONTest {
 			httpResp, _, err := testReq(app, route.Method, route.Path, content, map[string]string{})
 			assert.NotNilf(t, err, route.Path)
 			assert.Equalf(t, http.StatusUnprocessableEntity, httpResp.StatusCode, route.Method+" "+route.Path)
