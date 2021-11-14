@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/packetframe/api/internal/db"
@@ -172,7 +171,8 @@ func TestRoutesZoneUserAddDelete(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(zones))
 	assert.Equal(t, 2, len(zones[0].Users))
-	assert.Equal(t, pq.StringArray{"user1@example.com", "user2@example.com"}, zones[0].UserEmails)
+	assert.Contains(t, zones[0].UserEmails, "user1@example.com")
+	assert.Contains(t, zones[0].UserEmails, "user2@example.com")
 
 	// Remove user2 from zone
 	content = fmt.Sprintf(`{"zone":"%s", "user": "user2@example.com"}`, zones[0].ID)

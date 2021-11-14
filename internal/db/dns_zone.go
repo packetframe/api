@@ -239,6 +239,7 @@ func ZoneGet(db *gorm.DB, zoneUuid string) (*Zone, error) {
 // ZoneUserGetZones gets all zones a user is a member of
 func ZoneUserGetZones(db *gorm.DB, userUuid string) ([]Zone, error) {
 	var zones []Zone
+	// It seems that user_emails is not guaranteed to be in the same order as the as the original users array
 	tx := db.Raw(`SELECT z.*,array_agg(u.email) user_emails
 			FROM zones z
 			JOIN users u ON u.id = ANY (z.users)
