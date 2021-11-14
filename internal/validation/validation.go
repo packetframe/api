@@ -58,6 +58,10 @@ func Register() error {
 
 // Validate runs a validation and returns a list of errors
 func Validate(s interface{}) []*ErrorResponse {
+	if localValidator == nil {
+		panic("validator must be registered before validating")
+	}
+
 	var errors []*ErrorResponse
 	err := localValidator.Struct(s)
 	if err != nil {
