@@ -60,6 +60,13 @@ func TestRoutesUserSignupLoginDelete(t *testing.T) {
 	userToken := apiResp.Data["token"].(string)
 	assert.Equal(t, 64, len(userToken)) // 64 is the user token length
 
+	// Check user1@example.com's info
+	httpResp, apiResp, err = testReq(app, http.MethodGet, "/user/info", "", map[string]string{"Authorization": "Token " + userToken})
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
+	assert.True(t, apiResp.Success)
+	assert.False(t, apiResp.Data["admin"].(bool))
+
 	// Change user1@example.com's password
 	content = `{"password":"example-users-NEW-password'"}`
 	httpResp, apiResp, err = testReq(app, http.MethodPost, "/user/password", content, map[string]string{"Authorization": "Token " + userToken})

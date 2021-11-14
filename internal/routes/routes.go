@@ -21,6 +21,7 @@ var routes = []*route{
 	{Path: "/user/signup", Method: http.MethodPost, Handler: UserSignup, Description: "Create a new user account", InvalidJSONTest: true},
 	{Path: "/user/delete", Method: http.MethodDelete, Handler: UserDelete, Description: "Delete a user account", InvalidJSONTest: false},
 	{Path: "/user/password", Method: http.MethodPost, Handler: UserChangePassword, Description: "Change a user's password", InvalidJSONTest: true},
+	{Path: "/user/info", Method: http.MethodGet, Handler: UserInfo, Description: "Get user info", InvalidJSONTest: false},
 	{Path: "/dns/zones", Method: http.MethodGet, Handler: ZoneList, Description: "List all DNS zones authorized for a user", InvalidJSONTest: false},
 	{Path: "/dns/zones", Method: http.MethodPost, Handler: ZoneAdd, Description: "Add a new DNS zone", InvalidJSONTest: true},
 	{Path: "/dns/zones", Method: http.MethodDelete, Handler: ZoneDelete, Description: "Delete a DNS zone", InvalidJSONTest: true},

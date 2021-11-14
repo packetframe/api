@@ -147,3 +147,19 @@ func UserChangePassword(c *fiber.Ctx) error {
 
 	return response(c, http.StatusOK, "Password reset successfully", nil)
 }
+
+// UserInfo handles a GET request to get a user's info
+func UserInfo(c *fiber.Ctx) error {
+	user, err := findUser(c)
+	if err != nil {
+		return internalServerError(c, err)
+	}
+	if user == nil {
+		return response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
+	}
+
+	return response(c, http.StatusOK, "User retrieved successfully", map[string]interface{}{
+		"user":  user,
+		"admin": util.StrSliceContains(user.Groups, db.GroupAdmin),
+	})
+}
