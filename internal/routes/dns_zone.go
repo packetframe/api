@@ -145,6 +145,8 @@ func ZoneUserDelete(c *fiber.Ctx) error {
 			return response(c, http.StatusBadRequest, err.Error(), nil)
 		} else if errors.Is(err, db.ErrUserNotFound) {
 			return response(c, http.StatusBadRequest, err.Error(), nil)
+		} else if errors.Is(err, db.ErrLastZoneUser) {
+			return response(c, http.StatusBadRequest, err.Error(), nil)
 		} else {
 			return internalServerError(c, err)
 		}

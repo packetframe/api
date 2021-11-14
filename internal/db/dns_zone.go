@@ -17,6 +17,7 @@ import (
 var (
 	ErrUserExistingZoneMember = errors.New("user is already a member of this zone")
 	ErrUserNotFound           = errors.New("user not found")
+	ErrLastZoneUser           = errors.New("unable to remove last user from zone")
 )
 
 // Zone stores a DNS zone
@@ -207,6 +208,10 @@ func ZoneUserDelete(db *gorm.DB, zoneUuid string, userEmail string) error {
 	var z Zone
 	if err := db.First(&z, "id = ?", zoneUuid).Error; err != nil {
 		return err
+	}
+
+	if len(z.Users) == 1 {
+		return ErrLastZoneUser
 	}
 
 	// Find the user ID
