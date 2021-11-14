@@ -104,6 +104,19 @@ func UserLogin(c *fiber.Ctx) error {
 	return response(c, http.StatusOK, "Authentication success", fiber.Map{"token": user.Token})
 }
 
+// UserLogout handles a GET request to log the user out
+func UserLogout(c *fiber.Ctx) error {
+	// Known workaround https://github.com/gofiber/fiber/issues/1127
+	c.ClearCookie("token")
+	c.Cookie(&fiber.Cookie{
+		Name:     "token",
+		Value:    "",
+		Expires:  time.Now(),
+		HTTPOnly: true,
+	})
+	return response(c, http.StatusOK, "Logout success", nil)
+}
+
 // UserDelete handles a DELETE request to delete a user
 func UserDelete(c *fiber.Ctx) error {
 	user, err := findUser(c)
