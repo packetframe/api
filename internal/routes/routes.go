@@ -116,6 +116,11 @@ func checkUserAuthorizationByID(c *fiber.Ctx, zoneId string) error {
 		return response(c, http.StatusForbidden, errUserDisabled, nil)
 	}
 
+	// Check admin group
+	if util.StrSliceContains(user.Groups, db.GroupAdmin) {
+		return nil
+	}
+
 	// Check if user is authorized for zone
 	authorized, err := db.ZoneUserAuthorized(Database, zoneId, user.ID)
 	if err != nil {
