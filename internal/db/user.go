@@ -28,7 +28,6 @@ type User struct {
 	Token        string         `json:"-"` // Rotated every n minutes (TODO: autorotate this)
 	CreatedAt    time.Time      `json:"-"`
 	UpdatedAt    time.Time      `json:"-"`
-	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // UserAdd creates a new user

@@ -29,7 +29,6 @@ type Zone struct {
 	UserEmails pq.StringArray `gorm:"type:text[]" json:"user_emails"` // TODO: readonly?
 	CreatedAt  time.Time      `json:"-"`
 	UpdatedAt  time.Time      `json:"-"`
-	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // DNSSECKey stores a DNSSEC signing key
@@ -244,7 +243,6 @@ func ZoneUserGetZones(db *gorm.DB, userUuid string) ([]Zone, error) {
 			FROM zones z
 			JOIN users u ON u.id = ANY (z.users)
 			AND ? = ANY(z.users)
-			AND z.deleted_at IS NULL
 			GROUP BY z.id;`, userUuid).Scan(&zones)
 	if tx.Error != nil {
 		return nil, tx.Error

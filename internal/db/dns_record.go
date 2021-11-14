@@ -16,10 +16,9 @@ type Record struct {
 	Proxy  bool   `json:"proxy"`
 	ZoneID string `json:"zone"`
 
-	Zone      Zone           `json:"-" validate:"-"` // Zone is populated by the database so will be zero value at record creation time
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	Zone      Zone      `json:"-" validate:"-"` // Zone is populated by the database so will be zero value at record creation time
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 }
 
 // RecordAdd adds a new record to a zone
