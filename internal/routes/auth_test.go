@@ -27,7 +27,7 @@ func TestRoutesAuthInvalidUserPass(t *testing.T) {
 	}
 }
 
-func TestRoutesAuthSignupLoginDelete(t *testing.T) {
+func TestRoutesUserSignupLoginDelete(t *testing.T) {
 	var err error
 	Database, err = db.TestSetup()
 	assert.Nil(t, err)

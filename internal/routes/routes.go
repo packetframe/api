@@ -17,8 +17,8 @@ var Database *gorm.DB
 
 // routes stores a map of route to handler
 var routes = []*route{
-	{Path: "/user/login", Method: http.MethodPost, Handler: AuthLogin, Description: "Log a user in", InvalidJSONTest: true},
-	{Path: "/user/signup", Method: http.MethodPost, Handler: AuthSignup, Description: "Create a new user account", InvalidJSONTest: true},
+	{Path: "/user/login", Method: http.MethodPost, Handler: UserLogin, Description: "Log a user in", InvalidJSONTest: true},
+	{Path: "/user/signup", Method: http.MethodPost, Handler: UserSignup, Description: "Create a new user account", InvalidJSONTest: true},
 	{Path: "/user/delete", Method: http.MethodDelete, Handler: UserDelete, Description: "Delete a user account", InvalidJSONTest: false},
 	{Path: "/user/password", Method: http.MethodPost, Handler: UserChangePassword, Description: "Change a user's password", InvalidJSONTest: true},
 	{Path: "/dns/zones", Method: http.MethodGet, Handler: ZoneList, Description: "List all DNS zones authorized for a user", InvalidJSONTest: false},
