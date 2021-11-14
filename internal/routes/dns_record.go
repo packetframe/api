@@ -25,6 +25,10 @@ func RecordAdd(c *fiber.Ctx) error {
 		return err
 	}
 
+	if r.Proxy {
+		return response(c, http.StatusBadRequest, "Proxied records are not currently supported", nil)
+	}
+
 	// Add the record
 	if err := db.RecordAdd(Database, &r); err != nil {
 		return internalServerError(c, err)
@@ -96,7 +100,12 @@ func RecordUpdate(c *fiber.Ctx) error {
 		return err
 	}
 
+	if r.Proxy {
+		return response(c, http.StatusBadRequest, "Proxied records are not currently supported", nil)
+	}
+
 	// Update the record
+	// TODO: This doesn't update the proxy field
 	if err := db.RecordUpdate(Database, &r); err != nil {
 		return internalServerError(c, err)
 	}
