@@ -164,16 +164,25 @@ func UserGroupDelete(db *gorm.DB, uuid string, group string) error {
 }
 
 // UserResetPassword resets a User's password
-func UserResetPassword(db *gorm.DB, uuid string, password string) error {
+func UserResetPassword(db *gorm.DB, email string, password string) error {
 	var user User
-	if err := db.First(&user, "id = ?", uuid).Error; err != nil {
+	if err := db.First(&user, "email = ?", email).Error; err != nil {
 		return err
 	}
 
+	// Hash new password
 	passwordHash, err := auth.Hash(password)
 	if err != nil {
 		return err
 	}
 	user.PasswordHash = passwordHash
+
+	// Generate new token to invalidate all new API requests from old logins
+	token, err := auth.RandomString(64)
+	if err != nil {
+		return err
+	}
+	user.Token = token
+
 	return db.Save(&user).Error
 }

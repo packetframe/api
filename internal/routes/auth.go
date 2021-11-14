@@ -122,4 +122,28 @@ func UserDelete(c *fiber.Ctx) error {
 }
 
 // UserChangePassword handles a POST request to change a user's password
-// TODO
+func UserChangePassword(c *fiber.Ctx) error {
+	var p struct {
+		Password string `json:"password" validate:"required,min=8,max=256"`
+	}
+	if err := c.BodyParser(&p); err != nil {
+		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
+	}
+	if err := validation.Validate(p); err != nil {
+		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
+	}
+
+	user, err := findUser(c)
+	if err != nil {
+		return internalServerError(c, err)
+	}
+	if user == nil {
+		return response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
+	}
+
+	if err := db.UserResetPassword(Database, user.Email, p.Password); err != nil {
+		return internalServerError(c, err)
+	}
+
+	return response(c, http.StatusOK, "Password reset successfully", nil)
+}

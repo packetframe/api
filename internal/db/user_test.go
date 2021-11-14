@@ -90,7 +90,7 @@ func TestDbUserResetPassword(t *testing.T) {
 
 	oldPassword := user1.PasswordHash
 
-	err = UserResetPassword(db, user1.ID, "new-password")
+	err = UserResetPassword(db, user1.Email, "new-password")
 	assert.Nil(t, err)
 
 	// Find user1
