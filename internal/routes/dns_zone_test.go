@@ -30,14 +30,14 @@ func TestRoutesZoneAddListDelete(t *testing.T) {
 
 	// Sign up user1@example.com
 	content := `{"email":"user1@example.com", "password":"example-users-password'"}`
-	httpResp, apiResp, err := testReq(app, http.MethodPost, "/user/signup", content, map[string]string{})
+	httpResp, apiResp, err := testReq(app, http.MethodPost, "/auth/signup", content, map[string]string{})
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
 
 	// Log in user1@example.com
 	content = `{"email":"user1@example.com", "password":"example-users-password'"}`
-	httpResp, apiResp, err = testReq(app, http.MethodPost, "/user/login", content, map[string]string{})
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/auth/login", content, map[string]string{})
 	assert.Nil(t, err)
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 	assert.Truef(t, apiResp.Success, apiResp.Message)
@@ -113,21 +113,21 @@ func TestRoutesZoneUserAddDelete(t *testing.T) {
 
 	// Sign up user1@example.com
 	content := `{"email":"user1@example.com", "password":"example-users-password'"}`
-	httpResp, apiResp, err := testReq(app, http.MethodPost, "/user/signup", content, map[string]string{})
+	httpResp, apiResp, err := testReq(app, http.MethodPost, "/auth/signup", content, map[string]string{})
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
 
 	// Sign up user2@example.com
 	content = `{"email":"user2@example.com", "password":"example-users-password'"}`
-	httpResp, apiResp, err = testReq(app, http.MethodPost, "/user/signup", content, map[string]string{})
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/auth/signup", content, map[string]string{})
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
 
 	// Log in user1@example.com
 	content = `{"email":"user1@example.com", "password":"example-users-password'"}`
-	httpResp, apiResp, err = testReq(app, http.MethodPost, "/user/login", content, map[string]string{})
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/auth/login", content, map[string]string{})
 	assert.Nil(t, err)
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 	assert.Truef(t, apiResp.Success, apiResp.Message)
