@@ -244,6 +244,7 @@ func ZoneUserGetZones(db *gorm.DB, userUuid string) ([]Zone, error) {
 			FROM zones z
 			JOIN users u ON u.id = ANY (z.users)
 			AND ? = ANY(z.users)
+			AND z.deleted_at IS NULL
 			GROUP BY z.id;`, userUuid).Scan(&zones)
 	if tx.Error != nil {
 		return nil, tx.Error
