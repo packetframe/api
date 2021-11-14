@@ -13,6 +13,8 @@ import (
 var (
 	GroupEnabled = "ENABLED" // User is permitted to make API requests
 	GroupAdmin   = "ADMIN"   // User is permitted to modify all resources
+
+	ErrUserOwnsZones = errors.New("user has zones without other users, delete or add another user to these zones before deleting this user account")
 )
 
 type User struct {
@@ -82,8 +84,36 @@ func UserFindByAuth(db *gorm.DB, id string) (*User, error) {
 }
 
 // UserDelete deletes a user
-func UserDelete(db *gorm.DB, uuid string) error {
-	return db.Where("id = ?", uuid).Delete(&User{}).Error
+func UserDelete(db *gorm.DB, email string) error {
+	// Find user ID
+	user, err := UserFindByEmail(db, email)
+	if err != nil {
+		return err
+	}
+
+	// Check if user is the only user in any zones
+	var zones []Zone
+	tx := db.Find(&zones, "? = ANY (users) AND array_length(users, 1) = 1", user.ID)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	if len(zones) > 0 {
+		return ErrUserOwnsZones
+	}
+
+	// Remove user from zones
+	zones = []Zone{}
+	tx = db.Find(&zones, "? = ANY (users)", user.ID)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	for _, zone := range zones {
+		if err := ZoneUserDelete(db, zone.ID, user.Email); err != nil {
+			return err
+		}
+	}
+
+	return db.Where("id = ?", user.ID).Delete(&User{}).Error
 }
 
 // UserList gets a list of all users

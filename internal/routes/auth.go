@@ -103,3 +103,25 @@ func AuthLogin(c *fiber.Ctx) error {
 
 	return response(c, http.StatusOK, "Authentication success", fiber.Map{"token": user.Token})
 }
+
+// UserDelete handles a DELETE request to delete a user
+func UserDelete(c *fiber.Ctx) error {
+	var u struct {
+		Email string `json:"email" validate:"email"`
+	}
+	if err := c.BodyParser(&u); err != nil {
+		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
+	}
+	if err := validation.Validate(u); err != nil {
+		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
+	}
+
+	if err := db.UserDelete(Database, u.Email); err != nil {
+		return internalServerError(c, err)
+	}
+
+	return response(c, http.StatusOK, "User deleted successfully", nil)
+}
+
+// UserChangePassword handles a POST request to change a user's password
+// TODO

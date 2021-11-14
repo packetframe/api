@@ -27,13 +27,16 @@ func TestRoutesAuthInvalidUserPass(t *testing.T) {
 	}
 }
 
-func TestRoutesAuthSignupLogin(t *testing.T) {
+func TestRoutesAuthSignupLoginDelete(t *testing.T) {
 	var err error
 	Database, err = db.TestSetup()
 	assert.Nil(t, err)
 
 	app := fiber.New()
 	Register(app)
+
+	err = validation.Register()
+	assert.Nil(t, err)
 
 	// Sign up user1@example.com
 	content := `{"email":"user1@example.com", "password":"example-users-password'"}`
@@ -55,4 +58,17 @@ func TestRoutesAuthSignupLogin(t *testing.T) {
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
 	assert.Equal(t, 64, len(apiResp.Data["token"].(string))) // 64 is the user token length
+
+	// Delete user1@example.com
+	content = `{"email":"user1@example.com"}`
+	httpResp, apiResp, err = testReq(app, http.MethodDelete, "/auth/delete", content, map[string]string{})
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
+	assert.True(t, apiResp.Success)
+
+	// Log in user1@example.com to make sure it's been deleted
+	content = `{"email":"user1@example.com", "password":"example-users-password'"}`
+	httpResp, _, err = testReq(app, http.MethodPost, "/auth/login", content, map[string]string{})
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusUnauthorized, httpResp.StatusCode)
 }

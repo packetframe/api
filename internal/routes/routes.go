@@ -19,6 +19,7 @@ var Database *gorm.DB
 var routes = []*route{
 	{Path: "/auth/login", Method: http.MethodPost, Handler: AuthLogin, Description: "Log a user in"},
 	{Path: "/auth/signup", Method: http.MethodPost, Handler: AuthSignup, Description: "Create a new user account"},
+	{Path: "/auth/delete", Method: http.MethodDelete, Handler: UserDelete, Description: "Delete a user account"},
 	{Path: "/dns/zones", Method: http.MethodGet, Handler: ZoneList, Description: "List all DNS zones authorized for a user"},
 	{Path: "/dns/zones", Method: http.MethodPost, Handler: ZoneAdd, Description: "Add a new DNS zone"},
 	{Path: "/dns/zones", Method: http.MethodDelete, Handler: ZoneDelete, Description: "Delete a DNS zone"},

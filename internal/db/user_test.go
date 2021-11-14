@@ -37,7 +37,7 @@ func TestDbUserAddDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Delete user1
-	err = UserDelete(db, user1.ID)
+	err = UserDelete(db, user1.Email)
 	assert.Nil(t, err)
 
 	// Assert that user1 no longer exists
