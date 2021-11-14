@@ -24,6 +24,10 @@ func TestRoutesZoneAddListDelete(t *testing.T) {
 	app := fiber.New()
 	Register(app)
 
+	// Populate suffixes slice. This normally happens in a go routine, but this is required for testing
+	Suffixes, err = db.SuffixList()
+	assert.Nil(t, err)
+
 	// Sign up user1@example.com
 	content := `{"email":"user1@example.com", "password":"example-users-password'"}`
 	httpResp, apiResp, err := testReq(app, http.MethodPost, "/auth/signup", content, map[string]string{})
@@ -49,10 +53,6 @@ func TestRoutesZoneAddListDelete(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 	assert.Truef(t, apiResp.Success, apiResp.Message)
-
-	// Populate suffixes slice. This normally happens in a go routine, but this is required for testing
-	Suffixes, err = db.SuffixList()
-	assert.Nil(t, err)
 
 	// Add com (known public suffix)
 	httpResp, _, err = testReq(app, http.MethodPost, "/dns/zones", `{"zone":"pages.dev"}`, map[string]string{"Authorization": "Token " + userToken})
