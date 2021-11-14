@@ -20,7 +20,7 @@ func TestRoutesAuthInvalidUserPass(t *testing.T) {
 	assert.Nil(t, err)
 
 	content := `{"email":"invalidemail", "password":"x"}` // Invalid email and password too short
-	for _, route := range []string{"/auth/signup", "/auth/login"} {
+	for _, route := range []string{"/user/signup", "/user/login"} {
 		httpResp, _, err := testReq(app, http.MethodPost, route, content, map[string]string{})
 		assert.NotNilf(t, err, route)
 		assert.Equalf(t, http.StatusBadRequest, httpResp.StatusCode, route)
@@ -40,20 +40,20 @@ func TestRoutesAuthSignupLoginDelete(t *testing.T) {
 
 	// Sign up user1@example.com
 	content := `{"email":"user1@example.com", "password":"example-users-password'"}`
-	httpResp, apiResp, err := testReq(app, http.MethodPost, "/auth/signup", content, map[string]string{})
+	httpResp, apiResp, err := testReq(app, http.MethodPost, "/user/signup", content, map[string]string{})
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
 
 	// Sign up user1@example.com again to check for conflict validation
 	content = `{"email":"user1@example.com", "password":"example-users-password'"}`
-	httpResp, _, err = testReq(app, http.MethodPost, "/auth/signup", content, map[string]string{})
+	httpResp, _, err = testReq(app, http.MethodPost, "/user/signup", content, map[string]string{})
 	assert.NotNil(t, err)
 	assert.Equal(t, http.StatusConflict, httpResp.StatusCode)
 
 	// Log in user1@example.com
 	content = `{"email":"user1@example.com", "password":"example-users-password'"}`
-	httpResp, apiResp, err = testReq(app, http.MethodPost, "/auth/login", content, map[string]string{})
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/user/login", content, map[string]string{})
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
@@ -62,14 +62,14 @@ func TestRoutesAuthSignupLoginDelete(t *testing.T) {
 
 	// Change user1@example.com's password
 	content = `{"password":"example-users-NEW-password'"}`
-	httpResp, apiResp, err = testReq(app, http.MethodPost, "/auth/password", content, map[string]string{"Authorization": "Token " + userToken})
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/user/password", content, map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
 
 	// Log in user1@example.com with the new password
 	content = `{"email":"user1@example.com", "password":"example-users-NEW-password'"}`
-	httpResp, apiResp, err = testReq(app, http.MethodPost, "/auth/login", content, map[string]string{})
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/user/login", content, map[string]string{})
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
@@ -78,14 +78,14 @@ func TestRoutesAuthSignupLoginDelete(t *testing.T) {
 
 	// Delete user1@example.com
 	content = `{"email":"user1@example.com"}`
-	httpResp, apiResp, err = testReq(app, http.MethodDelete, "/auth/delete", content, map[string]string{"Authorization": "Token " + userToken})
+	httpResp, apiResp, err = testReq(app, http.MethodDelete, "/user/delete", content, map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
 
 	// Log in user1@example.com to make sure it's been deleted
 	content = `{"email":"user1@example.com", "password":"example-users-password'"}`
-	httpResp, _, err = testReq(app, http.MethodPost, "/auth/login", content, map[string]string{})
+	httpResp, _, err = testReq(app, http.MethodPost, "/user/login", content, map[string]string{})
 	assert.NotNil(t, err)
 	assert.Equal(t, http.StatusUnauthorized, httpResp.StatusCode)
 }
