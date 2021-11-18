@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,6 +12,76 @@ import (
 	"github.com/packetframe/api/internal/db"
 	"github.com/packetframe/api/internal/validation"
 )
+
+func TestRoutesAdminNonAdminUser(t *testing.T) {
+	var err error
+	Database, err = db.TestSetup()
+	assert.Nil(t, err)
+
+	app := fiber.New()
+	Register(app)
+
+	err = validation.Register()
+	assert.Nil(t, err)
+
+	// Sign up user1@example.com
+	content := `{"email":"user1@example.com", "password":"example-users-password'"}`
+	httpResp, apiResp, err := testReq(app, http.MethodPost, "/user/signup", content, map[string]string{})
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
+	assert.True(t, apiResp.Success)
+
+	// Sign up user2@example.com
+	content = `{"email":"user2@example.com", "password":"example-users-password'"}`
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/user/signup", content, map[string]string{})
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
+	assert.True(t, apiResp.Success)
+
+	// Log in user1@example.com
+	content = `{"email":"user1@example.com", "password":"example-users-password'"}`
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/user/login", content, map[string]string{})
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
+	assert.True(t, apiResp.Success)
+	user1Token := apiResp.Data["token"].(string)
+	assert.Equal(t, 64, len(user1Token)) // 64 is the user token length
+
+	// Log in user2@example.com
+	content = `{"email":"user2@example.com", "password":"example-users-password'"}`
+	httpResp, apiResp, err = testReq(app, http.MethodPost, "/user/login", content, map[string]string{})
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
+	assert.True(t, apiResp.Success)
+	user2Token := apiResp.Data["token"].(string)
+	assert.Equal(t, 64, len(user2Token)) // 64 is the user token length
+
+	// Get user1@example.com's ID
+	user1, err := db.UserFindByEmail(Database, "user1@example.com")
+	assert.Nil(t, err)
+
+	// Make user1@example.com admin
+	err = db.UserGroupAdd(Database, user1.ID, db.GroupAdmin)
+	assert.Nil(t, err)
+
+	assert.Greater(t, len(routes), 5)
+	for _, route := range routes {
+		if strings.Contains(route.Path, "admin") {
+			t.Logf("Checking %s", route.Path)
+
+			// Make sure this doesn't throw a 401 for an admins
+			httpResp, apiResp, err := testReq(app, route.Method, route.Path, "", map[string]string{"Authorization": "Token " + user1Token})
+			assert.Nil(t, err)
+			assert.NotEqual(t, http.StatusUnauthorized, httpResp.StatusCode)
+			assert.True(t, apiResp.Success)
+
+			// Make sure this throws a 401 for non admins
+			httpResp, _, err = testReq(app, route.Method, route.Path, "", map[string]string{"Authorization": "Token " + user2Token})
+			assert.NotNil(t, err)
+			assert.Equal(t, http.StatusUnauthorized, httpResp.StatusCode)
+		}
+	}
+}
 
 func TestRoutesAdminUserList(t *testing.T) {
 	var err error

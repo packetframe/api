@@ -9,28 +9,28 @@ import (
 	"github.com/packetframe/api/internal/util"
 )
 
-// checkAdminUserAuth checks if a user is an administrator and returns a gofiber response or nil if user is an admin
-func checkAdminUserAuth(c *fiber.Ctx) (*db.User, error) {
+// checkAdminUserAuth checks if a user is an administrator and returns a gofiber response or nil if user is an admin. If it returns true, the user is authorized.
+func checkAdminUserAuth(c *fiber.Ctx) (bool, *db.User, error) {
 	// Check if user exists
 	user, err := findUser(c)
 	if err != nil {
-		return nil, internalServerError(c, err)
+		return false, nil, internalServerError(c, err)
 	}
 	if user == nil {
-		return nil, response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
+		return false, nil, response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
 	}
 	if !util.StrSliceContains(user.Groups, db.GroupAdmin) {
-		return nil, response(c, http.StatusUnauthorized, "Unauthorized", nil)
+		return false, nil, response(c, http.StatusUnauthorized, "Unauthorized", nil)
 	}
 
 	// If user exists and is admin, return
-	return user, nil
+	return true, user, nil
 }
 
 // AdminUserList handles a GET request to list all users
 func AdminUserList(c *fiber.Ctx) error {
-	_, err := checkAdminUserAuth(c)
-	if err != nil {
+	ok, _, err := checkAdminUserAuth(c)
+	if err != nil || !ok {
 		return err
 	}
 
