@@ -29,7 +29,7 @@ func RecordAdd(db *gorm.DB, record *Record) error {
 // RecordList returns a list of DNS records for a zone
 func RecordList(db *gorm.DB, zone string) ([]Record, error) {
 	var records []Record
-	err := db.Where("zone_id = ?", zone).Find(&records).Error
+	err := db.Order("created_at").Where("zone_id = ?", zone).Find(&records).Error
 	return records, err
 }
 
