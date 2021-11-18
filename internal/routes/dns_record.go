@@ -21,7 +21,7 @@ func RecordAdd(c *fiber.Ctx) error {
 	}
 
 	// Check if user is authorized for zone
-	if err := checkUserAuthorization(c, r.Zone.Zone); err != nil {
+	if ok, err := checkUserAuthorization(c, r.Zone.Zone); err != nil || !ok {
 		return err
 	}
 
@@ -97,7 +97,7 @@ func RecordUpdate(c *fiber.Ctx) error {
 	}
 
 	// Check if user is authorized for zone
-	if err := checkUserAuthorization(c, r.Zone.Zone); err != nil {
+	if ok, err := checkUserAuthorization(c, r.Zone.Zone); err != nil || !ok {
 		return err
 	}
 

@@ -98,18 +98,18 @@ func Document() string {
 	return table
 }
 
-// checkUserAuthorization checks if a user is authorized for a zone by FQDN
-func checkUserAuthorization(c *fiber.Ctx, zoneFqdn string) error {
+// checkUserAuthorization checks if a user is authorized for a zone by FQDN. If it returns true, the user is authorized.
+func checkUserAuthorization(c *fiber.Ctx, zoneFqdn string) (bool, error) {
 	// Find zone
 	zDb, err := db.ZoneFind(Database, dns.Fqdn(zoneFqdn))
 	if err != nil {
-		return internalServerError(c, err)
+		return false, internalServerError(c, err)
 	}
 	if zDb == nil {
-		return response(c, http.StatusNotFound, "Zone doesn't exist", nil)
+		return false, response(c, http.StatusNotFound, "Zone doesn't exist", nil)
 	}
 
-	return checkUserAuthorizationByID(c, zDb.ID)
+	return true, checkUserAuthorizationByID(c, zDb.ID)
 }
 
 // checkUserAuthorizationByID checks if a user is authorized for a zone given a zone ID
