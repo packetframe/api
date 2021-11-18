@@ -208,14 +208,12 @@ func TestZoneUserAuthorized(t *testing.T) {
 	assert.NotNil(t, example1)
 
 	// Test zone authorization
-	authorized, err := ZoneUserAuthorized(db, example1.ID, user1.ID)
+	err = ZoneUserAuthorized(db, example1.ID, user1.ID)
 	assert.Nil(t, err)
-	assert.True(t, authorized)
 
 	// Test zone authorization on random ID
-	authorized, err = ZoneUserAuthorized(db, "not-a-real-zone", user1.ID)
-	assert.Nil(t, err)
-	assert.False(t, authorized)
+	err = ZoneUserAuthorized(db, "not-a-real-zone", user1.ID)
+	assert.NotNil(t, err)
 }
 
 func TestSuffixList(t *testing.T) {

@@ -79,11 +79,11 @@ func TestRoutesZoneAddListDelete(t *testing.T) {
 	assert.Truef(t, apiResp.Success, apiResp.Message)
 
 	// Delete example.com again
+	// NOTE: If you try to delete a zone that doesn't exist, you'll get a 403 Forbidden
 	content = fmt.Sprintf(`{"id":"%s"}`, zones[0].ID)
 	httpResp, _, err = testReq(app, http.MethodDelete, "/dns/zones", content, map[string]string{"Authorization": "Token " + userToken})
-	assert.Nil(t, err)
-	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
-	assert.Truef(t, apiResp.Success, apiResp.Message)
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusForbidden, httpResp.StatusCode)
 
 	// List zones for user
 	httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/zones", "", map[string]string{"Authorization": "Token " + userToken})

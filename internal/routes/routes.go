@@ -119,11 +119,7 @@ func checkUserAuthorizationByID(c *fiber.Ctx, zoneId string) (bool, error) {
 	}
 
 	// Check if user is authorized for zone
-	authorized, err := db.ZoneUserAuthorized(Database, zoneId, user.ID)
-	if err != nil {
-		return false, internalServerError(c, err)
-	}
-	if !authorized {
+	if err := db.ZoneUserAuthorized(Database, zoneId, user.ID); err != nil {
 		return false, response(c, http.StatusForbidden, "Forbidden", nil)
 	}
 

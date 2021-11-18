@@ -17,6 +17,7 @@ import (
 var (
 	ErrUserExistingZoneMember = errors.New("user is already a member of this zone")
 	ErrUserNotFound           = errors.New("user not found")
+	ErrZoneNotFound           = errors.New("zone not found")
 	ErrLastZoneUser           = errors.New("unable to remove last user from zone")
 )
 
@@ -257,15 +258,11 @@ func ZoneUserGetZones(db *gorm.DB, userUuid string) ([]Zone, error) {
 }
 
 // ZoneUserAuthorized checks if a user is authorized for a zone
-func ZoneUserAuthorized(db *gorm.DB, zoneUuid string, userUuid string) (bool, error) {
+func ZoneUserAuthorized(db *gorm.DB, zoneUuid string, userUuid string) error {
 	var z Zone
 	res := db.Model(&Zone{}).Where("id = ? AND ? = ANY(users)", zoneUuid, userUuid).Find(&z)
-	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-		return false, nil
+	if z.ID == "" {
+		return ErrZoneNotFound
 	}
-	if res.Error != nil {
-		return false, res.Error
-	}
-
-	return z.Zone != "", nil
+	return res.Error
 }
