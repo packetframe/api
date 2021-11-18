@@ -61,18 +61,6 @@ func TestRoutesRecordAddListDelete(t *testing.T) {
 	assert.Equal(t, 1, len(zones))
 	assert.Equal(t, "example.com.", zones[0].Zone)
 
-	// List zones for user
-	httpResp, apiResp, err = testReq(app, http.MethodGet, "/dns/zones", "", map[string]string{"Authorization": "Token " + userToken})
-	assert.Nil(t, err)
-	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
-	assert.Truef(t, apiResp.Success, apiResp.Message)
-	respJSON, err = json.Marshal(apiResp.Data["zones"])
-	assert.Nil(t, err)
-	zones = []db.Zone{}
-	err = json.Unmarshal(respJSON, &zones)
-	assert.Nil(t, err)
-	assert.Equal(t, 1, len(zones))
-
 	// Add a record to example.com
 	httpResp, apiResp, err = testReq(app, http.MethodPost, "/dns/records", fmt.Sprintf(`{"zone": "%s", "label": "@", "type": "A", "value": "192.0.2.1", "ttl": 300}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
