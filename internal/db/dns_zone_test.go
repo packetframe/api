@@ -82,8 +82,8 @@ func TestZoneAddDuplicate(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-// TestZoneUserAdd tests adding a user to a zone
-func TestZoneUserAdd(t *testing.T) {
+// TestZoneUserAddListDelete tests adding a user to a zone
+func TestZoneUserAddListDelete(t *testing.T) {
 	db, err := TestSetup()
 	assert.Nil(t, err)
 
@@ -91,6 +91,12 @@ func TestZoneUserAdd(t *testing.T) {
 	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
 	assert.Nil(t, err)
 	user1, err := UserFindByEmail(db, "user1@example.com")
+	assert.Nil(t, err)
+
+	// Create user2@example.com
+	err = UserAdd(db, "user2@example.com", "password2", "example referrer")
+	assert.Nil(t, err)
+	user2, err := UserFindByEmail(db, "user2@example.com")
 	assert.Nil(t, err)
 
 	// Add and find example1.com
@@ -104,15 +110,27 @@ func TestZoneUserAdd(t *testing.T) {
 	err = ZoneUserAdd(db, example1.ID, user1.Email)
 	assert.NotNil(t, err)
 
+	// Add user2
+	err = ZoneUserAdd(db, example1.ID, user2.Email)
+	assert.Nil(t, err)
+
 	// List zone users
 	example1, err = ZoneGet(db, example1.ID)
 	assert.Nil(t, err)
-	assert.Equal(t, 1, len(example1.Users))
-	assert.Equal(t, user1.ID, example1.Users[0])
+	assert.Equal(t, 2, len(example1.Users))
+	assert.Contains(t, example1.Users, user1.ID)
+	assert.Contains(t, example1.Users, user2.ID)
 
-	// Delete user
-	err = ZoneUserDelete(db, example1.ID, user1.Email)
+	// Remove user
+	err = ZoneUserDelete(db, example1.ID, user2.Email)
 	assert.Nil(t, err)
+
+	// List zone users again
+	example1, err = ZoneGet(db, example1.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(example1.Users))
+	assert.Contains(t, example1.Users, user1.ID)
+	assert.NotContains(t, example1.Users, user2.ID)
 }
 
 // TestZoneSetSerial tests setting the serial of a zone
