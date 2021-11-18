@@ -32,6 +32,9 @@ var routes = []*route{
 	{Path: "/dns/records", Method: http.MethodPost, Handler: RecordAdd, Description: "Add a DNS record to a zone", InvalidJSONTest: true},
 	{Path: "/dns/records", Method: http.MethodDelete, Handler: RecordDelete, Description: "Delete a DNS record from a zone", InvalidJSONTest: true},
 	{Path: "/dns/records", Method: http.MethodPut, Handler: RecordUpdate, Description: "Update a DNS record", InvalidJSONTest: true},
+
+	// Admin
+	{Path: "/admin/user/list", Method: http.MethodGet, Handler: AdminUserList, Description: "Get a list of all users", InvalidJSONTest: false},
 }
 
 type route struct {
