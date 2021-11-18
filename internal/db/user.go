@@ -18,7 +18,7 @@ var (
 )
 
 type User struct {
-	ID           string         `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()" json:"-"`
+	ID           string         `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()" json:"id"`
 	Email        string         `gorm:"uniqueIndex" json:"email" validate:"required,email,min=6,max=32"`
 	Password     string         `gorm:"-" json:"password" validate:"required,min=8,max=256"`
 	Refer        string         `json:"refer"` // Where did you hear about Packetframe?

@@ -88,6 +88,7 @@ func RecordDelete(c *fiber.Ctx) error {
 // RecordUpdate handles a PUT request to update a DNS record
 func RecordUpdate(c *fiber.Ctx) error {
 	var r db.Record
+	r.ID = ""
 	if err := c.BodyParser(&r); err != nil {
 		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
 	}
