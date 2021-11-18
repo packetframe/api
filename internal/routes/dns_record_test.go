@@ -88,7 +88,8 @@ func TestRoutesRecordAddListDelete(t *testing.T) {
 	assert.Equal(t, "192.0.2.1", records[0].Value)
 
 	// Update record
-	httpResp, _, err = testReq(app, http.MethodPut, "/dns/records", fmt.Sprintf(`{"zone": "%s", "label": "@", "type": "A", "value": "192.0.2.2", "ttl": 600, "id": "%s"}`, zones[0].ID, records[0].ID), map[string]string{"Authorization": "Token " + userToken})
+	content = fmt.Sprintf(`{"zone": "%s", "label": "@", "type": "A", "value": "192.0.2.2", "ttl": 600, "id": "%s"}`, zones[0].ID, records[0].ID)
+	httpResp, _, err = testReq(app, http.MethodPut, "/dns/records", content, map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 
