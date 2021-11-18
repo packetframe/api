@@ -17,17 +17,24 @@ var Database *gorm.DB
 
 // routes stores a map of route to handler
 var routes = []*route{
+	// Authentication
 	{Path: "/user/login", Method: http.MethodPost, Handler: UserLogin, Description: "Log a user in", InvalidJSONTest: true},
 	{Path: "/user/signup", Method: http.MethodPost, Handler: UserSignup, Description: "Create a new user account", InvalidJSONTest: true},
 	{Path: "/user/logout", Method: http.MethodPost, Handler: UserLogout, Description: "Log a user out", InvalidJSONTest: false},
+
+	// User account management
 	{Path: "/user/delete", Method: http.MethodDelete, Handler: UserDelete, Description: "Delete a user account", InvalidJSONTest: false},
 	{Path: "/user/password", Method: http.MethodPost, Handler: UserChangePassword, Description: "Change a user's password", InvalidJSONTest: true},
 	{Path: "/user/info", Method: http.MethodGet, Handler: UserInfo, Description: "Get user info", InvalidJSONTest: false},
+
+	// Zone management
 	{Path: "/dns/zones", Method: http.MethodGet, Handler: ZoneList, Description: "List all DNS zones authorized for a user", InvalidJSONTest: false},
 	{Path: "/dns/zones", Method: http.MethodPost, Handler: ZoneAdd, Description: "Add a new DNS zone", InvalidJSONTest: true},
 	{Path: "/dns/zones", Method: http.MethodDelete, Handler: ZoneDelete, Description: "Delete a DNS zone", InvalidJSONTest: true},
 	{Path: "/dns/zones/user", Method: http.MethodPut, Handler: ZoneUserAdd, Description: "Add a user to a DNS zone", InvalidJSONTest: true},
 	{Path: "/dns/zones/user", Method: http.MethodDelete, Handler: ZoneUserDelete, Description: "Remove a user from a DNS zone", InvalidJSONTest: true},
+
+	// Record management
 	{Path: "/dns/records/:id", Method: http.MethodGet, Handler: RecordList, Description: "List DNS records for a zone", InvalidJSONTest: false},
 	{Path: "/dns/records", Method: http.MethodPost, Handler: RecordAdd, Description: "Add a DNS record to a zone", InvalidJSONTest: true},
 	{Path: "/dns/records", Method: http.MethodDelete, Handler: RecordDelete, Description: "Delete a DNS record from a zone", InvalidJSONTest: true},
