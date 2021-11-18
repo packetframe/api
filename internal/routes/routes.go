@@ -109,37 +109,38 @@ func checkUserAuthorization(c *fiber.Ctx, zoneFqdn string) (bool, error) {
 		return false, response(c, http.StatusNotFound, "Zone doesn't exist", nil)
 	}
 
-	return true, checkUserAuthorizationByID(c, zDb.ID)
+	return checkUserAuthorizationByID(c, zDb.ID)
 }
 
 // checkUserAuthorizationByID checks if a user is authorized for a zone given a zone ID
-func checkUserAuthorizationByID(c *fiber.Ctx, zoneId string) error {
+func checkUserAuthorizationByID(c *fiber.Ctx, zoneId string) (bool, error) {
 	// Find user
 	user, err := findUser(c)
 	if err != nil {
-		return internalServerError(c, err)
+		return false, internalServerError(c, err)
 	}
 	if user == nil {
-		return response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
+		return false, response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
 	}
 
 	// Check enabled group
 	if !util.StrSliceContains(user.Groups, db.GroupEnabled) {
-		return response(c, http.StatusForbidden, errUserDisabled, nil)
+		return false, response(c, http.StatusForbidden, errUserDisabled, nil)
 	}
 
-	// Check admin group
+	// Allow admins access to all zones
 	if util.StrSliceContains(user.Groups, db.GroupAdmin) {
-		return nil
+		return true, nil
 	}
 
 	// Check if user is authorized for zone
 	authorized, err := db.ZoneUserAuthorized(Database, zoneId, user.ID)
 	if err != nil {
-		return internalServerError(c, err)
+		return false, internalServerError(c, err)
 	}
 	if !authorized {
-		return response(c, http.StatusForbidden, "Forbidden", nil)
+		return false, response(c, http.StatusForbidden, "Forbidden", nil)
 	}
-	return nil
+
+	return true, nil
 }
