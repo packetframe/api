@@ -72,13 +72,15 @@ func TestRoutesZoneAddListDelete(t *testing.T) {
 	assert.Equal(t, "example.com.", zones[0].Zone)
 
 	// Delete example.com
-	httpResp, apiResp, err = testReq(app, http.MethodDelete, "/dns/zones", fmt.Sprintf(`{"id":"%s"}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
+	content = fmt.Sprintf(`{"id":"%s"}`, zones[0].ID)
+	httpResp, apiResp, err = testReq(app, http.MethodDelete, "/dns/zones", content, map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 	assert.Truef(t, apiResp.Success, apiResp.Message)
 
 	// Delete example.com again
-	httpResp, apiResp, err = testReq(app, http.MethodDelete, "/dns/zones", fmt.Sprintf(`{"id":"%s"}`, zones[0].ID), map[string]string{"Authorization": "Token " + userToken})
+	content = fmt.Sprintf(`{"id":"%s"}`, zones[0].ID)
+	httpResp, _, err = testReq(app, http.MethodDelete, "/dns/zones", content, map[string]string{"Authorization": "Token " + userToken})
 	assert.Nil(t, err)
 	assert.Equalf(t, http.StatusOK, httpResp.StatusCode, apiResp.Message)
 	assert.Truef(t, apiResp.Success, apiResp.Message)
