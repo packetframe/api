@@ -21,7 +21,7 @@ func RecordAdd(c *fiber.Ctx) error {
 	}
 
 	// Check if user is authorized for zone
-	if ok, err := checkUserAuthorization(c, r.Zone.Zone); err != nil || !ok {
+	if ok, err := checkUserAuthorizationByID(c, r.ZoneID); err != nil || !ok {
 		return err
 	}
 
@@ -42,7 +42,7 @@ func RecordList(c *fiber.Ctx) error {
 	zoneID := c.Params("id")
 
 	// Check if user is authorized for zone
-	if err := checkUserAuthorizationByID(c, zoneID); err != nil {
+	if ok, err := checkUserAuthorizationByID(c, zoneID); err != nil || !ok {
 		return err
 	}
 
@@ -69,7 +69,7 @@ func RecordDelete(c *fiber.Ctx) error {
 	}
 
 	// Check if user is authorized for zone
-	if err := checkUserAuthorizationByID(c, r.ZoneID); err != nil {
+	if ok, err := checkUserAuthorizationByID(c, r.ZoneID); err != nil || !ok {
 		return err
 	}
 
@@ -91,13 +91,12 @@ func RecordUpdate(c *fiber.Ctx) error {
 	if err := c.BodyParser(&r); err != nil {
 		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
 	}
-	r.ID = ""
 	if err := validation.Validate(r); err != nil {
 		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
 	}
 
 	// Check if user is authorized for zone
-	if ok, err := checkUserAuthorization(c, r.Zone.Zone); err != nil || !ok {
+	if ok, err := checkUserAuthorizationByID(c, r.ZoneID); err != nil || !ok {
 		return err
 	}
 

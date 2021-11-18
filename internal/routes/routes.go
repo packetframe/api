@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/miekg/dns"
 	"gorm.io/gorm"
 
 	"github.com/packetframe/api/internal/db"
@@ -96,20 +95,6 @@ func Document() string {
 	}
 
 	return table
-}
-
-// checkUserAuthorization checks if a user is authorized for a zone by FQDN. If it returns true, the user is authorized.
-func checkUserAuthorization(c *fiber.Ctx, zoneFqdn string) (bool, error) {
-	// Find zone
-	zDb, err := db.ZoneFind(Database, dns.Fqdn(zoneFqdn))
-	if err != nil {
-		return false, internalServerError(c, err)
-	}
-	if zDb == nil {
-		return false, response(c, http.StatusNotFound, "Zone doesn't exist", nil)
-	}
-
-	return checkUserAuthorizationByID(c, zDb.ID)
 }
 
 // checkUserAuthorizationByID checks if a user is authorized for a zone given a zone ID

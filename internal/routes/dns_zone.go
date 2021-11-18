@@ -81,7 +81,7 @@ func ZoneDelete(c *fiber.Ctx) error {
 	}
 
 	// Check if user is authorized for zone
-	if err := checkUserAuthorizationByID(c, z.ID); err != nil {
+	if ok, err := checkUserAuthorizationByID(c, z.ID); err != nil || !ok {
 		return err
 	}
 
@@ -107,7 +107,7 @@ func ZoneUserAdd(c *fiber.Ctx) error {
 	}
 
 	// Check if user is authorized for zone
-	if err := checkUserAuthorizationByID(c, z.ZoneID); err != nil {
+	if ok, err := checkUserAuthorizationByID(c, z.ZoneID); err != nil || !ok {
 		return err
 	}
 
@@ -135,7 +135,7 @@ func ZoneUserDelete(c *fiber.Ctx) error {
 	}
 
 	// Check if user is authorized for zone
-	if err := checkUserAuthorizationByID(c, z.ZoneID); err != nil {
+	if ok, err := checkUserAuthorizationByID(c, z.ZoneID); err != nil || !ok {
 		return err
 	}
 
