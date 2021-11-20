@@ -11,6 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/packetframe/api/internal/db"
+	"github.com/packetframe/api/internal/orchestrator"
 	"github.com/packetframe/api/internal/routes"
 	"github.com/packetframe/api/internal/validation"
 )
@@ -50,6 +51,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	orchestrator.Register()
 
 	// Update public suffix list on a ticker
 	suffixUpdateTicker := time.NewTicker(24 * time.Hour)
