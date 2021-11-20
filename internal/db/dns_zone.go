@@ -28,7 +28,7 @@ type Zone struct {
 	Serial     uint64         `json:"-"`
 	DNSSEC     DNSSECKey      `gorm:"embedded" json:"-"`
 	Users      pq.StringArray `gorm:"type:text[]" json:"users"`
-	UserEmails pq.StringArray `gorm:"type:text[]" json:"user_emails"` // TODO: readonly?
+	UserEmails pq.StringArray `gorm:"type:text[]" json:"user_emails"`
 	CreatedAt  time.Time      `json:"-"`
 	UpdatedAt  time.Time      `json:"-"`
 }

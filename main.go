@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	log "github.com/sirupsen/logrus"
-	"os"
-	"time"
 
 	"github.com/packetframe/api/internal/db"
 	"github.com/packetframe/api/internal/routes"
