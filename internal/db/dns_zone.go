@@ -233,8 +233,8 @@ func ZoneUserDelete(db *gorm.DB, zoneUuid string, userEmail string) error {
 	return db.Save(&z).Error
 }
 
-// ZoneGet gets a zone by UUID
-func ZoneGet(db *gorm.DB, zoneUuid string) (*Zone, error) {
+// ZoneFindByID gets a zone by UUID
+func ZoneFindByID(db *gorm.DB, zoneUuid string) (*Zone, error) {
 	var z Zone
 	if err := db.First(&z, "id = ?", zoneUuid).Error; err != nil {
 		return nil, err

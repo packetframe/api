@@ -115,7 +115,7 @@ func TestZoneUserAddListDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// List zone users
-	example1, err = ZoneGet(db, example1.ID)
+	example1, err = ZoneFindByID(db, example1.ID)
 	assert.Nil(t, err)
 	assert.Equal(t, 2, len(example1.Users))
 	assert.Contains(t, example1.Users, user1.ID)
@@ -126,7 +126,7 @@ func TestZoneUserAddListDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	// List zone users again
-	example1, err = ZoneGet(db, example1.ID)
+	example1, err = ZoneFindByID(db, example1.ID)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(example1.Users))
 	assert.Contains(t, example1.Users, user1.ID)
@@ -159,7 +159,7 @@ func TestZoneSetSerial(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Check new serial
-	example1, err = ZoneGet(db, example1.ID)
+	example1, err = ZoneFindByID(db, example1.ID)
 	assert.Nil(t, err)
 	assert.NotEqual(t, oldSerial, example1.Serial)
 }
