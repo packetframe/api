@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -101,4 +102,41 @@ func AdminUserGroupRemove(c *fiber.Ctx) error {
 	}
 
 	return response(c, http.StatusOK, "Group removed successfully", nil)
+}
+
+// AdminUserImpersonate handles a POST request to log in as another user
+func AdminUserImpersonate(c *fiber.Ctx) error {
+	// Make sure the user is an admin
+	ok, _, err := checkAdminUserAuth(c)
+	if err != nil || !ok {
+		return err
+	}
+
+	var u struct {
+		Email string `json:"email"`
+	}
+	if err := c.BodyParser(&u); err != nil {
+		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
+	}
+	if err := validation.Validate(u); err != nil {
+		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
+	}
+
+	user, err := db.UserFindByEmail(Database, u.Email)
+	if err != nil {
+		return internalServerError(c, err)
+	}
+	if user == nil {
+		return response(c, http.StatusUnauthorized, errInvalidCredentials, nil)
+	}
+
+	// Set Token in HTTPONLY cookie
+	c.Cookie(&fiber.Cookie{
+		Name:     "token",
+		Value:    user.Token,
+		Expires:  time.Now().Add(30 * 24 * time.Hour), // 30 days
+		HTTPOnly: true,
+	})
+
+	return response(c, http.StatusOK, "Authentication success", fiber.Map{"token": user.Token})
 }
