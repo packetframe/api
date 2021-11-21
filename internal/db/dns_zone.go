@@ -211,10 +211,6 @@ func ZoneUserDelete(db *gorm.DB, zoneUuid string, userEmail string) error {
 		return err
 	}
 
-	if len(z.Users) == 1 {
-		return ErrLastZoneUser
-	}
-
 	// Find the user ID
 	u, err := UserFindByEmail(db, userEmail)
 	if err != nil {
@@ -222,6 +218,11 @@ func ZoneUserDelete(db *gorm.DB, zoneUuid string, userEmail string) error {
 	}
 	if u == nil {
 		return ErrUserNotFound
+	}
+
+	// Prevent the user from removing the last user of the zone
+	if len(z.Users) == 1 {
+		return ErrLastZoneUser
 	}
 
 	for i, existingUserId := range z.Users {
