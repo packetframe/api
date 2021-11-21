@@ -12,6 +12,9 @@ curl --request POST \
 }'
 echo
 
+echo -n "Making user1@example.com an admin..."
+docker exec -it postgres psql --host localhost --username api --command "UPDATE users SET groups = groups || '{ADMIN}' WHERE email = 'user1@example.com';"
+
 echo -n Creating user2@example.com...
 curl --request POST \
   --url http://localhost:8080/user/signup \
