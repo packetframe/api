@@ -20,6 +20,12 @@ func checkAdminUserAuth(c *fiber.Ctx) (bool, *db.User, error) {
 	if user == nil {
 		return false, nil, response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
 	}
+
+	// Check enabled group
+	if !util.StrSliceContains(user.Groups, db.GroupEnabled) {
+		return false, nil, response(c, http.StatusForbidden, errUserDisabled, nil)
+	}
+
 	if !util.StrSliceContains(user.Groups, db.GroupAdmin) {
 		return false, nil, response(c, http.StatusUnauthorized, "Unauthorized", nil)
 	}
