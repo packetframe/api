@@ -22,7 +22,7 @@ type User struct {
 	Email        string         `gorm:"uniqueIndex" json:"email" validate:"required,email,min=6,max=32"`
 	Password     string         `gorm:"-" json:"password" validate:"required,min=8,max=256"`
 	Refer        string         `json:"refer"` // Where did you hear about Packetframe?
-	Groups       pq.StringArray `gorm:"type:text[]" json:"-"`
+	Groups       pq.StringArray `gorm:"type:text[]" json:"groups"`
 	PasswordHash []byte         `json:"-"`
 	APIKey       string         `json:"-"` // Rotated manually by user if needed
 	Token        string         `json:"-"` // Rotated every n minutes (TODO: autorotate this)
