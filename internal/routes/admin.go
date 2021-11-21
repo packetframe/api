@@ -7,6 +7,7 @@ import (
 
 	"github.com/packetframe/api/internal/db"
 	"github.com/packetframe/api/internal/util"
+	"github.com/packetframe/api/internal/validation"
 )
 
 // checkAdminUserAuth checks if a user is an administrator and returns a gofiber response or nil if user is an admin. If it returns true, the user is authorized.
@@ -40,4 +41,58 @@ func AdminUserList(c *fiber.Ctx) error {
 	}
 
 	return response(c, http.StatusOK, "Users retrieved successfully", map[string]interface{}{"users": users})
+}
+
+// AdminUserGroupAdd handles a PUT request to add a group to a user
+func AdminUserGroupAdd(c *fiber.Ctx) error {
+	// Make sure the user is an admin
+	ok, _, err := checkAdminUserAuth(c)
+	if err != nil || !ok {
+		return err
+	}
+
+	var r struct {
+		UserID string `json:"user"`
+		Group  string `json:"group"`
+	}
+	if err := c.BodyParser(&r); err != nil {
+		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
+	}
+	if err := validation.Validate(r); err != nil {
+		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
+	}
+
+	// Add the group
+	if err := db.UserGroupAdd(Database, r.UserID, r.Group); err != nil {
+		return response(c, http.StatusBadRequest, err.Error(), nil)
+	}
+
+	return response(c, http.StatusOK, "Group added successfully", nil)
+}
+
+// AdminUserGroupRemove handles a DELETE request to remove a group from a user
+func AdminUserGroupRemove(c *fiber.Ctx) error {
+	// Make sure the user is an admin
+	ok, _, err := checkAdminUserAuth(c)
+	if err != nil || !ok {
+		return err
+	}
+
+	var r struct {
+		UserID string `json:"user"`
+		Group  string `json:"group"`
+	}
+	if err := c.BodyParser(&r); err != nil {
+		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
+	}
+	if err := validation.Validate(r); err != nil {
+		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
+	}
+
+	// Add the group
+	if err := db.UserGroupDelete(Database, r.UserID, r.Group); err != nil {
+		return response(c, http.StatusBadRequest, err.Error(), nil)
+	}
+
+	return response(c, http.StatusOK, "Group removed successfully", nil)
 }
