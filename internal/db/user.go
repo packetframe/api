@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	GroupEnabled = "ENABLED" // User is permitted to make API requests
-	GroupAdmin   = "ADMIN"   // User is permitted to modify all resources
+	GroupEnabled = "core.ENABLED" // User is permitted to make API requests
+	GroupAdmin   = "core.ADMIN"   // User is permitted to modify all resources
 
 	ErrUserOwnsZones = errors.New("user has zones without other users, delete or add another user to these zones before deleting this user account")
 )
