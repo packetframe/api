@@ -24,8 +24,19 @@ const (
 	metricsUpdateInterval    = 15 * time.Minute
 )
 
+var (
+	dbHost        = os.Getenv("DB_HOST")
+	metricsListen = os.Getenv("METRICS_LISTEN")
+)
+
 func main() {
-	dbHost := os.Getenv("DB_HOST")
+	if dbHost == "" {
+		log.Fatal("DB_HOST must be set")
+	}
+	if metricsListen == "" {
+		log.Fatal("METRICS_LISTEN must be set")
+	}
+
 	log.Infof("DB host %s", dbHost)
 	postgresDSN := fmt.Sprintf("host=%s user=api password=api dbname=api port=5432 sslmode=disable", os.Getenv("DB_HOST"))
 
@@ -81,7 +92,7 @@ func main() {
 
 	// Metrics goroutines
 	go metrics.Collector(database, metricsUpdateInterval)
-	go metrics.Listen(os.Getenv("METRICS_LISTEN"))
+	go metrics.Listen(metricsListen)
 
 	listenAddr := ":8080"
 	log.Printf("Starting API on %s", listenAddr)
