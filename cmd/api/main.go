@@ -52,7 +52,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	log.Println("Waiting %+v before connecting to database...", startupDelay)
+	log.Printf("Waiting %+v before connecting to database...", startupDelay)
 	time.Sleep(startupDelay)
 
 	log.Println("Connecting to database")
