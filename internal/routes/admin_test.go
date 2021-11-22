@@ -68,13 +68,13 @@ func TestRoutesAdminNonAdminUser(t *testing.T) {
 	assert.Greater(t, len(routes), 5)
 	for _, route := range routes {
 		if strings.Contains(route.Path, "admin") {
-			t.Logf("Checking %s", route.Path)
+			t.Logf("Checking %s %s", route.Method, route.Path)
 
 			// Make sure this doesn't throw a 401 for an admins
-			httpResp, apiResp, err := testReq(app, route.Method, route.Path, "", map[string]string{"Authorization": "Token " + user1Token})
-			assert.Nil(t, err)
-			assert.NotEqual(t, http.StatusUnauthorized, httpResp.StatusCode)
-			assert.True(t, apiResp.Success)
+			httpResp, _, err := testReq(app, route.Method, route.Path, "", map[string]string{"Authorization": "Token " + user1Token})
+			if err == nil {
+				assert.NotEqual(t, http.StatusUnauthorized, httpResp.StatusCode)
+			} // Might error due to invalid req body
 
 			// Make sure this throws a 401 for non admins
 			httpResp, _, err = testReq(app, route.Method, route.Path, "", map[string]string{"Authorization": "Token " + user2Token})
