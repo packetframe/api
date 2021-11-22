@@ -1,10 +1,8 @@
 package db
 
 import (
-	"testing"
-	"time"
-
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestZoneAddListFindDelete(t *testing.T) {
@@ -131,37 +129,6 @@ func TestZoneUserAddListDelete(t *testing.T) {
 	assert.Equal(t, 1, len(example1.Users))
 	assert.Contains(t, example1.Users, user1.ID)
 	assert.NotContains(t, example1.Users, user2.ID)
-}
-
-// TestZoneSetSerial tests setting the serial of a zone
-func TestZoneSetSerial(t *testing.T) {
-	db, err := TestSetup()
-	assert.Nil(t, err)
-
-	// Add user1
-	err = UserAdd(db, "user1@example.com", "password1", "example referrer")
-	assert.Nil(t, err)
-
-	// Add and find example1.com
-	err = ZoneAdd(db, "example1.com", "user1@example.com")
-	assert.Nil(t, err)
-	example1, err := ZoneFind(db, "example1.com")
-	assert.Nil(t, err)
-	assert.NotNil(t, example1)
-
-	oldSerial := example1.Serial
-
-	// Wait one second to allow for UNIX timestamp to change
-	time.Sleep(time.Second)
-
-	// Set serial
-	err = ZoneSetSerial(db, example1.ID)
-	assert.Nil(t, err)
-
-	// Check new serial
-	example1, err = ZoneFindByID(db, example1.ID)
-	assert.Nil(t, err)
-	assert.NotEqual(t, oldSerial, example1.Serial)
 }
 
 // TestZoneUserGetZones tests getting the zones of a user
