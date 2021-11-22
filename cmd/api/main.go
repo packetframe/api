@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/packetframe/api/internal/api/metrics"
 	"github.com/packetframe/api/internal/api/routes"
 	"github.com/packetframe/api/internal/api/validation"
 	"github.com/packetframe/api/internal/common/db"
@@ -16,6 +17,12 @@ import (
 
 // Linker flags
 var version = "dev"
+
+// Ticker intervals
+const (
+	suffixListUpdateInterval = 24 * time.Hour
+	metricsUpdateInterval    = 15 * time.Minute
+)
 
 func main() {
 	dbHost := os.Getenv("DB_HOST")
@@ -47,7 +54,7 @@ func main() {
 	}
 
 	// Update public suffix list on a ticker
-	suffixUpdateTicker := time.NewTicker(24 * time.Hour)
+	suffixUpdateTicker := time.NewTicker(suffixListUpdateInterval)
 	go func() {
 		for range suffixUpdateTicker.C {
 			log.Debugln("Updating local public suffix list")
@@ -71,6 +78,10 @@ func main() {
 	if err := validation.Register(); err != nil {
 		log.Fatal(err)
 	}
+
+	// Metrics goroutines
+	go metrics.Collector(database, metricsUpdateInterval)
+	go metrics.Listen(os.Getenv("METRICS_LISTEN"))
 
 	listenAddr := ":8080"
 	log.Printf("Starting API on %s", listenAddr)
