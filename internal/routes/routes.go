@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -74,6 +75,11 @@ func Register(app *fiber.App) {
 
 // response returns a JSON response
 func response(c *fiber.Ctx, status int, message string, data map[string]interface{}) error {
+	// Capitalize first letter
+	if len(message) > 1 {
+		message = strings.ToUpper(message[0:1]) + message[1:]
+	}
+
 	return c.Status(status).JSON(fiber.Map{
 		"success": (200 <= status) && (status < 300),
 		"message": message,
