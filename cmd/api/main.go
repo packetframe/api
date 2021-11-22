@@ -18,10 +18,10 @@ import (
 // Linker flags
 var version = "dev"
 
-// Ticker intervals
 const (
 	suffixListUpdateInterval = 24 * time.Hour
 	metricsUpdateInterval    = 15 * time.Minute
+	startupDelay             = 5 * time.Second
 )
 
 var (
@@ -51,6 +51,9 @@ func main() {
 		fmt.Println(routes.Document())
 		os.Exit(0)
 	}
+
+	log.Println("Waiting %+v before connecting to database...", startupDelay)
+	time.Sleep(startupDelay)
 
 	log.Println("Connecting to database")
 	database, err := db.Connect(postgresDSN)
