@@ -90,7 +90,7 @@ func main() {
 		update()
 	} else {
 		// Update local zone cache
-		log.Info("Starting update ticker every %+v", updateInterval)
+		log.Infof("Starting update ticker every %+v", updateInterval)
 		zoneFileUpdateTicker := time.NewTicker(updateInterval)
 		for range zoneFileUpdateTicker.C {
 			log.Debugln("Updating local public suffix list")
