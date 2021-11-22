@@ -32,12 +32,24 @@ func TestRoutesAdminNonAdminUser(t *testing.T) {
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
 
+	// Enable user1@example.com
+	u, err := db.UserFindByEmail(Database, "user1@example.com")
+	assert.Nil(t, err)
+	err = db.UserGroupAdd(Database, u.ID, db.GroupEnabled)
+	assert.Nil(t, err)
+
 	// Sign up user2@example.com
 	content = `{"email":"user2@example.com", "password":"example-users-password'"}`
 	httpResp, apiResp, err = testReq(app, http.MethodPost, "/user/signup", content, map[string]string{})
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
+
+	// Enable user2@example.com
+	u, err = db.UserFindByEmail(Database, "user2@example.com")
+	assert.Nil(t, err)
+	err = db.UserGroupAdd(Database, u.ID, db.GroupEnabled)
+	assert.Nil(t, err)
 
 	// Log in user1@example.com
 	content = `{"email":"user1@example.com", "password":"example-users-password'"}`
@@ -102,12 +114,24 @@ func TestRoutesAdminUserList(t *testing.T) {
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
 
+	// Enable user1@example.com
+	u, err := db.UserFindByEmail(Database, "user1@example.com")
+	assert.Nil(t, err)
+	err = db.UserGroupAdd(Database, u.ID, db.GroupEnabled)
+	assert.Nil(t, err)
+
 	// Sign up user2@example.com
 	content = `{"email":"user2@example.com", "password":"example-users-password'"}`
 	httpResp, apiResp, err = testReq(app, http.MethodPost, "/user/signup", content, map[string]string{})
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
+
+	// Enable user2@example.com
+	u, err = db.UserFindByEmail(Database, "user2@example.com")
+	assert.Nil(t, err)
+	err = db.UserGroupAdd(Database, u.ID, db.GroupEnabled)
+	assert.Nil(t, err)
 
 	// Sign up user3@example.com
 	content = `{"email":"user3@example.com", "password":"example-users-password'"}`
@@ -170,6 +194,12 @@ func TestRoutesAdminGroupAddRemove(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, httpResp.StatusCode)
 	assert.True(t, apiResp.Success)
+
+	// Enable user1@example.com
+	u, err := db.UserFindByEmail(Database, "user1@example.com")
+	assert.Nil(t, err)
+	err = db.UserGroupAdd(Database, u.ID, db.GroupEnabled)
+	assert.Nil(t, err)
 
 	// Log in user1@example.com
 	content = `{"email":"user1@example.com", "password":"example-users-password'"}`

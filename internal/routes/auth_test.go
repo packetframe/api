@@ -51,6 +51,12 @@ func TestRoutesUserSignupLoginDelete(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, http.StatusConflict, httpResp.StatusCode)
 
+	// Enable user1@example.com
+	u, err := db.UserFindByEmail(Database, "user1@example.com")
+	assert.Nil(t, err)
+	err = db.UserGroupAdd(Database, u.ID, db.GroupEnabled)
+	assert.Nil(t, err)
+
 	// Log in user1@example.com
 	content = `{"email":"user1@example.com", "password":"example-users-password'"}`
 	httpResp, apiResp, err = testReq(app, http.MethodPost, "/user/login", content, map[string]string{})

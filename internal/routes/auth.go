@@ -15,7 +15,7 @@ import (
 
 var (
 	errInvalidCredentials = "invalid username and/or password"
-	errUserDisabled       = "this user is disabled"
+	errUserDisabled       = "this user is disabled, please contact info@packetframe.com"
 )
 
 // findUser finds a user by Authorization header or cookie and returns nil if a user isn't found

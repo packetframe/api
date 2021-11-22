@@ -49,7 +49,7 @@ func UserAdd(db *gorm.DB, email string, password string, refer string) error {
 		PasswordHash: passwordHash,
 		APIKey:       apiKey,
 		Token:        token,
-		Groups:       []string{GroupEnabled},
+		Groups:       []string{},
 		Refer:        refer,
 	}).Error
 }
