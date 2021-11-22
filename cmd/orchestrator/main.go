@@ -67,6 +67,8 @@ func update() {
 }
 
 func main() {
+	log.Infof("Starting Packetframe zone orchestrator (%s)", version)
+
 	if dbHost == "" {
 		log.Fatal("DB_HOST must be set")
 	}

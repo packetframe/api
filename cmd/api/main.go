@@ -30,6 +30,8 @@ var (
 )
 
 func main() {
+	log.Infof("Starting Packetframe API (%s)", version)
+
 	if dbHost == "" {
 		log.Fatal("DB_HOST must be set")
 	}
