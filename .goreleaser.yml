@@ -1,5 +1,17 @@
 builds:
   - id: api
+    dir: ./cmd/api
+    binary: api
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+
+  - id: orchestrator
+    dir: ./cmd/orchestrator
+    binary: orchestrator
     env:
       - CGO_ENABLED=0
     goos:
@@ -15,23 +27,23 @@ changelog:
       - "^test:"
 
 dockers:
-  - image_templates: ["ghcr.io/packetframe/api:{{ .Version }}-amd64"]
-    dockerfile: Dockerfile
+  - ids: [ "api" ]
+    image_templates: [ "ghcr.io/packetframe/api:{{ .Version }}" ]
+    dockerfile: Dockerfile.api
     use: buildx
     build_flag_templates:
       - --platform=linux/amd64
-      - --label=org.opencontainers.image.title=api
-      - --label=org.opencontainers.image.description=Packetframe API v4
-      - --label=org.opencontainers.image.url=https://github.com/packetframe/api
-      - --label=org.opencontainers.image.source=https://github.com/packetframe/api
       - --label=org.opencontainers.image.version={{ .Version }}
       - --label=org.opencontainers.image.revision={{ .FullCommit }}
       - --label=org.opencontainers.image.licenses=AGPL-3.0-only
 
-docker_manifests:
-  - name_template: ghcr.io/packetframe/api:{{ .Version }}
-    image_templates:
-      - ghcr.io/packetframe/api:{{ .Version }}-amd64
-  - name_template: ghcr.io/packetframe/api:latest
-    image_templates:
-      - ghcr.io/packetframe/api:{{ .Version }}-amd64
+  - ids: [ "orchestrator" ]
+    image_templates: [ "ghcr.io/packetframe/orchestrator:{{ .Version }}" ]
+    dockerfile: Dockerfile.orchestrator
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/amd64
+      - --label=org.opencontainers.image.title=orchestrator
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=AGPL-3.0-only

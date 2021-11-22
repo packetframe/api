@@ -1,0 +1,3 @@
+FROM alpine
+COPY orchestrator /usr/bin/orchestrator
+ENTRYPOINT ["/usr/bin/orchestrator"]
