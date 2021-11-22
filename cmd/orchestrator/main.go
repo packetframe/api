@@ -2,11 +2,15 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"path"
 	"strings"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
@@ -22,6 +26,15 @@ var (
 	database       *gorm.DB
 	dbHost         = os.Getenv("DB_HOST")
 	cacheDirectory = os.Getenv("CACHE_DIR")
+	metricsListen  = os.Getenv("METRICS_LISTEN")
+)
+
+// Metrics
+var (
+	metricLastUpdated = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "pforchestrator_last_update",
+		Help: "Timestamp of the end of the last orchestrator update run",
+	})
 )
 
 func update() {
@@ -60,6 +73,8 @@ func update() {
 			log.Fatal(err)
 		}
 	}
+
+	metricLastUpdated.Set(float64(time.Now().Unix()))
 }
 
 func main() {
@@ -68,6 +83,14 @@ func main() {
 	}
 	if cacheDirectory == "" {
 		log.Fatal("CACHE_DIR must be set")
+	}
+	if metricsListen == "" {
+		log.Fatal("METRICS_LISTEN must be set")
+	}
+
+	// Make cache directory
+	if err := os.MkdirAll(cacheDirectory, os.ModeDir); err != nil {
+		log.Fatal(err)
 	}
 
 	log.Infof("DB host %s, cache %s", dbHost, cacheDirectory)
@@ -85,6 +108,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Metrics listener
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		log.Infof("Starting metrics exoprter on http://%s/metrics", metricsListen)
+		log.Fatal(http.ListenAndServe(metricsListen, nil))
+	}()
+
 	if version == "dev" {
 		log.Info("Dev mode enabled, updating once and exiting")
 		update()
@@ -93,7 +123,6 @@ func main() {
 		log.Infof("Starting update ticker every %+v", updateInterval)
 		zoneFileUpdateTicker := time.NewTicker(updateInterval)
 		for range zoneFileUpdateTicker.C {
-			log.Debugln("Updating local public suffix list")
 			update()
 		}
 	}
