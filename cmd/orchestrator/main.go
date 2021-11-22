@@ -2,19 +2,16 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"path"
 	"strings"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
-	"github.com/packetframe/api/internal/db"
+	"github.com/packetframe/api/internal/common/db"
+	"github.com/packetframe/api/internal/orchestrator/metrics"
 )
 
 // Linker flags
@@ -27,14 +24,6 @@ var (
 	dbHost         = os.Getenv("DB_HOST")
 	cacheDirectory = os.Getenv("CACHE_DIR")
 	metricsListen  = os.Getenv("METRICS_LISTEN")
-)
-
-// Metrics
-var (
-	metricLastUpdated = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "pforchestrator_last_update",
-		Help: "Timestamp of the end of the last orchestrator update run",
-	})
 )
 
 func update() {
@@ -74,7 +63,7 @@ func update() {
 		}
 	}
 
-	metricLastUpdated.Set(float64(time.Now().Unix()))
+	metrics.MetricLastUpdated.Set(float64(time.Now().Unix()))
 }
 
 func main() {
@@ -109,11 +98,7 @@ func main() {
 	}
 
 	// Metrics listener
-	go func() {
-		http.Handle("/metrics", promhttp.Handler())
-		log.Infof("Starting metrics exoprter on http://%s/metrics", metricsListen)
-		log.Fatal(http.ListenAndServe(metricsListen, nil))
-	}()
+	go metrics.Listen(metricsListen)
 
 	if version == "dev" {
 		log.Info("Dev mode enabled, updating once and exiting")

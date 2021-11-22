@@ -8,8 +8,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
-	"github.com/packetframe/api/internal/db"
-	"github.com/packetframe/api/internal/util"
+	"github.com/packetframe/api/internal/common/db"
+	"github.com/packetframe/api/internal/common/util"
 )
 
 // Database stores the global database for the API

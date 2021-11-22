@@ -6,8 +6,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/miekg/dns"
 
-	"github.com/packetframe/api/internal/db"
-	"github.com/packetframe/api/internal/util"
+	"github.com/packetframe/api/internal/common/db"
+	"github.com/packetframe/api/internal/common/util"
 )
 
 // Validation parameters

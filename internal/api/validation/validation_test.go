@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/packetframe/api/internal/db"
+	"github.com/packetframe/api/internal/common/db"
 )
 
 func TestValidate(t *testing.T) {

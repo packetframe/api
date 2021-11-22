@@ -6,9 +6,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/packetframe/api/internal/db"
-	"github.com/packetframe/api/internal/util"
-	"github.com/packetframe/api/internal/validation"
+	"github.com/packetframe/api/internal/api/validation"
+	"github.com/packetframe/api/internal/common/db"
+	"github.com/packetframe/api/internal/common/util"
 )
 
 // checkAdminUserAuth checks if a user is an administrator and returns a gofiber response or nil if user is an admin. If it returns true, the user is authorized.

@@ -7,7 +7,7 @@ import (
 	"github.com/lib/pq"
 	"gorm.io/gorm"
 
-	"github.com/packetframe/api/internal/auth"
+	"github.com/packetframe/api/internal/api/auth"
 )
 
 var (

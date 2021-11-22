@@ -9,8 +9,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/packetframe/api/internal/db"
-	"github.com/packetframe/api/internal/validation"
+	"github.com/packetframe/api/internal/api/validation"
+	"github.com/packetframe/api/internal/common/db"
 )
 
 func TestRoutesRecordAddListDelete(t *testing.T) {

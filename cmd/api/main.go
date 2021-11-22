@@ -9,9 +9,9 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/packetframe/api/internal/db"
-	"github.com/packetframe/api/internal/routes"
-	"github.com/packetframe/api/internal/validation"
+	"github.com/packetframe/api/internal/api/routes"
+	"github.com/packetframe/api/internal/api/validation"
+	"github.com/packetframe/api/internal/common/db"
 )
 
 // Linker flags

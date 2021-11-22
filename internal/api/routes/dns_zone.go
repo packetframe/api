@@ -7,9 +7,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/packetframe/api/internal/db"
-	"github.com/packetframe/api/internal/util"
-	"github.com/packetframe/api/internal/validation"
+	"github.com/packetframe/api/internal/api/validation"
+	"github.com/packetframe/api/internal/common/db"
+	"github.com/packetframe/api/internal/common/util"
 )
 
 var Suffixes []string

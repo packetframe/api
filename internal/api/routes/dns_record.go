@@ -5,8 +5,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/packetframe/api/internal/db"
-	"github.com/packetframe/api/internal/validation"
+	"github.com/packetframe/api/internal/api/validation"
+	"github.com/packetframe/api/internal/common/db"
 )
 
 // RecordAdd handles a POST request to add a DNS record
