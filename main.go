@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"time"
@@ -19,27 +18,31 @@ import (
 // Linker flags
 var version = "dev"
 
-var (
-	document    = flag.Bool("d", false, "Generate documentation instead of starting the API server")
-	listenAddr  = flag.String("l", ":8080", "API listen address")
-	postgresDSN = flag.String("p", "host=localhost user=api password=api dbname=api port=5432 sslmode=disable", "Postgres DSN")
-)
-
 func main() {
-	flag.Parse()
+	postgresDSN := os.Getenv("POSTGRES_DSN")
+	if postgresDSN == "" {
+		log.Info("Using default POSTGRES_DSN")
+		postgresDSN = "host=localhost user=api password=api dbname=api port=5432 sslmode=disable"
+	}
+
+	listenAddr := os.Getenv("LISTEN")
+	if listenAddr == "" {
+		log.Info("Using default LISTEN")
+		listenAddr = ":8080"
+	}
 
 	if version == "dev" {
 		log.SetLevel(log.DebugLevel)
 		log.Debugln("Running in dev mode")
 	}
 
-	if *document {
+	if os.Getenv("DOCUMENT") != "" {
 		fmt.Println(routes.Document())
 		os.Exit(0)
 	}
 
 	log.Println("Connecting to database")
-	database, err := db.Connect(*postgresDSN)
+	database, err := db.Connect(postgresDSN)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -80,6 +83,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Printf("Starting API on %s", *listenAddr)
-	log.Fatal(app.Listen(*listenAddr))
+	log.Printf("Starting API on %s", listenAddr)
+	log.Fatal(app.Listen(listenAddr))
 }
