@@ -19,17 +19,9 @@ import (
 var version = "dev"
 
 func main() {
-	postgresDSN := os.Getenv("POSTGRES_DSN")
-	if postgresDSN == "" {
-		log.Info("Using default POSTGRES_DSN")
-		postgresDSN = "host=localhost user=api password=api dbname=api port=5432 sslmode=disable"
-	}
-
-	listenAddr := os.Getenv("LISTEN")
-	if listenAddr == "" {
-		log.Info("Using default LISTEN")
-		listenAddr = ":8080"
-	}
+	dbHost := os.Getenv("DB_HOST")
+	log.Infof("DB host %s", dbHost)
+	postgresDSN := fmt.Sprintf("host=%s user=api password=api dbname=api port=5432 sslmode=disable", os.Getenv("DB_HOST"))
 
 	if version == "dev" {
 		log.SetLevel(log.DebugLevel)
@@ -83,6 +75,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	listenAddr := ":8080"
 	log.Printf("Starting API on %s", listenAddr)
 	log.Fatal(app.Listen(listenAddr))
 }
