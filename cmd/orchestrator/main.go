@@ -92,6 +92,10 @@ func main() {
 		log.Debugln("Running in dev mode")
 	}
 
+	startupDelay := 5 * time.Second
+	log.Printf("Waiting %+v before connecting to database...", startupDelay)
+	time.Sleep(startupDelay)
+
 	log.Println("Connecting to database")
 	var err error
 	database, err = db.Connect(postgresDSN)

@@ -21,7 +21,6 @@ var version = "dev"
 const (
 	suffixListUpdateInterval = 24 * time.Hour
 	metricsUpdateInterval    = 15 * time.Minute
-	startupDelay             = 5 * time.Second
 )
 
 var (
@@ -52,6 +51,7 @@ func main() {
 		os.Exit(0)
 	}
 
+	startupDelay := 5 * time.Second
 	log.Printf("Waiting %+v before connecting to database...", startupDelay)
 	time.Sleep(startupDelay)
 
