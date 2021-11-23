@@ -45,17 +45,16 @@ func update() {
 			log.Fatal(err)
 		}
 
+		// Serial
+		// Refresh, number of seconds after which secondary NSes should query the main to detect zone changes
+		// Retry, number of seconds after which secondary NSes should retry serial query from the main if it doesn't respond
+		// Expire, number of seconds after which secondary NSes should stop answering if main doesn't respond
+		// Negative Cache TTL
 		zoneFile := fmt.Sprintf(`// Packetframe zone file
-@ IN SOA ns1.packetframe.com. info.packetframe.com. (
-   %d       ; Serial
-   7200     ; Refresh, number of seconds after which secondary NSes should query the main to detect zone changes
-   3600     ; Retry, number of seconds after which secondary NSes should retry serial query from the main if it doesn't respond
-   1209600  ; Expire, number of seconds after which secondary NSes should stop answering if main doesn't respond
-   300 )    ; Negative Cache TTL
-
+@ IN SOA ns1.packetframe.com. info.packetframe.com. %d 7200 3600 1209600 300    
 @ 86400 IN NS ns1.packetframe.com.
 @ 86400 IN NS ns2.packetframe.com.
-`, uint64(time.Now().Unix()))
+`, uint64(time.Now().Unix())) // Serial is also the approx time the zone file was generated (in reality it's shortly after the records were retrieved)
 
 		for _, record := range records {
 			zoneFile += fmt.Sprintf("%s %d IN %s %s", record.Label, record.TTL, record.Type, record.Value)
