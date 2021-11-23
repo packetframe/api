@@ -52,6 +52,9 @@ func update() {
    3600     ; Retry, number of seconds after which secondary NSes should retry serial query from the main if it doesn't respond
    1209600  ; Expire, number of seconds after which secondary NSes should stop answering if main doesn't respond
    300 )    ; Negative Cache TTL
+
+@ 86400 IN NS ns1.packetframe.com.
+@ 86400 IN NS ns2.packetframe.com.
 `, uint64(time.Now().Unix()))
 
 		for _, record := range records {
