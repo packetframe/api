@@ -29,6 +29,11 @@ var (
 )
 
 func main() {
+	if os.Getenv("DOCUMENT") != "" {
+		fmt.Println(routes.Document())
+		os.Exit(0)
+	}
+
 	log.Infof("Starting Packetframe API (%s)", version)
 
 	if dbHost == "" {
@@ -44,16 +49,11 @@ func main() {
 	if version == "dev" {
 		log.SetLevel(log.DebugLevel)
 		log.Debugln("Running in dev mode")
+	} else {
+		startupDelay := 5 * time.Second
+		log.Printf("Waiting %+v before connecting to database...", startupDelay)
+		time.Sleep(startupDelay)
 	}
-
-	if os.Getenv("DOCUMENT") != "" {
-		fmt.Println(routes.Document())
-		os.Exit(0)
-	}
-
-	startupDelay := 5 * time.Second
-	log.Printf("Waiting %+v before connecting to database...", startupDelay)
-	time.Sleep(startupDelay)
 
 	log.Println("Connecting to database")
 	database, err := db.Connect(postgresDSN)

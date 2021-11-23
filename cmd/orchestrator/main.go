@@ -93,11 +93,11 @@ func main() {
 	if version == "dev" {
 		log.SetLevel(log.DebugLevel)
 		log.Debugln("Running in dev mode")
+	} else {
+		startupDelay := 5 * time.Second
+		log.Printf("Waiting %+v before connecting to database...", startupDelay)
+		time.Sleep(startupDelay)
 	}
-
-	startupDelay := 5 * time.Second
-	log.Printf("Waiting %+v before connecting to database...", startupDelay)
-	time.Sleep(startupDelay)
 
 	log.Println("Connecting to database")
 	var err error
