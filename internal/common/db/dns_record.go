@@ -1,8 +1,6 @@
 package db
 
 import (
-	"github.com/miekg/dns"
-	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -25,13 +23,6 @@ type Record struct {
 
 // RecordAdd adds a new record to a zone
 func RecordAdd(db *gorm.DB, record *Record) error {
-	zone, err := ZoneFindByID(db, record.ZoneID)
-	if err != nil {
-		return err
-	}
-	if strings.HasSuffix(record.Label, zone.Zone) {
-		record.Label = dns.Fqdn(record.Label)
-	}
 	return db.Create(record).Error
 }
 
