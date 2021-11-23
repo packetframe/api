@@ -1,6 +1,7 @@
 package db
 
 import (
+	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -30,15 +31,20 @@ func Connect(dsn string) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	// Create UUID extension
-	err = db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`).Error
-	if err != nil {
-		return nil, err
-	}
+	// Select a table to check if the database has been initialized
+	if err := db.Exec("SELECT * FROM users;").Error; err != nil {
+		// Create UUID extension
+		err = db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`).Error
+		if err != nil {
+			// This seems to be a race condition in postgres
+			// ref: https://stackoverflow.com/questions/63104126/create-extention-if-not-exists-doesnt-really-check-if-extention-does-not-exis
+			log.Warn(err)
+		}
 
-	// Run schema migrations
-	if err := migrate(db); err != nil {
-		return nil, err
+		// Run schema migrations
+		if err := migrate(db); err != nil {
+			return nil, err
+		}
 	}
 
 	return db, nil
