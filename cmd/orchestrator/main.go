@@ -8,6 +8,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
 	"github.com/packetframe/api/internal/common/db"
@@ -98,7 +99,7 @@ func main() {
 
 	log.Println("Connecting to database")
 	var err error
-	database, err = db.Connect(postgresDSN)
+	database, err = gorm.Open(postgres.Open(postgresDSN), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
