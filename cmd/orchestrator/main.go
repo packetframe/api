@@ -57,7 +57,7 @@ func update() {
 `, uint64(time.Now().Unix())) // Serial is also the approx time the zone file was generated (in reality it's shortly after the records were retrieved)
 
 		for _, record := range records {
-			zoneFile += fmt.Sprintf("%s %d IN %s %s", record.Label, record.TTL, record.Type, record.Value)
+			zoneFile += fmt.Sprintf("%s %d IN %s %s\n", record.Label, record.TTL, record.Type, record.Value)
 		}
 
 		// Write the zone file to disk
