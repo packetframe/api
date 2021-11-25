@@ -147,6 +147,7 @@ func ZoneFind(db *gorm.DB, zone string) (*Zone, error) {
 
 // ZoneDelete deletes a DNS zone
 func ZoneDelete(db *gorm.DB, zone string) (bool, error) {
+	db.Delete(&Record{}, "zone_id = ?", zone)
 	r := db.Delete(&Zone{}, "id = ?", zone)
 	return r.RowsAffected > 0, r.Error
 }
