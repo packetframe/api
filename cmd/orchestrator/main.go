@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -62,6 +63,27 @@ func update() {
 		// Write the zone file to disk
 		if err := os.WriteFile(path.Join(cacheDirectory, "db."+strings.TrimSuffix(zone.Zone, ".")), []byte(zoneFile), 0644); err != nil {
 			log.Fatal(err)
+		}
+	}
+
+	// Remove files that aren't referenced in the database
+	files, err := ioutil.ReadDir(cacheDirectory)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, f := range files {
+		found := false
+		for _, zone := range zones {
+			if "db."+strings.TrimSuffix(zone.Zone, ".") == f.Name() {
+				found = true
+				break
+			}
+		}
+		if !found {
+			log.Debugf("%s not found, removing", f.Name())
+			if err := os.Remove(path.Join(cacheDirectory, f.Name())); err != nil {
+				log.Warnf("removing %s: %s", f.Name(), err)
+			}
 		}
 	}
 
