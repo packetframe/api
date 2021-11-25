@@ -19,7 +19,7 @@ var apiVersion string
 
 // routes stores a map of route to handler
 var routes = []*route{
-	{Path: "/meta", Method: http.MethodGet, Handler: Meta, Description: "Get API metadata", InvalidJSONTest: false},
+	{Path: "/meta", Method: http.MethodGet, Handler: meta, Description: "Get API metadata", InvalidJSONTest: false},
 
 	// Authentication
 	{Path: "/user/login", Method: http.MethodPost, Handler: UserLogin, Description: "Log a user in", InvalidJSONTest: true},

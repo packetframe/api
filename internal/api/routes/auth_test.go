@@ -15,7 +15,8 @@ func TestRoutesAuthInvalidUserPass(t *testing.T) {
 	Database = nil
 
 	app := fiber.New()
-	Register(app)
+	Register(app, "dev")
+
 	err := validation.Register()
 	assert.Nil(t, err)
 
@@ -33,7 +34,7 @@ func TestRoutesUserSignupLoginDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	app := fiber.New()
-	Register(app)
+	Register(app, "dev")
 
 	err = validation.Register()
 	assert.Nil(t, err)

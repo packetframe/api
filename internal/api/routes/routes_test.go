@@ -56,7 +56,7 @@ func TestRoutes404(t *testing.T) {
 	Database, err = db.TestSetup()
 	assert.Nil(t, err)
 	app := fiber.New()
-	Register(app)
+	Register(app, "dev")
 	httpResp, _, err := testReq(app, http.MethodGet, "/non-existent-path", "", map[string]string{})
 	assert.NotNil(t, err)
 	assert.Equal(t, http.StatusNotFound, httpResp.StatusCode)
@@ -71,7 +71,7 @@ func TestRoutesInvalidJSON(t *testing.T) {
 	Database = nil
 
 	app := fiber.New()
-	Register(app)
+	Register(app, "dev")
 
 	content := "invalid json"
 	for _, route := range routes {
