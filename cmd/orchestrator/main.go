@@ -36,11 +36,6 @@ func update() {
 	log.Debugf("Found %d zones", len(zones))
 
 	for _, zone := range zones {
-		zone, err := db.ZoneFindByID(database, zone.ID)
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		records, err := db.RecordList(database, zone.ID)
 		if err != nil {
 			log.Fatal(err)
