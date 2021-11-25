@@ -50,8 +50,7 @@ func update() {
 		// Retry, number of seconds after which secondary NSes should retry serial query from the main if it doesn't respond
 		// Expire, number of seconds after which secondary NSes should stop answering if main doesn't respond
 		// Negative Cache TTL
-		zoneFile := fmt.Sprintf(`// Packetframe zone file
-@ IN SOA ns1.packetframe.com. info.packetframe.com. %d 7200 3600 1209600 300    
+		zoneFile := fmt.Sprintf(`@ IN SOA ns1.packetframe.com. info.packetframe.com. %d 7200 3600 1209600 300    
 @ 86400 IN NS ns1.packetframe.com.
 @ 86400 IN NS ns2.packetframe.com.
 `, uint64(time.Now().Unix())) // Serial is also the approx time the zone file was generated (in reality it's shortly after the records were retrieved)
