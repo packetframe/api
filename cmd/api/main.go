@@ -89,7 +89,7 @@ func main() {
 			AllowCredentials: true,
 		}))
 	}
-	routes.Register(app)
+	routes.Register(app, version)
 
 	if err := validation.Register(); err != nil {
 		log.Fatal(err)
