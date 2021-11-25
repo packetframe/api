@@ -20,7 +20,7 @@ func TestRoutesAdminNonAdminUser(t *testing.T) {
 	assert.Nil(t, err)
 
 	app := fiber.New()
-	Register(app, "dev")
+	Register(app, map[string]interface{}{"version": "dev"})
 
 	err = validation.Register()
 	assert.Nil(t, err)
@@ -102,7 +102,7 @@ func TestRoutesAdminUserList(t *testing.T) {
 	assert.Nil(t, err)
 
 	app := fiber.New()
-	Register(app, "dev")
+	Register(app, map[string]interface{}{"version": "dev"})
 
 	err = validation.Register()
 	assert.Nil(t, err)
@@ -183,7 +183,7 @@ func TestRoutesAdminGroupAddRemove(t *testing.T) {
 	assert.Nil(t, err)
 
 	app := fiber.New()
-	Register(app, "dev")
+	Register(app, map[string]interface{}{"version": "dev"})
 
 	err = validation.Register()
 	assert.Nil(t, err)

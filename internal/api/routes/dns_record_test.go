@@ -21,7 +21,7 @@ func TestRoutesRecordAddListDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	app := fiber.New()
-	Register(app, "dev")
+	Register(app, map[string]interface{}{"version": "dev"})
 
 	// Sign up user1@example.com
 	content := `{"email":"user1@example.com", "password":"example-users-password'"}`

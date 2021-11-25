@@ -21,7 +21,7 @@ func TestRoutesZoneAddListDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	app := fiber.New()
-	Register(app, "dev")
+	Register(app, map[string]interface{}{"version": "dev"})
 
 	// Populate suffixes slice. This normally happens in a go routine, but this is required for testing
 	Suffixes, err = db.SuffixList()
@@ -112,7 +112,7 @@ func TestRoutesZoneUserAddDelete(t *testing.T) {
 	assert.Nil(t, err)
 
 	app := fiber.New()
-	Register(app, "dev")
+	Register(app, map[string]interface{}{"version": "dev"})
 
 	// Populate suffixes slice. This normally happens in a go routine, but this is required for testing
 	Suffixes, err = db.SuffixList()

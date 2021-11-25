@@ -16,7 +16,11 @@ import (
 )
 
 // Linker flags
-var version = "dev"
+var (
+	version = "dev"
+	commit  = "dev"
+	date    = "dev"
+)
 
 const (
 	suffixListUpdateInterval = 24 * time.Hour
@@ -89,7 +93,7 @@ func main() {
 			AllowCredentials: true,
 		}))
 	}
-	routes.Register(app, version)
+	routes.Register(app, map[string]interface{}{"version": version, "commit": commit, "date": date})
 
 	if err := validation.Register(); err != nil {
 		log.Fatal(err)

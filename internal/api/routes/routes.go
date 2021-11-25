@@ -15,7 +15,7 @@ import (
 // Database stores the global database for the API
 var Database *gorm.DB
 
-var apiVersion string
+var buildMetadata map[string]interface{}
 
 // routes stores a map of route to handler
 var routes = []*route{
@@ -60,8 +60,9 @@ type route struct {
 }
 
 // Register registers route handlers
-func Register(app *fiber.App, version string) {
-	apiVersion = version
+func Register(app *fiber.App, meta map[string]interface{}) {
+	buildMetadata = meta
+
 	for _, route := range routes {
 		switch route.Method {
 		case http.MethodGet:
@@ -142,7 +143,5 @@ func checkUserAuthorizationByID(c *fiber.Ctx, zoneId string) (bool, error) {
 
 // meta handles a GET request to get API metadata
 func meta(c *fiber.Ctx) error {
-	return response(c, http.StatusOK, "Metadata retrieved successfully", map[string]interface{}{
-		"version": apiVersion,
-	})
+	return response(c, http.StatusOK, "Metadata retrieved successfully", buildMetadata)
 }
