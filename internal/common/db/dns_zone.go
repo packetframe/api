@@ -25,6 +25,7 @@ var (
 type Zone struct {
 	ID         string         `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()" json:"id"`
 	Zone       string         `gorm:"uniqueIndex" json:"zone" validate:"required,fqdn"`
+	Serial     uint64         `json:"-"`
 	DNSSEC     DNSSECKey      `gorm:"embedded" json:"-"`
 	Users      pq.StringArray `gorm:"type:text[]" json:"users"`
 	UserEmails pq.StringArray `gorm:"type:text[]" json:"user_emails"`
@@ -98,6 +99,16 @@ func NewKey(zone string) (*DNSSECKey, error) {
 	}, nil // nil error
 }
 
+// ZoneSetSerial sets a zone's SOA serial to the current UNIX time
+func ZoneSetSerial(db *gorm.DB, uuid string) error {
+	var zone Zone
+	if err := db.First(&zone, "id = ?", uuid).Error; err != nil {
+		return err
+	}
+	zone.Serial = uint64(time.Now().Unix())
+	return db.Save(&zone).Error
+}
+
 // ZoneAdd adds a DNS zone by zone name and user email
 func ZoneAdd(db *gorm.DB, zone string, user string) error {
 	u, err := UserFindByEmail(db, user)
@@ -116,6 +127,7 @@ func ZoneAdd(db *gorm.DB, zone string, user string) error {
 	return db.Create(&Zone{
 		Zone:   zone,
 		DNSSEC: *dnssecKey,
+		Serial: uint64(time.Now().Unix()),
 		Users:  []string{u.ID},
 	}).Error
 }

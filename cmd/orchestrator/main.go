@@ -54,7 +54,7 @@ func update() {
 		zoneFile := fmt.Sprintf(`@ IN SOA ns1.packetframe.com. info.packetframe.com. %d 7200 3600 1209600 300
 @ 86400 IN NS ns1.packetframe.com.
 @ 86400 IN NS ns2.packetframe.com.
-`, uint64(time.Now().Unix())) // Serial is also the approx time the zone file was generated (in reality it's shortly after the records were retrieved)
+`, zone.Serial)
 
 		for _, record := range records {
 			zoneFile += fmt.Sprintf("%s %d IN %s %s\n", record.Label, record.TTL, record.Type, record.Value)

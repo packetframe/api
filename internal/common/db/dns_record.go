@@ -23,6 +23,10 @@ type Record struct {
 
 // RecordAdd adds a new record to a zone
 func RecordAdd(db *gorm.DB, record *Record) error {
+	if err := ZoneSetSerial(db, record.ZoneID); err != nil {
+		return err
+	}
+
 	return db.Create(record).Error
 }
 
@@ -34,8 +38,19 @@ func RecordList(db *gorm.DB, zone string) ([]Record, error) {
 }
 
 // RecordDelete deletes a DNS record from a zone
-func RecordDelete(db *gorm.DB, record string) (bool, error) {
-	req := db.Where("id = ?", record).Delete(&Record{})
+func RecordDelete(db *gorm.DB, recordID string) (bool, error) {
+	// Find the record to get the zone ID
+	var r Record
+	if err := db.Find(&r, "id = ?", recordID).Error; err != nil {
+		return false, err
+	}
+
+	// Bump the zone serial
+	if err := ZoneSetSerial(db, r.ZoneID); err != nil {
+		return false, err
+	}
+
+	req := db.Where("id = ?", recordID).Delete(&Record{})
 	return req.RowsAffected > 0, req.Error
 }
 
@@ -43,6 +58,10 @@ func RecordDelete(db *gorm.DB, record string) (bool, error) {
 func RecordUpdate(db *gorm.DB, updates *Record) error {
 	var currentRecord Record
 	if err := db.Find(&currentRecord, "id = ?", updates.ID).Error; err != nil {
+		return err
+	}
+
+	if err := ZoneSetSerial(db, currentRecord.ZoneID); err != nil {
 		return err
 	}
 
