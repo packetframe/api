@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	MetricLastUpdated = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "packetframe_orchestrator_last_update",
-		Help: "Timestamp of the end of the last orchestrator update run",
+	MetricQueueLength = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "packetframe_orchestrator_queue_length",
+		Help: "Number of elements in the orchestrator operation queue",
 	})
 )
 

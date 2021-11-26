@@ -3,6 +3,7 @@ module github.com/packetframe/api
 go 1.17
 
 require (
+	github.com/caarlos0/env/v6 v6.7.2
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/gofiber/fiber/v2 v2.21.0
 	github.com/lib/pq v1.10.4
@@ -11,6 +12,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa
+	gopkg.in/yaml.v2 v2.3.0
 	gorm.io/driver/postgres v1.2.1
 	gorm.io/gorm v1.22.2
 )
