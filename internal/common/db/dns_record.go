@@ -1,9 +1,13 @@
 package db
 
 import (
+	"fmt"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+
+	"github.com/packetframe/api/internal/api/rpc"
 )
 
 // Record stores a DNS record
@@ -27,7 +31,13 @@ func RecordAdd(db *gorm.DB, record *Record) error {
 		return err
 	}
 
-	return db.Create(record).Error
+	tx := db.Create(record)
+	if tx.Error == nil {
+		if err := rpc.Call("update_zone", map[string]string{"id": record.ZoneID}); err != nil {
+			log.Warnf("RPC: %v", err)
+		}
+	}
+	return tx.Error
 }
 
 // RecordList returns a list of DNS records for a zone
@@ -51,6 +61,12 @@ func RecordDelete(db *gorm.DB, recordID string) (bool, error) {
 	}
 
 	req := db.Where("id = ?", recordID).Delete(&Record{})
+	if req.Error == nil {
+		if err := rpc.Call("update_zone", map[string]string{"id": r.ZoneID}); err != nil {
+			log.Warnf("RPC: %v", err)
+		}
+	}
+
 	return req.RowsAffected > 0, req.Error
 }
 
@@ -65,5 +81,14 @@ func RecordUpdate(db *gorm.DB, updates *Record) error {
 		return err
 	}
 
-	return db.Model(&currentRecord).Updates(updates).Error
+	tx := db.Model(&currentRecord).Updates(updates)
+	if tx.Error == nil {
+		// TODO: Remove this
+		fmt.Printf("Record update: here's the zone ID: %s", currentRecord.Zone.ID)
+		if err := rpc.Call("update_zone", map[string]string{"id": currentRecord.Zone.ID}); err != nil {
+			log.Warnf("RPC: %v", err)
+		}
+	}
+
+	return tx.Error
 }

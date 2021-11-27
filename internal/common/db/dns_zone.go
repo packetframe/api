@@ -11,7 +11,10 @@ import (
 
 	"github.com/lib/pq"
 	"github.com/miekg/dns"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+
+	"github.com/packetframe/api/internal/api/rpc"
 )
 
 var (
@@ -124,12 +127,29 @@ func ZoneAdd(db *gorm.DB, zone string, user string) error {
 	if err != nil {
 		return err
 	}
-	return db.Create(&Zone{
+
+	tx := db.Create(&Zone{
 		Zone:   zone,
 		DNSSEC: *dnssecKey,
 		Serial: uint64(time.Now().Unix()),
 		Users:  []string{u.ID},
-	}).Error
+	})
+
+	if tx.Error == nil {
+		z, err := ZoneFind(db, zone)
+		if err != nil {
+			log.Fatalf("Unable to find newly created zone %s", zone)
+		} else {
+			if err := rpc.Call("update_zone", map[string]string{"id": z.ID}); err != nil {
+				log.Warnf("RPC: %v", err)
+			}
+			if err := rpc.Call("update_corefile", nil); err != nil {
+				log.Warnf("RPC: %v", err)
+			}
+		}
+	}
+
+	return tx.Error
 }
 
 // ZoneList gets a list of all zones
@@ -161,6 +181,16 @@ func ZoneFind(db *gorm.DB, zone string) (*Zone, error) {
 func ZoneDelete(db *gorm.DB, zone string) (bool, error) {
 	db.Delete(&Record{}, "zone_id = ?", zone)
 	r := db.Delete(&Zone{}, "id = ?", zone)
+
+	if r.Error == nil {
+		if err := rpc.Call("purge_zones", nil); err != nil {
+			log.Warnf("RPC: %v", err)
+		}
+		if err := rpc.Call("update_corefile", nil); err != nil {
+			log.Warnf("RPC: %v", err)
+		}
+	}
+
 	return r.RowsAffected > 0, r.Error
 }
 
