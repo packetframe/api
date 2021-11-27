@@ -205,7 +205,7 @@ func buildDeployCorefile() (bool, error) {
 	for _, zone := range zones {
 		coreFile += fmt.Sprintf(`%s {
   import pf_default
-  file /opt/packetframe/dns/db.%s
+  file /opt/packetframe/dns/zones/db.%s
 }
 `, strings.TrimSuffix(zone.Zone, "."), strings.TrimSuffix(zone.Zone, "."))
 	}
