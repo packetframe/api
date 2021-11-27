@@ -24,6 +24,7 @@ func Call(path string, args map[string]string) error {
 		for k, v := range args {
 			q.Set(k, v)
 		}
+		u.RawQuery = q.Encode()
 	}
 
 	_, err = http.Get(u.String())
