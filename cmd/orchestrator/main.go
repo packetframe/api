@@ -33,6 +33,7 @@ const (
 const (
 	opZoneUpdate = iota
 	opCorefileUpdate
+	opZonePurge
 )
 
 type queueMessage struct {
@@ -98,6 +99,12 @@ func purgeZoneFiles() error {
 				break
 			}
 		}
+
+		// Keep Corefiles
+		if f.Name() == "Corefile" || f.Name() == "Corefile.zones" {
+			found = true
+		}
+
 		if !found {
 			log.Debugf("%s not found, removing", f.Name())
 			if err := os.Remove(path.Join(conf.CacheDirectory, f.Name())); err != nil {
@@ -181,7 +188,7 @@ func buildDeployCorefile() (bool, error) {
 	for _, zone := range zones {
 		coreFile += fmt.Sprintf(`%s {
   import pf_default
-  file /opt/packetframe/dns/zones/db.%s
+  file /opt/packetframe/dns/db.%s
 }
 `, strings.TrimSuffix(zone.Zone, "."), strings.TrimSuffix(zone.Zone, "."))
 	}
@@ -287,6 +294,24 @@ func main() {
 		}
 	})
 
+	http.HandleFunc("/purge_zones", func(w http.ResponseWriter, r *http.Request) {
+		duplicateMessageExists := false
+		for _, message := range queue {
+			if message.operation == opZonePurge && !message.acked {
+				duplicateMessageExists = true
+			}
+		}
+
+		if !duplicateMessageExists {
+			log.Debug("Adding zone purge message")
+			queue = append(queue, queueMessage{
+				operation: opZonePurge,
+				acked:     false,
+				created:   time.Now(),
+			})
+		}
+	})
+
 	// Metrics listener
 	go metrics.Listen(conf.MetricsListen)
 
@@ -332,7 +357,6 @@ func main() {
 					}
 				case opCorefileUpdate:
 					log.Debugf("Updating Corefile")
-
 					ok, err := buildDeployCorefile()
 					if err != nil {
 						log.Warn(err)
@@ -340,6 +364,14 @@ func main() {
 
 					// TODO: This might break the for loop
 					if ok && err == nil {
+						queue = queue[1:]
+					}
+				case opZonePurge:
+					log.Debugf("Purging zones")
+					if err := purgeZoneFiles(); err != nil {
+						log.Warn(err)
+					} else {
+						// TODO: This might break the for loop
 						queue = queue[1:]
 					}
 				default:
