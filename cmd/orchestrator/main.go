@@ -28,6 +28,7 @@ const (
 	startupDelay    = 5 * time.Second
 	updateInterval  = 2 * time.Second
 	messageLifespan = 30 * time.Minute // Duration after which a queue message will be discarded
+	sshOpts         = "-o StrictHostKeyChecking=no"
 )
 
 const (
@@ -162,7 +163,7 @@ func deployZoneFile(zoneId string) (bool, error) {
 			"--partial",
 			"--archive",
 			"--compress",
-			"-e", fmt.Sprintf("ssh -p %d -i %s", conf.SSHPort, conf.SSHKeyFile),
+			"-e", fmt.Sprintf("ssh %s -p %d -i %s", sshOpts, conf.SSHPort, conf.SSHKeyFile),
 			path.Join(conf.CacheDirectory, "db."+strings.TrimSuffix(zone.Zone, ".")),
 			"root@"+ip+":/opt/packetframe/dns/zones/")
 		cmd.Stdout = os.Stdout
@@ -208,7 +209,7 @@ func buildDeployCorefile() (bool, error) {
 			"--partial",
 			"--archive",
 			"--compress",
-			"-e", fmt.Sprintf("ssh -p %d -i %s", conf.SSHPort, conf.SSHKeyFile),
+			"-e", fmt.Sprintf("ssh %s -p %d -i %s", sshOpts, conf.SSHPort, conf.SSHKeyFile),
 			path.Join(conf.CacheDirectory, "Corefile.zones"),
 			"root@"+ip+":/opt/packetframe/dns/Corefile.zones")
 		cmd.Stdout = os.Stdout
