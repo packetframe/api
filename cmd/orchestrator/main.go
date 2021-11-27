@@ -16,7 +16,6 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/packetframe/api/internal/common/db"
-	"github.com/packetframe/api/internal/common/util"
 	"github.com/packetframe/api/internal/orchestrator/metrics"
 )
 
@@ -26,14 +25,26 @@ import (
 var version = "dev"
 
 const (
-	startupDelay   = 5 * time.Second
-	updateInterval = 2 * time.Second
+	startupDelay    = 5 * time.Second
+	updateInterval  = 2 * time.Second
+	messageLifespan = 30 * time.Minute // Duration after which a queue message will be discarded
 )
+
+const (
+	opZoneUpdate = iota
+)
+
+type queueMessage struct {
+	operation int
+	arg       string
+	acked     bool
+	created   time.Time
+}
 
 var (
 	database *gorm.DB
 	edges    map[string]string
-	queue    []string
+	queue    []queueMessage
 )
 
 type config struct {
@@ -191,9 +202,22 @@ func main() {
 	}
 
 	http.HandleFunc("/update_zone", func(w http.ResponseWriter, r *http.Request) {
-		elem := "zone_update/" + r.URL.Query().Get("id")
-		if !util.StrSliceContains(queue, elem) {
-			queue = append(queue, elem)
+		zoneId := r.URL.Query().Get("id")
+
+		duplicateMessageExists := false
+		for _, message := range queue {
+			if message.operation == opZoneUpdate && message.arg == zoneId && !message.acked {
+				duplicateMessageExists = true
+			}
+		}
+
+		if !duplicateMessageExists {
+			queue = append(queue, queueMessage{
+				operation: opZoneUpdate,
+				arg:       zoneId,
+				acked:     false,
+				created:   time.Now(),
+			})
 		}
 	})
 
@@ -207,16 +231,23 @@ func main() {
 		for range zoneFileUpdateTicker.C {
 			log.Debug("Iterating over queue")
 			for _, message := range queue {
-				if strings.HasPrefix(message, "zone_update") {
-					zoneId := strings.Split(message, "/")[1]
-					log.Debugf("Updating zone %s", zoneId)
+				message.acked = true
+
+				// Remove messages older than messageLifespan
+				if message.created.Before(time.Now().Add(messageLifespan)) {
+					queue = queue[1:]
+					continue
+				}
+
+				if message.operation == opZoneUpdate {
+					log.Debugf("Updating zone %s", message.arg)
 
 					transferOk := true
-					if err := buildZoneFile(zoneId); err != nil {
+					if err := buildZoneFile(message.arg); err != nil {
 						transferOk = false
 						log.Warn(err)
 					}
-					ok, err := deployZoneFile(zoneId)
+					ok, err := deployZoneFile(message.arg)
 					if err != nil {
 						log.Warn(err)
 					}
@@ -227,6 +258,9 @@ func main() {
 					// TODO: This might break the for loop
 					if transferOk {
 						queue = queue[1:]
+					} else {
+						// Release the message to be retried
+						message.acked = false
 					}
 				}
 			}
