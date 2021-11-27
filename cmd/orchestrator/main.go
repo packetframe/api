@@ -32,6 +32,7 @@ const (
 
 const (
 	opZoneUpdate = iota
+	opCorefileUpdate
 )
 
 type queueMessage struct {
@@ -138,7 +139,7 @@ func buildZoneFile(zoneID string) error {
 	return os.WriteFile(path.Join(conf.CacheDirectory, "db."+strings.TrimSuffix(zone.Zone, ".")), []byte(zoneFile), 0644)
 }
 
-// deployZoneFile copies a zone file to all edge nodes and returns a boolean if all edge nodes received the transfer correctly
+// deployZoneFile copies a zone file to all edge nodes and returns if all edge nodes received the transfer correctly
 func deployZoneFile(zoneId string) (bool, error) {
 	zone, err := db.ZoneFindByID(database, zoneId)
 	if err != nil {
@@ -166,6 +167,53 @@ func deployZoneFile(zoneId string) (bool, error) {
 			log.Warnf("zone deploy to %s (%s): %v", host, ip, err)
 		}
 	}
+	return transferOk, nil
+}
+
+// buildDeployCorefile builds and deploys a new Corefile and returns if all edge nodes received the transfer correctly
+func buildDeployCorefile() (bool, error) {
+	zones, err := db.ZoneList(database)
+	if err != nil {
+		return false, err
+	}
+
+	coreFile := fmt.Sprintf("# Corefile.zones generated at %v\n", time.Now().UTC())
+	for _, zone := range zones {
+		coreFile += fmt.Sprintf(`%s {
+  import pf_default
+  file /opt/packetframe/dns/zones/db.%s
+}
+`, strings.TrimSuffix(zone.Zone, "."), strings.TrimSuffix(zone.Zone, "."))
+	}
+
+	// Write the Corefile to disk
+	if err := os.WriteFile(path.Join(conf.CacheDirectory, "Corefile.zones"), []byte(coreFile), 0644); err != nil {
+		return false, err
+	}
+	//return true, nil
+
+	transferOk := true
+	for host, ip := range edges {
+		log.Infof("Attempting deploy zone to %s (%s)", host, ip)
+		cmd := exec.Command("rsync",
+			"--delete",
+			"--progress",
+			"--partial",
+			"--archive",
+			"--compress",
+			"-e", fmt.Sprintf("ssh -J vpn.fmt2 -p %d -i %s", conf.SSHPort, conf.SSHKeyFile),
+			path.Join(conf.CacheDirectory, "Corefile.zones"),
+			"root@"+ip+":/opt/packetframe/dns/Corefile.zones")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		log.Debugf("Running %s", cmd.String())
+		if err := cmd.Run(); err != nil {
+			transferOk = false
+			log.Warnf("Corefile.zones deploy to %s (%s): %v", host, ip, err)
+		}
+	}
+
 	return transferOk, nil
 }
 
@@ -221,6 +269,24 @@ func main() {
 		}
 	})
 
+	http.HandleFunc("/update_corefile", func(w http.ResponseWriter, r *http.Request) {
+		duplicateMessageExists := false
+		for _, message := range queue {
+			if message.operation == opCorefileUpdate && !message.acked {
+				duplicateMessageExists = true
+			}
+		}
+
+		if !duplicateMessageExists {
+			log.Debug("Adding corefile update message")
+			queue = append(queue, queueMessage{
+				operation: opCorefileUpdate,
+				acked:     false,
+				created:   time.Now(),
+			})
+		}
+	})
+
 	// Metrics listener
 	go metrics.Listen(conf.MetricsListen)
 
@@ -233,13 +299,15 @@ func main() {
 			for _, message := range queue {
 				message.acked = true
 
-				// Remove messages older than messageLifespan
-				if message.created.Before(time.Now().Add(messageLifespan)) {
+				// Remove messages created more than messageLifespan ago
+				if message.created.After(time.Now().Add(messageLifespan)) {
+					log.Debug("Message created after")
 					queue = queue[1:]
 					continue
 				}
 
-				if message.operation == opZoneUpdate {
+				switch message.operation {
+				case opZoneUpdate:
 					log.Debugf("Updating zone %s", message.arg)
 
 					transferOk := true
@@ -262,6 +330,20 @@ func main() {
 						// Release the message to be retried
 						message.acked = false
 					}
+				case opCorefileUpdate:
+					log.Debugf("Updating Corefile")
+
+					ok, err := buildDeployCorefile()
+					if err != nil {
+						log.Warn(err)
+					}
+
+					// TODO: This might break the for loop
+					if ok && err == nil {
+						queue = queue[1:]
+					}
+				default:
+					log.Warnf("Queue message opcode %d not found", message.operation)
 				}
 			}
 			metrics.MetricQueueLength.Set(float64(len(queue)))
