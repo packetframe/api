@@ -326,7 +326,7 @@ func main() {
 
 				// Remove messages created more than messageLifespan ago
 				if message.created.After(time.Now().Add(messageLifespan)) {
-					log.Debug("Message created after %s, skipping. opcode %d, arg %s", messageLifespan, message.operation, message.arg)
+					log.Debugf("Message created after %s, skipping. opcode %d, arg %s", messageLifespan, message.operation, message.arg)
 					queue = queue[1:]
 					continue
 				}
