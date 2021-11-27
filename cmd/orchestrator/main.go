@@ -130,6 +130,8 @@ func purgeZoneFiles() (bool, error) {
 			log.Warnf("all zones deploy to %s (%s): %v", host, ip, err)
 		}
 	}
+
+	log.Infoln("Finished purging zone files")
 	return transferOk, nil
 }
 
@@ -172,7 +174,7 @@ func deployZoneFile(zoneId string) (bool, error) {
 
 	transferOk := true
 	for host, ip := range edges {
-		log.Infof("Attempting deploy zone to %s (%s)", host, ip)
+		log.Infof("Attempting deploy %s to %s (%s)", zone.Zone, host, ip)
 		cmd := exec.Command("rsync",
 			"--delete",
 			"--progress",
@@ -191,6 +193,8 @@ func deployZoneFile(zoneId string) (bool, error) {
 			log.Warnf("zone deploy to %s (%s): %v", host, ip, err)
 		}
 	}
+	log.Infof("Finished deploying zone file for %s", zone.Zone)
+
 	return transferOk, nil
 }
 
@@ -214,11 +218,10 @@ func buildDeployCorefile() (bool, error) {
 	if err := os.WriteFile(path.Join(conf.CacheDirectory, "Corefile.zones"), []byte(coreFile), 0644); err != nil {
 		return false, err
 	}
-	//return true, nil
 
 	transferOk := true
 	for host, ip := range edges {
-		log.Infof("Attempting deploy zone to %s (%s)", host, ip)
+		log.Infof("Attempting deploy Corefile.zones to %s (%s)", host, ip)
 		cmd := exec.Command("rsync",
 			"--delete",
 			"--progress",
@@ -237,6 +240,7 @@ func buildDeployCorefile() (bool, error) {
 			log.Warnf("Corefile.zones deploy to %s (%s): %v", host, ip, err)
 		}
 	}
+	log.Infoln("Finished deploying Corefile.zones")
 
 	return transferOk, nil
 }
