@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -83,9 +82,7 @@ func RecordUpdate(db *gorm.DB, updates *Record) error {
 
 	tx := db.Model(&currentRecord).Updates(updates)
 	if tx.Error == nil {
-		// TODO: Remove this
-		fmt.Printf("Record update: here's the zone ID: %s", currentRecord.Zone.ID)
-		if err := rpc.Call("update_zone", map[string]string{"id": currentRecord.Zone.ID}); err != nil {
+		if err := rpc.Call("update_zone", map[string]string{"id": currentRecord.ZoneID}); err != nil {
 			log.Warnf("RPC: %v", err)
 		}
 	}
