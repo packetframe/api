@@ -365,6 +365,8 @@ func main() {
 				case opZoneUpdate:
 					if message.arg == "" {
 						log.Warn("Got zone update with empty zone arg, skipping")
+						// TODO: This might break the for loop
+						queue = queue[1:]
 						continue
 					}
 
