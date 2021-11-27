@@ -47,7 +47,7 @@ type queueMessage struct {
 var (
 	database *gorm.DB
 	edges    map[string]string
-	queue    []queueMessage
+	queue    []*queueMessage
 )
 
 type config struct {
@@ -288,7 +288,7 @@ func main() {
 		}
 
 		if !duplicateMessageExists {
-			queue = append(queue, queueMessage{
+			queue = append(queue, &queueMessage{
 				operation: opZoneUpdate,
 				arg:       zoneId,
 				acked:     false,
@@ -307,7 +307,7 @@ func main() {
 
 		if !duplicateMessageExists {
 			log.Debug("Adding corefile update message")
-			queue = append(queue, queueMessage{
+			queue = append(queue, &queueMessage{
 				operation: opCorefileUpdate,
 				acked:     false,
 				created:   time.Now(),
@@ -325,7 +325,7 @@ func main() {
 
 		if !duplicateMessageExists {
 			log.Debug("Adding zone purge message")
-			queue = append(queue, queueMessage{
+			queue = append(queue, &queueMessage{
 				operation: opZonePurge,
 				acked:     false,
 				created:   time.Now(),
@@ -334,7 +334,7 @@ func main() {
 	})
 
 	http.HandleFunc("/clear_queue", func(w http.ResponseWriter, r *http.Request) {
-		queue = []queueMessage{}
+		queue = []*queueMessage{}
 		fmt.Fprint(w, "Queue cleared")
 	})
 
