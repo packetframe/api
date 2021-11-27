@@ -79,18 +79,18 @@ func parseEdgeConfig() (map[string]string, error) {
 	return config.Nodes, nil
 }
 
-// purgeZoneFiles removes all zone files on disk that aren't referenced in the database
-func purgeZoneFiles() error {
+// purgeZoneFiles removes all zone files on disk that aren't referenced in the database and copies the entire zones directory to all nodes
+func purgeZoneFiles() (bool, error) {
 	zones, err := db.ZoneList(database)
 	if err != nil {
-		return err
+		return false, err
 	}
 	log.Debugf("Found %d zones", len(zones))
 
 	// Remove files that aren't referenced in the database
-	files, err := os.ReadDir(conf.CacheDirectory)
+	files, err := os.ReadDir(path.Join(conf.CacheDirectory, "zones"))
 	if err != nil {
-		return err
+		return false, err
 	}
 	for _, f := range files {
 		found := false
@@ -101,20 +101,36 @@ func purgeZoneFiles() error {
 			}
 		}
 
-		// Keep Corefiles
-		if f.Name() == "Corefile" || f.Name() == "Corefile.zones" {
-			found = true
-		}
-
 		if !found {
 			log.Debugf("%s not found, removing", f.Name())
-			if err := os.Remove(path.Join(conf.CacheDirectory, f.Name())); err != nil {
+			if err := os.Remove(path.Join(conf.CacheDirectory, "zones", f.Name())); err != nil {
 				log.Warnf("removing %s: %s", f.Name(), err)
 			}
 		}
 	}
 
-	return nil
+	transferOk := true
+	for host, ip := range edges {
+		log.Infof("Attempting deploy all zones to %s (%s)", host, ip)
+		cmd := exec.Command("rsync",
+			"--delete",
+			"--progress",
+			"--partial",
+			"--archive",
+			"--compress",
+			"-e", fmt.Sprintf("ssh %s -p %d -i %s", sshOpts, conf.SSHPort, conf.SSHKeyFile),
+			path.Join(conf.CacheDirectory, "zones/"),
+			"root@"+ip+":/opt/packetframe/dns/")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		log.Debugf("Running %s", cmd.String())
+		if err := cmd.Run(); err != nil {
+			transferOk = false
+			log.Warnf("all zones deploy to %s (%s): %v", host, ip, err)
+		}
+	}
+	return transferOk, nil
 }
 
 // buildZoneFile writes a zone file to disk by zone ID
@@ -144,7 +160,7 @@ func buildZoneFile(zoneID string) error {
 	}
 
 	// Write the zone file to disk
-	return os.WriteFile(path.Join(conf.CacheDirectory, "db."+strings.TrimSuffix(zone.Zone, ".")), []byte(zoneFile), 0644)
+	return os.WriteFile(path.Join(conf.CacheDirectory, "zones/db."+strings.TrimSuffix(zone.Zone, ".")), []byte(zoneFile), 0644)
 }
 
 // deployZoneFile copies a zone file to all edge nodes and returns if all edge nodes received the transfer correctly
@@ -164,7 +180,7 @@ func deployZoneFile(zoneId string) (bool, error) {
 			"--archive",
 			"--compress",
 			"-e", fmt.Sprintf("ssh %s -p %d -i %s", sshOpts, conf.SSHPort, conf.SSHKeyFile),
-			path.Join(conf.CacheDirectory, "db."+strings.TrimSuffix(zone.Zone, ".")),
+			path.Join(conf.CacheDirectory, "zones/db."+strings.TrimSuffix(zone.Zone, ".")),
 			"root@"+ip+":/opt/packetframe/dns/zones/")
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
@@ -313,6 +329,15 @@ func main() {
 		}
 	})
 
+	http.HandleFunc("/clear_queue", func(w http.ResponseWriter, r *http.Request) {
+		queue = []queueMessage{}
+		fmt.Fprint(w, "Queue cleared")
+	})
+
+	http.HandleFunc("/queue_content", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Queue content: %+v", queue)
+	})
+
 	// Metrics listener
 	go metrics.Listen(conf.MetricsListen)
 
@@ -334,6 +359,11 @@ func main() {
 
 				switch message.operation {
 				case opZoneUpdate:
+					if message.arg == "" {
+						log.Warn("Got zone update with empty zone arg, skipping")
+						continue
+					}
+
 					log.Infof("Updating zone %s", message.arg)
 
 					transferOk := true
@@ -369,10 +399,13 @@ func main() {
 					}
 				case opZonePurge:
 					log.Infof("Purging zones")
-					if err := purgeZoneFiles(); err != nil {
+					ok, err := purgeZoneFiles()
+					if err != nil {
 						log.Warn(err)
-					} else {
-						// TODO: This might break the for loop
+					}
+
+					// TODO: This might break the for loop
+					if ok && err == nil {
 						queue = queue[1:]
 					}
 				default:
