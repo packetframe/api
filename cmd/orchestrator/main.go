@@ -162,7 +162,7 @@ func deployZoneFile(zoneId string) (bool, error) {
 			"--partial",
 			"--archive",
 			"--compress",
-			"-e", fmt.Sprintf("ssh -J vpn.fmt2 -p %d -i %s", conf.SSHPort, conf.SSHKeyFile),
+			"-e", fmt.Sprintf("ssh -p %d -i %s", conf.SSHPort, conf.SSHKeyFile),
 			path.Join(conf.CacheDirectory, "db."+strings.TrimSuffix(zone.Zone, ".")),
 			"root@"+ip+":/opt/packetframe/dns/zones/")
 		cmd.Stdout = os.Stdout
@@ -208,7 +208,7 @@ func buildDeployCorefile() (bool, error) {
 			"--partial",
 			"--archive",
 			"--compress",
-			"-e", fmt.Sprintf("ssh -J vpn.fmt2 -p %d -i %s", conf.SSHPort, conf.SSHKeyFile),
+			"-e", fmt.Sprintf("ssh -p %d -i %s", conf.SSHPort, conf.SSHKeyFile),
 			path.Join(conf.CacheDirectory, "Corefile.zones"),
 			"root@"+ip+":/opt/packetframe/dns/Corefile.zones")
 		cmd.Stdout = os.Stdout
