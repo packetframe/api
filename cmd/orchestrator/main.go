@@ -326,14 +326,14 @@ func main() {
 
 				// Remove messages created more than messageLifespan ago
 				if message.created.After(time.Now().Add(messageLifespan)) {
-					log.Debug("Message created after")
+					log.Debug("Message created after %s, skipping. opcode %d, arg %s", messageLifespan, message.operation, message.arg)
 					queue = queue[1:]
 					continue
 				}
 
 				switch message.operation {
 				case opZoneUpdate:
-					log.Debugf("Updating zone %s", message.arg)
+					log.Infof("Updating zone %s", message.arg)
 
 					transferOk := true
 					if err := buildZoneFile(message.arg); err != nil {
@@ -356,7 +356,7 @@ func main() {
 						message.acked = false
 					}
 				case opCorefileUpdate:
-					log.Debugf("Updating Corefile")
+					log.Infof("Updating Corefile")
 					ok, err := buildDeployCorefile()
 					if err != nil {
 						log.Warn(err)
@@ -367,7 +367,7 @@ func main() {
 						queue = queue[1:]
 					}
 				case opZonePurge:
-					log.Debugf("Purging zones")
+					log.Infof("Purging zones")
 					if err := purgeZoneFiles(); err != nil {
 						log.Warn(err)
 					} else {
