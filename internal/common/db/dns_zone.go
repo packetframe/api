@@ -286,7 +286,10 @@ func ZoneUserGetZones(db *gorm.DB, userUuid string) ([]Zone, error) {
 	var tx *gorm.DB
 
 	if util.StrSliceContains(user.Groups, GroupAdmin) { // If admin
-		tx = db.Raw("SELECT * FROM zones GROUP BY id").Scan(&zones)
+		tx = db.Raw(`SELECT z.*,array_agg(u.email) user_emails
+			FROM zones z
+			JOIN users u ON u.id = ANY (z.users)
+			GROUP BY z.id;`).Scan(&zones)
 	} else {
 		// It seems that user_emails is not guaranteed to be in the same order as the as the original users array
 		tx = db.Raw(`SELECT z.*,array_agg(u.email) user_emails
