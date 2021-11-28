@@ -55,7 +55,7 @@ func main() {
 	rpc.Server = rpcServer
 
 	log.Infof("DB host %s", dbHost)
-	postgresDSN := fmt.Sprintf("host=%s user=api password=api dbname=api port=5432 sslmode=disable", os.Getenv("DB_HOST"))
+	postgresDSN := fmt.Sprintf("host=%s user=api password=api dbname=api port=5432 sslmode=disable", dbHost)
 
 	if version == "dev" {
 		log.SetLevel(log.DebugLevel)
