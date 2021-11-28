@@ -58,6 +58,8 @@ type config struct {
 	SSHKeyFile     string `env:"SSH_KEY_FILE,required"`
 	SSHPort        uint32 `env:"SSH_PORT,required"`
 	NodeFile       string `env:"NODE_FILE,required"`
+	NS1Hostname    string `env:"NS1_HOSTNAME"`
+	NS2Hostname    string `env:"NS2_HOSTNAME"`
 }
 
 var conf config
@@ -152,10 +154,10 @@ func buildZoneFile(zoneID string) error {
 	// Retry, number of seconds after which secondary NSes should retry serial query from the main if it doesn't respond
 	// Expire, number of seconds after which secondary NSes should stop answering if main doesn't respond
 	// Negative Cache TTL
-	zoneFile := fmt.Sprintf(`@ IN SOA ns1.packetframe.com. info.packetframe.com. %d 7200 3600 1209600 300
-@ 86400 IN NS ns1.packetframe.com.
-@ 86400 IN NS ns2.packetframe.com.
-`, zone.Serial)
+	zoneFile := fmt.Sprintf(`@ IN SOA %s.packetframe.com. info.packetframe.com. %d 7200 3600 1209600 300
+@ 86400 IN NS %s.packetframe.com.
+@ 86400 IN NS %s.packetframe.com.
+`, conf.NS1Hostname, zone.Serial, conf.NS1Hostname, conf.NS2Hostname)
 
 	for _, record := range records {
 		zoneFile += fmt.Sprintf("%s %d IN %s %s\n", record.Label, record.TTL, record.Type, record.Value)
