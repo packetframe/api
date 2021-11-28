@@ -1,0 +1,40 @@
+version: "3.3"
+services:
+  api:
+    image: "ghcr.io/packetframe/api:${PFDEV_TAG}"
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - METRICS_LISTEN=:8081
+      - RPC_SERVER=http://orchestrator:8080
+
+  orchestrator:
+    image: "ghcr.io/packetframe/orchestrator:${PFDEV_TAG}"
+    volumes:
+      - ./cache:/data
+      - ./ssh-key:/ssh-key
+      - ./nodes.yml:/nodes.yml
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - CACHE_DIR=/data
+      - METRICS_LISTEN=:8081
+      - RPC_LISTEN=:8080
+      - SSH_KEY_FILE=/ssh-key
+      - SSH_PORT=22
+      - NODE_FILE=/nodes.yml
+      - NS1_HOSTNAME=ns1v4
+      - NS2_HOSTNAME=ns2v4
+
+  db:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=api
+      - POSTGRES_PASSWORD=api
+      - POSTGRES_DB=api
