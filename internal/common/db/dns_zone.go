@@ -15,6 +15,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/packetframe/api/internal/api/rpc"
+	"github.com/packetframe/api/internal/common/util"
 )
 
 var (
@@ -276,13 +277,25 @@ func ZoneFindByID(db *gorm.DB, zoneUuid string) (*Zone, error) {
 
 // ZoneUserGetZones gets all zones a user is a member of
 func ZoneUserGetZones(db *gorm.DB, userUuid string) ([]Zone, error) {
+	user, err := UserFindById(db, userUuid)
+	if err != nil {
+		return nil, err
+	}
+
 	var zones []Zone
-	// It seems that user_emails is not guaranteed to be in the same order as the as the original users array
-	tx := db.Raw(`SELECT z.*,array_agg(u.email) user_emails
+	var tx *gorm.DB
+
+	if util.StrSliceContains(user.Groups, GroupAdmin) { // If admin
+		tx = db.Raw("SELECT * FROM zones GROUP BY id").Scan(&zones)
+	} else {
+		// It seems that user_emails is not guaranteed to be in the same order as the as the original users array
+		tx = db.Raw(`SELECT z.*,array_agg(u.email) user_emails
 			FROM zones z
 			JOIN users u ON u.id = ANY (z.users)
 			AND ? = ANY(z.users)
 			GROUP BY z.id;`, userUuid).Scan(&zones)
+	}
+
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
