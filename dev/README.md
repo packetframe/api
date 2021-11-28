@@ -22,6 +22,13 @@ cd dev
 docker-compose up
 ```
 
+#### Create test users
+```bash
+./dev/setup-test-users.sh
+```
+
+### Misc:
+
 #### Drop all tables for a clean database:
 
 `docker-compose exec -it db psql --host localhost --username api --command 'DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA IF NOT EXISTS public;'`

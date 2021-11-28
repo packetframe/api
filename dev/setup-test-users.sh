@@ -1,5 +1,8 @@
 #!/bin/bash
-# This script signs up {user1,user2}@example.com, both a password of testing123, and adds example.com to user1@example.com's account
+# This script...
+#   Signs up {user1,user2}@example.com, both with a password of testing123
+#   And adds example.com to user1@example.com's account
+#   Makes user1@example.com an admin
 
 echo -n Creating user1@example.com...
 curl --request POST \
