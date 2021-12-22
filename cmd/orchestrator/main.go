@@ -33,7 +33,7 @@ const (
 
 const (
 	opZoneUpdate = iota
-	opCorefileUpdate
+	opManifestUpdate
 	opZonePurge
 )
 
@@ -200,30 +200,29 @@ func deployZoneFile(zoneId string) (bool, error) {
 	return transferOk, nil
 }
 
-// buildDeployCorefile builds and deploys a new Corefile and returns if all edge nodes received the transfer correctly
-func buildDeployCorefile() (bool, error) {
+// buildDeployManifest builds and deploys a new Manifest and returns if all edge nodes received the transfer correctly
+func buildDeployManifest() (bool, error) {
 	zones, err := db.ZoneList(database)
 	if err != nil {
 		return false, err
 	}
 
-	coreFile := fmt.Sprintf("# Corefile.zones generated at %v\n", time.Now().UTC())
+	manifestContent := fmt.Sprintf("# knot.zones.conf generated at %v\n", time.Now().UTC())
 	for _, zone := range zones {
-		coreFile += fmt.Sprintf(`%s {
-  import pf_default
-  file /opt/packetframe/dns/zones/db.%s
-}
-`, strings.TrimSuffix(zone.Zone, "."), strings.TrimSuffix(zone.Zone, "."))
+		manifestContent += fmt.Sprintf(`zone:
+  - domain: %s
+    template: default
+`, strings.TrimSuffix(zone.Zone, "."))
 	}
 
-	// Write the Corefile to disk
-	if err := os.WriteFile(path.Join(conf.CacheDirectory, "Corefile.zones"), []byte(coreFile), 0644); err != nil {
+	// Write the zone manifest to disk
+	if err := os.WriteFile(path.Join(conf.CacheDirectory, "knot.zones.conf"), []byte(manifestContent), 0644); err != nil {
 		return false, err
 	}
 
 	transferOk := true
 	for host, ip := range edges {
-		log.Infof("Attempting deploy Corefile.zones to %s (%s)", host, ip)
+		log.Infof("Attempting deploy knot.zones.conf to %s (%s)", host, ip)
 		cmd := exec.Command("rsync",
 			"--delete",
 			"--progress",
@@ -231,18 +230,18 @@ func buildDeployCorefile() (bool, error) {
 			"--archive",
 			"--compress",
 			"-e", fmt.Sprintf("ssh %s -p %d -i %s", sshOpts, conf.SSHPort, conf.SSHKeyFile),
-			path.Join(conf.CacheDirectory, "Corefile.zones"),
-			"root@"+ip+":/opt/packetframe/dns/Corefile.zones")
+			path.Join(conf.CacheDirectory, "knot.zones.conf"),
+			"root@"+ip+":/opt/packetframe/dns/knot.zones.conf")
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 
 		log.Debugf("Running %s", cmd.String())
 		if err := cmd.Run(); err != nil {
 			transferOk = false
-			log.Warnf("Corefile.zones deploy to %s (%s): %v", host, ip, err)
+			log.Warnf("knot.zones.conf deploy to %s (%s): %v", host, ip, err)
 		}
 	}
-	log.Infoln("Finished deploying Corefile.zones")
+	log.Infoln("Finished deploying knot.zones.conf")
 
 	return transferOk, nil
 }
@@ -299,18 +298,18 @@ func main() {
 		}
 	})
 
-	http.HandleFunc("/update_corefile", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/update_manifest", func(w http.ResponseWriter, r *http.Request) {
 		duplicateMessageExists := false
 		for _, message := range queue {
-			if message.operation == opCorefileUpdate && !message.acked {
+			if message.operation == opManifestUpdate && !message.acked {
 				duplicateMessageExists = true
 			}
 		}
 
 		if !duplicateMessageExists {
-			log.Debug("Adding corefile update message")
+			log.Debug("Adding manifest update message")
 			queue = append(queue, &queueMessage{
-				operation: opCorefileUpdate,
+				operation: opManifestUpdate,
 				acked:     false,
 				created:   time.Now(),
 			})
@@ -394,9 +393,9 @@ func main() {
 						// Release the message to be retried
 						message.acked = false
 					}
-				case opCorefileUpdate:
-					log.Infof("Updating Corefile")
-					ok, err := buildDeployCorefile()
+				case opManifestUpdate:
+					log.Infof("Updating manifest")
+					ok, err := buildDeployManifest()
 					if err != nil {
 						log.Warn(err)
 					}

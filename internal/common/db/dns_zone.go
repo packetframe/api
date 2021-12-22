@@ -144,7 +144,7 @@ func ZoneAdd(db *gorm.DB, zone string, user string) error {
 			if err := rpc.Call("update_zone", map[string]string{"id": z.ID}); err != nil {
 				log.Warnf("RPC: %v", err)
 			}
-			if err := rpc.Call("update_corefile", nil); err != nil {
+			if err := rpc.Call("update_manifest", nil); err != nil {
 				log.Warnf("RPC: %v", err)
 			}
 		}
@@ -187,7 +187,7 @@ func ZoneDelete(db *gorm.DB, zone string) (bool, error) {
 		if err := rpc.Call("purge_zones", nil); err != nil {
 			log.Warnf("RPC: %v", err)
 		}
-		if err := rpc.Call("update_corefile", nil); err != nil {
+		if err := rpc.Call("update_manifest", nil); err != nil {
 			log.Warnf("RPC: %v", err)
 		}
 	}
