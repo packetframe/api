@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -131,6 +132,10 @@ func purgeZoneFiles() (bool, error) {
 			transferOk = false
 			log.Warnf("all zones deploy to %s (%s): %v", host, ip, err)
 		}
+
+		if ok := reloadKnot(host, ip); !ok {
+			transferOk = false
+		}
 	}
 
 	log.Infoln("Finished purging zone files")
@@ -167,6 +172,24 @@ func buildZoneFile(zoneID string) error {
 	return os.WriteFile(path.Join(conf.CacheDirectory, "zones/db."+strings.TrimSuffix(zone.Zone, ".")), []byte(zoneFile), 0644)
 }
 
+// reloadKnot reloads the knot daemon
+func reloadKnot(host, ip string) bool {
+	log.Infof("Reloading knot on %s (%s)", host, ip)
+	cmd := exec.Command("ssh",
+		sshOpts,
+		"-p", strconv.Itoa(int(conf.SSHPort)),
+		"-i", conf.SSHKeyFile,
+		"systemctl reload knot")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	log.Debugf("Running %s", cmd.String())
+	if err := cmd.Run(); err != nil {
+		log.Warnf("Knot reload %s (%s): %v", host, ip, err)
+		return false
+	}
+	return true
+}
+
 // deployZoneFile copies a zone file to all edge nodes and returns if all edge nodes received the transfer correctly
 func deployZoneFile(zoneId string) (bool, error) {
 	zone, err := db.ZoneFindByID(database, zoneId)
@@ -193,6 +216,10 @@ func deployZoneFile(zoneId string) (bool, error) {
 		if err := cmd.Run(); err != nil {
 			transferOk = false
 			log.Warnf("zone deploy to %s (%s): %v", host, ip, err)
+		}
+
+		if ok := reloadKnot(host, ip); !ok {
+			transferOk = false
 		}
 	}
 	log.Infof("Finished deploying zone file for %s", zone.Zone)
@@ -239,6 +266,10 @@ func buildDeployManifest() (bool, error) {
 		if err := cmd.Run(); err != nil {
 			transferOk = false
 			log.Warnf("knot.zones.conf deploy to %s (%s): %v", host, ip, err)
+		}
+
+		if ok := reloadKnot(host, ip); !ok {
+			transferOk = false
 		}
 	}
 	log.Infoln("Finished deploying knot.zones.conf")
