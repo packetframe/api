@@ -179,6 +179,7 @@ func reloadKnot(host, ip string) bool {
 		sshOpts,
 		"-p", strconv.Itoa(int(conf.SSHPort)),
 		"-i", conf.SSHKeyFile,
+		"root@"+ip,
 		"systemctl reload knot")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
