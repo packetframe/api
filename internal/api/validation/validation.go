@@ -12,7 +12,7 @@ import (
 
 // Validation parameters
 var (
-	validRRTypes = []string{"A", "AAAA", "CNAME", "TXT", "MX", "SRV", "NS"}
+	validRRTypes = []string{"A", "AAAA", "CNAME", "TXT", "MX", "SRV", "NS", "PTR"}
 )
 
 // localValidator is the singleton validator used for all validations
