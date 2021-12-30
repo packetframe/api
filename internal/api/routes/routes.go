@@ -51,7 +51,7 @@ var routes = []*route{
 	{Path: "/admin/user/impersonate", Method: http.MethodPost, Handler: AdminUserImpersonate, Description: "Log in as another user", InvalidJSONTest: false},
 
 	// Monitor
-	{Path: "/monitor/targets", Method: http.MethodGet, Handler: MonitorTargets, Description: "Get target status", InvalidJSONTest: false},
+	{Path: "/admin/status/targets", Method: http.MethodGet, Handler: MonitorTargets, Description: "Get target status", InvalidJSONTest: false},
 }
 
 type route struct {
