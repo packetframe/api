@@ -79,11 +79,15 @@ func MonitorTargets(c *fiber.Ctx) error {
 		failedNodes[target.Labels.Node] = true
 	}
 
-	plural := ""
-	if len(failedJobs) != 1 {
-		plural = "s"
+	pluralTargets := ""
+	if len(failedTargets) != 1 {
+		pluralTargets = "s"
 	}
-	out := fmt.Sprintf("%d nodes, %d targets, %d target errors across %d failed job%s\n", nodes, len(r.Data.ActiveTargets), len(failedTargets), len(failedJobs), plural)
+	pluralJobs := ""
+	if len(failedJobs) != 1 {
+		pluralJobs = "s"
+	}
+	out := fmt.Sprintf("%d nodes and %d target error%s across %d failed job%s.\n", nodes, len(failedTargets), pluralTargets, len(failedJobs), pluralJobs)
 
 	nodesStr := ""
 	if len(failedNodes) == nodes {
@@ -95,7 +99,7 @@ func MonitorTargets(c *fiber.Ctx) error {
 	}
 
 	for job := range failedJobs {
-		out += fmt.Sprintf("job %s failed on %s\n", job, nodesStr)
+		out += fmt.Sprintf("Job %s failed on %s.\n", job, nodesStr)
 	}
 
 	return c.Status(http.StatusOK).SendString(out)
