@@ -49,6 +49,9 @@ var routes = []*route{
 	{Path: "/admin/user/groups", Method: http.MethodPut, Handler: AdminUserGroupAdd, Description: "Add a group to a user", InvalidJSONTest: false},
 	{Path: "/admin/user/groups", Method: http.MethodDelete, Handler: AdminUserGroupRemove, Description: "Remove a group from a user", InvalidJSONTest: false},
 	{Path: "/admin/user/impersonate", Method: http.MethodPost, Handler: AdminUserImpersonate, Description: "Log in as another user", InvalidJSONTest: false},
+
+	// Monitor
+	{Path: "/monitor/targets", Method: http.MethodGet, Handler: MonitorTargets, Description: "Get target status", InvalidJSONTest: false},
 }
 
 type route struct {
