@@ -32,6 +32,10 @@ var (
 	dbHost        = os.Getenv("DB_HOST")
 	metricsListen = os.Getenv("METRICS_LISTEN")
 	rpcServer     = os.Getenv("RPC_SERVER")
+
+	smtpHost = os.Getenv("SMTP_HOST")
+	smtpUser = os.Getenv("SMTP_USER")
+	smtpPass = os.Getenv("SMTP_PASS")
 )
 
 func main() {
