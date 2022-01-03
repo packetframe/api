@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -16,6 +17,12 @@ import (
 var (
 	errInvalidCredentials = "invalid username and/or password"
 	errUserDisabled       = "this user is disabled, please contact info@packetframe.com"
+)
+
+var (
+	SMTPHost string
+	SMTPUser string
+	SMTPPass string
 )
 
 // findUser finds a user by Authorization header or cookie and returns nil if a user isn't found
@@ -175,4 +182,60 @@ func UserInfo(c *fiber.Ctx) error {
 		"user":  user,
 		"admin": util.StrSliceContains(user.Groups, db.GroupAdmin),
 	})
+}
+
+// UserRequestPasswordReset handles a POST request to request a password reset
+func UserRequestPasswordReset(c *fiber.Ctx) error {
+	var p struct {
+		Email string `json:"email" validate:"required,email"`
+	}
+	if err := c.BodyParser(&p); err != nil {
+		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
+	}
+	if err := validation.Validate(p); err != nil {
+		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
+	}
+
+	user, err := db.UserFindByEmail(Database, p.Email)
+	if user == nil {
+		return response(c, http.StatusUnauthorized, "Unable to find user with this email", nil)
+	}
+
+	token, err := db.UserCreatePasswordResetToken(Database, user.Email)
+	if err != nil {
+		return internalServerError(c, err)
+	}
+
+	if err := util.SendEmail(SMTPHost, SMTPUser, SMTPPass, user.Email, "Packetframe password reset", fmt.Sprintf(`Hello,
+
+A password reset has been requested for your account. If this wasn't you, you can safely ignore this email.
+
+If you'd like to reset your password, visit https://packetframe.com/dashboard/password_reset?email=%s&token=%s
+
+-Packetframe`, user.Email, token)); err != nil {
+		return internalServerError(c, err)
+	}
+
+	return response(c, http.StatusOK, "Password reset requested successfully, check your email", nil)
+}
+
+// UserConfirmPasswordReset handles a POST request to change a user's password
+func UserConfirmPasswordReset(c *fiber.Ctx) error {
+	var p struct {
+		Email    string `json:"email"`
+		Token    string `json:"token"`
+		Password string `json:"password" validate:"required,min=8,max=256"`
+	}
+	if err := c.BodyParser(&p); err != nil {
+		return response(c, http.StatusUnprocessableEntity, "Invalid request", nil)
+	}
+	if err := validation.Validate(p); err != nil {
+		return response(c, http.StatusBadRequest, "Invalid JSON data", map[string]interface{}{"reason": err})
+	}
+
+	if err := db.UserValidatePasswordResetToken(Database, p.Email, p.Token); err != nil {
+		return response(c, http.StatusForbidden, "Unauthorized: "+err.Error(), nil)
+	}
+
+	return response(c, http.StatusOK, "Password reset successfully", nil)
 }

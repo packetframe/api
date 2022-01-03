@@ -18,7 +18,7 @@ func StrSliceContains(array []string, element string) bool {
 // SendEmail sends an email
 func SendEmail(host, user, pass, to, subject, body string) error {
 	return smtp.SendMail(
-		fmt.Sprintf("%s:%d", host, 465),
+		fmt.Sprintf("%s:%d", host, 587),
 		smtp.PlainAuth("", user, pass, host),
 		user,
 		[]string{to},

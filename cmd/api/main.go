@@ -55,6 +55,19 @@ func main() {
 	if rpcServer == "" {
 		log.Fatal("RPC_SERVER must be set")
 	}
+	if smtpHost == "" {
+		log.Fatal("SMTP_HOST must be set")
+	}
+	if smtpUser == "" {
+		log.Fatal("SMTP_USER must be set")
+	}
+	if smtpPass == "" {
+		log.Fatal("SMTP_PASS must be set")
+	}
+
+	routes.SMTPHost = smtpHost
+	routes.SMTPUser = smtpUser
+	routes.SMTPPass = smtpPass
 
 	rpc.Server = rpcServer
 

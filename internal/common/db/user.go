@@ -2,9 +2,13 @@ package db
 
 import (
 	"errors"
+	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/lib/pq"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
 	"github.com/packetframe/api/internal/api/auth"
@@ -14,20 +18,22 @@ var (
 	GroupEnabled = "core.ENABLED" // User is permitted to make API requests
 	GroupAdmin   = "core.ADMIN"   // User is permitted to modify all resources
 
-	ErrUserOwnsZones = errors.New("user has zones without other users, delete or add another user to these zones before deleting this user account")
+	ErrInvalidOrExpiredPasswordResetToken = errors.New("password reset token is invalid or expired")
+	ErrUserOwnsZones                      = errors.New("user has zones without other users, delete or add another user to these zones before deleting this user account")
 )
 
 type User struct {
-	ID           string         `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()" json:"id"`
-	Email        string         `gorm:"uniqueIndex" json:"email" validate:"required,email,min=6,max=32"`
-	Password     string         `gorm:"-" json:"password" validate:"required,min=8,max=256"`
-	Refer        string         `json:"refer"` // Where did you hear about Packetframe?
-	Groups       pq.StringArray `gorm:"type:text[]" json:"groups"`
-	PasswordHash []byte         `json:"-"`
-	APIKey       string         `json:"-"` // Rotated manually by user if needed
-	Token        string         `json:"-"` // Rotated every n minutes (TODO: autorotate this)
-	CreatedAt    time.Time      `json:"-"`
-	UpdatedAt    time.Time      `json:"-"`
+	ID                 string         `gorm:"primaryKey,type:uuid;default:uuid_generate_v4()" json:"id"`
+	Email              string         `gorm:"uniqueIndex" json:"email" validate:"required,email,min=6,max=32"`
+	Password           string         `gorm:"-" json:"password" validate:"required,min=8,max=256"`
+	Refer              string         `json:"refer"` // Where did you hear about Packetframe?
+	Groups             pq.StringArray `gorm:"type:text[]" json:"groups"`
+	PasswordHash       []byte         `json:"-"`
+	APIKey             string         `json:"-"` // Rotated manually by user if needed
+	Token              string         `json:"-"` // Rotated every n minutes (TODO: autorotate this)
+	PasswordResetToken string         `json:"-"` // <token>:<unix timestamp when it was created>
+	CreatedAt          time.Time      `json:"-"`
+	UpdatedAt          time.Time      `json:"-"`
 }
 
 // UserAdd creates a new user
@@ -198,4 +204,53 @@ func UserResetPassword(db *gorm.DB, email string, password string) error {
 	user.Token = token
 
 	return db.Save(&user).Error
+}
+
+// UserCreatePasswordResetToken creates a User's password reset token
+func UserCreatePasswordResetToken(db *gorm.DB, email string) (string, error) {
+	var user User
+	if err := db.First(&user, "email = ?", email).Error; err != nil {
+		return "", err
+	}
+
+	// Hash new password
+	token, err := auth.RandomString(64)
+	if err != nil {
+		return "", err
+	}
+	user.PasswordResetToken = fmt.Sprintf("%s:%d", token, time.Now().UTC().Unix())
+
+	return token, db.Save(&user).Error
+}
+
+// UserValidatePasswordResetToken checks that a provided password reset token is valid
+func UserValidatePasswordResetToken(db *gorm.DB, email, token string) error {
+	var user User
+	if err := db.First(&user, "email = ?", email).Error; err != nil {
+		return err
+	}
+
+	tokenParts := strings.Split(user.PasswordResetToken, ":")
+	if tokenParts[0] != token {
+		return ErrInvalidOrExpiredPasswordResetToken
+	}
+
+	createdAtUnix, err := strconv.Atoi(tokenParts[1])
+	if err != nil {
+		return err
+	}
+	createdAt := time.Unix(int64(createdAtUnix), 0)
+
+	// If the token was created more than 30 minute ago, it's expired
+	if time.Now().UTC().Add(30 * time.Minute).Before(createdAt) {
+		return ErrInvalidOrExpiredPasswordResetToken
+	}
+
+	// Invalidate token by creating a new one
+	_, err = UserCreatePasswordResetToken(db, email)
+	if err != nil {
+		log.Warn(err)
+	}
+
+	return nil
 }
