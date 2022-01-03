@@ -210,9 +210,9 @@ func UserRequestPasswordReset(c *fiber.Ctx) error {
 
 A password reset has been requested for your account. If this wasn't you, you can safely ignore this email.
 
-If you'd like to reset your password, visit https://packetframe.com/dashboard/password_reset?email=%s&token=%s
+If you'd like to reset your password, visit https://packetframe.com/dashboard/password_reset/?email=%s&token=%s
 
--Packetframe`, user.Email, token)); err != nil {
+Packetframe`, user.Email, token)); err != nil {
 		return internalServerError(c, err)
 	}
 
