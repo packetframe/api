@@ -206,7 +206,7 @@ func UserRequestPasswordReset(c *fiber.Ctx) error {
 		return internalServerError(c, err)
 	}
 
-	if err := util.SendEmail(SMTPHost, SMTPUser, SMTPPass, user.Email, "Packetframe password reset", fmt.Sprintf(`Hello,
+	if err := util.SendEmail(SMTPHost, SMTPUser, SMTPPass, user.Email, "Packetframe password reset request", fmt.Sprintf(`Hello,
 
 A password reset has been requested for your account. If this wasn't you, you can safely ignore this email.
 
@@ -238,6 +238,14 @@ func UserConfirmPasswordReset(c *fiber.Ctx) error {
 	}
 
 	if err := db.UserResetPassword(Database, p.Email, p.Password); err != nil {
+		return internalServerError(c, err)
+	}
+
+	if err := util.SendEmail(SMTPHost, SMTPUser, SMTPPass, p.Email, "Packetframe password reset", fmt.Sprintf(`Hello,
+
+The password for your Packetframe account %s has been reset. If this was unexpected, please reset your password at https://packetframe.com/dashboard/password_reset and contact info@packetframe.com.
+
+Packetframe`, p.Email)); err != nil {
 		return internalServerError(c, err)
 	}
 
