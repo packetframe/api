@@ -197,7 +197,7 @@ func UserRequestPasswordReset(c *fiber.Ctx) error {
 	}
 
 	user, err := db.UserFindByEmail(Database, p.Email)
-	if user == nil {
+	if user == nil || err != nil {
 		return response(c, http.StatusUnauthorized, "Unable to find user with this email", nil)
 	}
 
