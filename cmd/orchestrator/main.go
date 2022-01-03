@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/caarlos0/env/v6"
+	"github.com/fsnotify/fsnotify"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"gorm.io/driver/postgres"
@@ -303,6 +304,39 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Infof("Loaded %d edge nodes", len(edges))
+
+	// Start watcher for node file
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer watcher.Close()
+	go func() {
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					return
+				}
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					edges, err = parseEdgeConfig()
+					if err != nil {
+						log.Fatal(err)
+					}
+					log.Infof("Loaded %d edge nodes", len(edges))
+				}
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					return
+				}
+				log.Println("error:", err)
+			}
+		}
+	}()
+	err = watcher.Add(conf.NodeFile)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	log.Println("Connecting to database")
 	database, err = gorm.Open(postgres.Open(fmt.Sprintf("host=%s user=api password=api dbname=api port=5432 sslmode=disable", conf.DbHost)), &gorm.Config{})
