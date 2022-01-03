@@ -237,5 +237,9 @@ func UserConfirmPasswordReset(c *fiber.Ctx) error {
 		return response(c, http.StatusForbidden, "Unauthorized: "+err.Error(), nil)
 	}
 
+	if err := db.UserResetPassword(Database, p.Email, p.Password); err != nil {
+		return internalServerError(c, err)
+	}
+
 	return response(c, http.StatusOK, "Password reset successfully", nil)
 }
