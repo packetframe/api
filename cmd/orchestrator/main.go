@@ -409,6 +409,21 @@ func main() {
 		fmt.Fprintf(w, "Queue content: %+v", queue)
 	})
 
+	http.HandleFunc("/build_all_zones", func(w http.ResponseWriter, r *http.Request) {
+		zones, err := db.ZoneList(database)
+		if err != nil {
+			fmt.Fprintf(w, "error %+v", err)
+		}
+
+		for _, zone := range zones {
+			if err := buildZoneFile(zone.ID); err != nil {
+				log.Warn(err)
+			}
+		}
+
+		fmt.Fprintf(w, "Built all zone files and manifest")
+	})
+
 	// Metrics listener
 	go metrics.Listen(conf.MetricsListen)
 
