@@ -28,7 +28,7 @@ type Record struct {
 // RecordAdd adds a new record to a zone
 func RecordAdd(db *gorm.DB, record *Record) error {
 	if record.Type == "DNSSCRIPT" {
-		if err := DNSScriptCompile(record.Value, record.Label); err != nil {
+		if err := DNSScriptValidate(record.Value, record.Label); err != nil {
 			return fmt.Errorf("dns script compile: %s", err)
 		}
 	}

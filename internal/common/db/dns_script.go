@@ -9,12 +9,12 @@ import (
 )
 
 var (
-	compileTimeInterval    = 1 * time.Second
-	ErrCompileTimeExceeded = errors.New("script compile time exceeded: " + compileTimeInterval.String())
+	validationTimeInterval    = 1 * time.Second
+	ErrValidationTimeExceeded = errors.New("script validation time exceeded: " + validationTimeInterval.String())
 )
 
-// DNSScriptCompile attempts to compile a script
-func DNSScriptCompile(script, origin string) error {
+// DNSScriptValidate attempts to compile a script
+func DNSScriptValidate(script, origin string) error {
 	iso := v8.NewIsolate()
 	global := v8.NewObjectTemplate(iso)
 
@@ -41,9 +41,9 @@ func DNSScriptCompile(script, origin string) error {
 	case err := <-errs:
 		iso.Dispose()
 		return err
-	case <-time.After(compileTimeInterval):
+	case <-time.After(validationTimeInterval):
 		iso.TerminateExecution()
 		iso.Dispose()
-		return ErrCompileTimeExceeded
+		return ErrValidationTimeExceeded
 	}
 }

@@ -2,7 +2,7 @@ package db
 
 import "testing"
 
-func TestDNSScriptCompile(t *testing.T) {
+func TestDNSScriptValidate(t *testing.T) {
 	for _, tc := range []struct {
 		Script      string
 		ShouldError bool
@@ -25,7 +25,7 @@ async function handleQuery(query) {
 `, false},
 		{`async function handleQuery(query) {}`, false},
 	} {
-		err := DNSScriptCompile(tc.Script, "test")
+		err := DNSScriptValidate(tc.Script, "test")
 		if tc.ShouldError && err == nil {
 			t.Fatal("should error but didn't")
 		} else if !tc.ShouldError && err != nil {
