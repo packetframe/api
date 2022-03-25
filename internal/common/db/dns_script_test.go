@@ -2,7 +2,7 @@ package db
 
 import "testing"
 
-func DNSScriptCompile(t *testing.T) {
+func TestDNSScriptCompile(t *testing.T) {
 	for _, tc := range []struct {
 		Script      string
 		ShouldError bool
