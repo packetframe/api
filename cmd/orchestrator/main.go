@@ -150,7 +150,7 @@ func buildZoneFile(zoneID string) error {
 		return err
 	}
 
-	records, err := db.RecordList(database, zoneID)
+	records, err := db.RecordListNoDNSScript(database, zoneID)
 	if err != nil {
 		return err
 	}

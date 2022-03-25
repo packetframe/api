@@ -11,9 +11,7 @@ import (
 )
 
 // Validation parameters
-var (
-	validRRTypes = []string{"A", "AAAA", "CNAME", "TXT", "MX", "SRV", "NS", "PTR"}
-)
+var validRRTypes = []string{"DNSSCRIPT", "A", "AAAA", "CNAME", "TXT", "MX", "SRV", "NS", "PTR"}
 
 // localValidator is the singleton validator used for all validations
 var localValidator *validator.Validate

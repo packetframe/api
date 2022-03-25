@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -26,6 +27,12 @@ type Record struct {
 
 // RecordAdd adds a new record to a zone
 func RecordAdd(db *gorm.DB, record *Record) error {
+	if record.Type == "DNSSCRIPT" {
+		if err := DNSScriptCompile(record.Value, record.Label); err != nil {
+			return fmt.Errorf("dns script compile: %s", err)
+		}
+	}
+
 	if err := ZoneSetSerial(db, record.ZoneID); err != nil {
 		return err
 	}
@@ -43,6 +50,13 @@ func RecordAdd(db *gorm.DB, record *Record) error {
 func RecordList(db *gorm.DB, zone string) ([]Record, error) {
 	var records []Record
 	err := db.Order("created_at").Where("zone_id = ?", zone).Find(&records).Error
+	return records, err
+}
+
+// RecordListNoDNSScript returns a list of DNS records for a zone excluding DNSSCRIPT records
+func RecordListNoDNSScript(db *gorm.DB, zone string) ([]Record, error) {
+	var records []Record
+	err := db.Order("created_at").Where("zone_id = ? AND type IS NOT 'DNSSCRIPT'", zone).Find(&records).Error
 	return records, err
 }
 

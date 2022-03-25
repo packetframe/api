@@ -12,10 +12,12 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
+	go.kuoruan.net/v8go-polyfills v0.5.0
 	golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa
 	gopkg.in/yaml.v2 v2.3.0
 	gorm.io/driver/postgres v1.2.1
 	gorm.io/gorm v1.22.2
+	rogchap.com/v8go v0.7.0
 )
 
 require (
