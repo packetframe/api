@@ -44,10 +44,12 @@ func Register() error {
 	// Register validator for full Record type
 	localValidator.RegisterStructValidation(func(sl validator.StructLevel) {
 		record := sl.Current().Interface().(db.Record)
-		rrString := fmt.Sprintf("%s %d IN %s %s", record.Label, record.TTL, record.Type, record.Value)
-		_, err := dns.NewRR(rrString) // This is only used to catch an error so ignore resulting RR
-		if err != nil {
-			sl.ReportError(record.Value, err.Error(), "", "record", "")
+		if record.Type != "SCRIPT" {
+			rrString := fmt.Sprintf("%s %d IN %s %s", record.Label, record.TTL, record.Type, record.Value)
+			_, err := dns.NewRR(rrString) // This is only used to catch an error so ignore resulting RR
+			if err != nil {
+				sl.ReportError(record.Value, err.Error(), "", "record", "")
+			}
 		}
 	}, db.Record{})
 
