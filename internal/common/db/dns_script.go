@@ -13,8 +13,8 @@ var (
 	ErrValidationTimeExceeded = errors.New("script validation time exceeded: " + validationTimeInterval.String())
 )
 
-// DNSScriptValidate attempts to compile a script
-func DNSScriptValidate(script, origin string) error {
+// ScriptValidate attempts to compile a script
+func ScriptValidate(script, origin string) error {
 	iso := v8.NewIsolate()
 	global := v8.NewObjectTemplate(iso)
 

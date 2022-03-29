@@ -75,7 +75,7 @@ func TestRecordUpdate(t *testing.T) {
 	assert.Equal(t, "203.0.113.1", records[0].Value)
 }
 
-func TestDNSScriptRecordAddListDelete(t *testing.T) {
+func TestScriptRecordAddListDelete(t *testing.T) {
 	db, err := TestSetup()
 	assert.Nil(t, err)
 
@@ -90,7 +90,7 @@ func TestDNSScriptRecordAddListDelete(t *testing.T) {
 	assert.NotNil(t, example1)
 
 	err = RecordAdd(db, &Record{
-		Type:   "DNSSCRIPT",
+		Type:   "SCRIPT",
 		Label:  "@",
 		Value:  "async function handleQuery(query) {}",
 		TTL:    86400,
