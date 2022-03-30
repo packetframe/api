@@ -212,6 +212,10 @@ func loadRecord(label, script string) {
 
 // cached checks if a script is in the cache and updates the cache with the new value
 func cached(label, script string) bool {
+	if scriptCache == nil {
+		scriptCache = map[string]string{}
+	}
+
 	cachedScript, isCached := scriptCache[label]
 
 	if !isCached || cachedScript != script {
