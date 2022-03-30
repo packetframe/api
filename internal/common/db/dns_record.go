@@ -56,7 +56,7 @@ func RecordList(db *gorm.DB, zone string) ([]Record, error) {
 // RecordListNoScript returns a list of DNS records for a zone excluding SCRIPT records
 func RecordListNoScript(db *gorm.DB, zone string) ([]Record, error) {
 	var records []Record
-	err := db.Order("created_at").Where("zone_id = ? AND type IS NOT 'SCRIPT'", zone).Find(&records).Error
+	err := db.Order("created_at").Where("zone_id = ? AND type != 'SCRIPT'", zone).Find(&records).Error
 	return records, err
 }
 
