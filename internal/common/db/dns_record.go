@@ -85,6 +85,12 @@ func RecordDelete(db *gorm.DB, recordID string) (bool, error) {
 
 // RecordUpdate updates a DNS record
 func RecordUpdate(db *gorm.DB, updates *Record) error {
+	if updates.Type == "SCRIPT" {
+		if err := ScriptValidate(updates.Value, updates.Label); err != nil {
+			return fmt.Errorf("dns script compile: %s", err)
+		}
+	}
+
 	var currentRecord Record
 	if err := db.Find(&currentRecord, "id = ?", updates.ID).Error; err != nil {
 		return err
