@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strings"
 	"time"
 
@@ -103,6 +104,7 @@ func dnsQuestionMsgToObject(iso *v8.Isolate, ctx *v8.Context, m *dns.Msg) (*v8.O
 
 // newScript creates a new isolate for a script
 func newScript(scriptContents, origin string) (*v8.Isolate, *v8.Context, error) {
+	log.Debugf("Attempting to load script %s", origin)
 	iso := v8.NewIsolate()
 
 	//printfn := v8.NewFunctionTemplate(iso, func(info *v8.FunctionCallbackInfo) *v8.Value {
@@ -130,8 +132,6 @@ func newScript(scriptContents, origin string) (*v8.Isolate, *v8.Context, error) 
 
 // loadRecord loads a record into the DNS handler
 func loadRecord(label, script string) {
-	log.Debugf("Loading zone script %s", label)
-
 	iso, ctx, err := newScript(script, strings.TrimSuffix(label, "."))
 	if err != nil {
 		log.Fatal(err)
@@ -146,6 +146,7 @@ func loadRecord(label, script string) {
 		log.Fatalf("unable to retreive handleQuery as function")
 	}
 
+	log.Debugf("Registering %s to script", label)
 	dns.HandleRemove(label)
 	dns.HandleFunc(label, func(w dns.ResponseWriter, r *dns.Msg) {
 		m := new(dns.Msg)
@@ -229,6 +230,16 @@ func cached(label, script string) bool {
 	return true
 }
 
+// labelExists checks if a label exists in a given slice of records
+func labelExists(label string, records map[string]string) bool {
+	for recordLabel := range records {
+		if recordLabel == label {
+			return true
+		}
+	}
+	return false
+}
+
 // loadRecordHandlers loads DNS record handlers from the database
 func loadRecordHandlers(database *gorm.DB) {
 	scriptRecords, err := db.ScriptRecords(database)
@@ -239,6 +250,14 @@ func loadRecordHandlers(database *gorm.DB) {
 	for label, script := range scriptRecords {
 		if !cached(label, script) {
 			loadRecord(label, script)
+		}
+	}
+
+	// Remove handlers that don't have a record in the database
+	muxLabels := reflect.ValueOf(dns.DefaultServeMux).Elem().FieldByName("z").MapKeys()
+	for _, label := range muxLabels {
+		if !labelExists(label.String(), scriptRecords) {
+			dns.HandleRemove(label.String())
 		}
 	}
 }
