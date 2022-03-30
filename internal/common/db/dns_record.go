@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -27,12 +26,6 @@ type Record struct {
 
 // RecordAdd adds a new record to a zone
 func RecordAdd(db *gorm.DB, record *Record) error {
-	if record.Type == "SCRIPT" {
-		if err := ScriptValidate(record.Value, record.Label); err != nil {
-			return fmt.Errorf("dns script compile: %s", err)
-		}
-	}
-
 	if err := ZoneSetSerial(db, record.ZoneID); err != nil {
 		return err
 	}
@@ -85,12 +78,6 @@ func RecordDelete(db *gorm.DB, recordID string) (bool, error) {
 
 // RecordUpdate updates a DNS record
 func RecordUpdate(db *gorm.DB, updates *Record) error {
-	if updates.Type == "SCRIPT" {
-		if err := ScriptValidate(updates.Value, updates.Label); err != nil {
-			return fmt.Errorf("dns script compile: %s", err)
-		}
-	}
-
 	var currentRecord Record
 	if err := db.Find(&currentRecord, "id = ?", updates.ID).Error; err != nil {
 		return err

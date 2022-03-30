@@ -29,6 +29,13 @@ func RecordAdd(c *fiber.Ctx) error {
 		return response(c, http.StatusBadRequest, "Proxied records are not currently supported", nil)
 	}
 
+	// Validate if SCRIPT record
+	if r.Type == "SCRIPT" {
+		if err := db.ScriptValidate(r.Value, r.Label); err != nil {
+			return response(c, http.StatusBadRequest, "Error compiling DNS script: "+err.Error(), nil)
+		}
+	}
+
 	// Add the record
 	if err := db.RecordAdd(Database, &r); err != nil {
 		return internalServerError(c, err)
@@ -102,6 +109,13 @@ func RecordUpdate(c *fiber.Ctx) error {
 
 	if r.Proxy {
 		return response(c, http.StatusBadRequest, "Proxied records are not currently supported", nil)
+	}
+
+	// Validate if SCRIPT record
+	if r.Type == "SCRIPT" {
+		if err := db.ScriptValidate(r.Value, r.Label); err != nil {
+			return response(c, http.StatusBadRequest, "Error compiling DNS script: "+err.Error(), nil)
+		}
 	}
 
 	// Update the record
