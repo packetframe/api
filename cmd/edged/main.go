@@ -257,6 +257,9 @@ func main() {
 
 	// Update public suffix list on a ticker
 	refresh, err := time.ParseDuration(*refreshInterval)
+	if err != nil {
+		log.Fatal(err)
+	}
 	refreshTicker := time.NewTicker(refresh)
 	go func() {
 		for range refreshTicker.C {
