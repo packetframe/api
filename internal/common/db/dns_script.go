@@ -2,9 +2,11 @@ package db
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"go.kuoruan.net/v8go-polyfills/fetch"
+	"gorm.io/gorm"
 	v8 "rogchap.com/v8go"
 )
 
@@ -46,4 +48,23 @@ func ScriptValidate(script, origin string) error {
 		iso.Dispose()
 		return ErrValidationTimeExceeded
 	}
+}
+
+// ScriptRecords returns a map of DNS labels to script strings
+func ScriptRecords(db *gorm.DB) (map[string]string, error) {
+	var records []Record
+	if err := db.Order("created_at").Where("type = 'SCRIPT'").Joins("Zone").Find(&records).Error; err != nil {
+		return nil, err
+	}
+
+	scripts := map[string]string{}
+	for _, rec := range records {
+		label := rec.Label
+		if !strings.HasSuffix(rec.Label, rec.Zone.Zone) {
+			label += "." + rec.Zone.Zone
+		}
+		scripts[label] = rec.Value
+	}
+
+	return scripts, nil
 }
