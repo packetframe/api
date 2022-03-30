@@ -19,9 +19,11 @@ import (
 )
 
 var (
-	dnsListenAddr = flag.String("l", ":5354", "DNS listen address")
-	rpcListenAddr = flag.String("r", ":8083", "RPC listen address")
-	dbHost        = flag.String("d", "localhost", "postgres database host")
+	dnsListenAddr   = flag.String("dns-listen", ":5354", "DNS listen address")
+	rpcListenAddr   = flag.String("rpc-listen", ":8083", "RPC listen address")
+	dbHost          = flag.String("db-host", "localhost", "postgres database host")
+	refreshInterval = flag.String("refresh", "30s", "script refresh interval")
+	verbose         = flag.Bool("verbose", false, "enable verbose logging")
 )
 
 var scriptCache map[string]string
@@ -128,7 +130,7 @@ func newScript(scriptContents, origin string) (*v8.Isolate, *v8.Context, error) 
 
 // loadRecord loads a record into the DNS handler
 func loadRecord(label, script string) {
-	log.Infof("Loading zone script %s", label)
+	log.Debugf("Loading zone script %s", label)
 
 	iso, ctx, err := newScript(script, strings.TrimSuffix(label, "."))
 	if err != nil {
@@ -243,12 +245,25 @@ func loadRecordHandlers(database *gorm.DB) {
 
 func main() {
 	flag.Parse()
+	if *verbose {
+		log.SetLevel(log.DebugLevel)
+	}
 
 	log.Println("Connecting to database")
 	database, err := gorm.Open(postgres.Open(fmt.Sprintf("host=%s user=api password=api dbname=api port=5432 sslmode=disable", *dbHost)), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Update public suffix list on a ticker
+	refresh, err := time.ParseDuration(*refreshInterval)
+	refreshTicker := time.NewTicker(refresh)
+	go func() {
+		for range refreshTicker.C {
+			log.Debug("Refreshing")
+			loadRecordHandlers(database)
+		}
+	}()
 
 	loadRecordHandlers(database)
 
