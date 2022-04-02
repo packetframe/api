@@ -150,7 +150,7 @@ func buildZoneFile(zoneID string) error {
 		return err
 	}
 
-	records, err := db.RecordListNoScript(database, zoneID)
+	records, err := db.RecordList(database, zoneID)
 	if err != nil {
 		return err
 	}
@@ -166,7 +166,11 @@ func buildZoneFile(zoneID string) error {
 `, conf.NS1Hostname, zone.Serial, conf.NS1Hostname, conf.NS2Hostname)
 
 	for _, record := range records {
-		zoneFile += fmt.Sprintf("%s %d IN %s %s\n", record.Label, record.TTL, record.Type, record.Value)
+		if record.Type == "SCRIPT" {
+			zoneFile += fmt.Sprintf("%s 3600 IN NS script-ns.packetframe.com.\n", record.Label)
+		} else {
+			zoneFile += fmt.Sprintf("%s %d IN %s %s\n", record.Label, record.TTL, record.Type, record.Value)
+		}
 	}
 
 	// Write the zone file to disk
