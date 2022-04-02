@@ -103,13 +103,13 @@ func NewKey(zone string) (*DNSSECKey, error) {
 	}, nil // nil error
 }
 
-// ZoneSetSerial sets a zone's SOA serial to the current UNIX time
-func ZoneSetSerial(db *gorm.DB, uuid string) error {
+// ZoneIncrementSerial increments a zone's SOA serial by 1
+func ZoneIncrementSerial(db *gorm.DB, uuid string) error {
 	var zone Zone
 	if err := db.First(&zone, "id = ?", uuid).Error; err != nil {
 		return err
 	}
-	zone.Serial = uint64(time.Now().Unix())
+	zone.Serial++
 	return db.Save(&zone).Error
 }
 

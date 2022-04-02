@@ -1,10 +1,8 @@
 package db
 
 import (
-	"testing"
-	"time"
-
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestZoneAddListFindDelete(t *testing.T) {
@@ -133,8 +131,8 @@ func TestZoneUserAddListDelete(t *testing.T) {
 	assert.NotContains(t, example1.Users, user2.ID)
 }
 
-// TestZoneSetSerial tests setting the serial of a zone
-func TestZoneSetSerial(t *testing.T) {
+// TestZoneIncrementSerial tests incrementing the serial of a zone
+func TestZoneIncrementSerial(t *testing.T) {
 	db, err := TestSetup()
 	assert.Nil(t, err)
 
@@ -151,17 +149,14 @@ func TestZoneSetSerial(t *testing.T) {
 
 	oldSerial := example1.Serial
 
-	// Wait one second to allow for UNIX timestamp to change
-	time.Sleep(time.Second)
-
-	// Set serial
-	err = ZoneSetSerial(db, example1.ID)
+	// Increment serial
+	err = ZoneIncrementSerial(db, example1.ID)
 	assert.Nil(t, err)
 
 	// Check new serial
 	example1, err = ZoneFindByID(db, example1.ID)
 	assert.Nil(t, err)
-	assert.NotEqual(t, oldSerial, example1.Serial)
+	assert.Equal(t, oldSerial+1, example1.Serial)
 }
 
 // TestZoneUserGetZones tests getting the zones of a user

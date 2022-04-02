@@ -3,22 +3,26 @@ package main
 import (
 	"flag"
 	"fmt"
+	"gorm.io/gorm"
 	"net/http"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 
 	"github.com/packetframe/api/internal/edged/scriptdns"
+	"github.com/packetframe/api/internal/edged/zonegen"
 )
 
 var (
-	dnsListenAddr   = flag.String("dns-listen", ":5354", "DNS listen address")
-	rpcListenAddr   = flag.String("rpc-listen", ":8083", "RPC listen address")
-	dbHost          = flag.String("db-host", "localhost", "postgres database host")
-	refreshInterval = flag.String("refresh", "30s", "script refresh interval")
-	verbose         = flag.Bool("verbose", false, "enable verbose logging")
+	dnsListenAddr         = flag.String("dns-listen", ":5354", "DNS listen address")
+	rpcListenAddr         = flag.String("rpc-listen", ":8083", "RPC listen address")
+	dbHost                = flag.String("db-host", "localhost", "Postgres database host")
+	zonesDirectory        = flag.String("zones-dir", "/opt/packetframe/dns/zones/", "Directory to store DNS zone files to")
+	knotZonesFile         = flag.String("knot-zones-file", "/opt/packetframe/dns/knot.zones.conf", "File to write DNS zone manifest to")
+	scriptRefreshInterval = flag.String("script-refresh", "5s", "Script refresh interval")
+	zoneRefreshInterval   = flag.String("zone-refresh", "5s", "Zone refresh interval")
+	verbose               = flag.Bool("verbose", false, "Enable verbose logging")
 )
 
 func main() {
@@ -28,31 +32,41 @@ func main() {
 	}
 
 	log.Println("Connecting to database")
-	database, err := gorm.Open(postgres.Open(fmt.Sprintf("host=%s user=api password=api dbname=api port=5432 sslmode=disable", *dbHost)), &gorm.Config{})
+	database, err := gorm.Open(postgres.Open(fmt.Sprintf("host=%s user=readonly password=readonly dbname=api port=5432 sslmode=disable", *dbHost)), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Update public suffix list on a ticker
-	refresh, err := time.ParseDuration(*refreshInterval)
+	scriptRefresh, err := time.ParseDuration(*scriptRefreshInterval)
 	if err != nil {
 		log.Fatal(err)
 	}
-	refreshTicker := time.NewTicker(refresh)
+	scriptRefreshTicker := time.NewTicker(scriptRefresh)
 	go func() {
-		for range refreshTicker.C {
-			log.Debug("Refreshing")
+		for range scriptRefreshTicker.C {
+			log.Debug("Refreshing SCRIPT handlers")
 			scriptdns.LoadRecordHandlers(database)
 		}
 	}()
 
-	log.Printf("Starting ScriptDNS server on %s", *dnsListenAddr)
-	scriptdns.Listen(*dnsListenAddr)
+	// Update zones list on a ticker
+	zoneRefresh, err := time.ParseDuration(*zoneRefreshInterval)
+	if err != nil {
+		log.Fatal(err)
+	}
+	zoneRefreshTicker := time.NewTicker(zoneRefresh)
+	go func() {
+		for range zoneRefreshTicker.C {
+			log.Debug("Refreshing zones")
+			if err := zonegen.Update(*zonesDirectory, *knotZonesFile, database); err != nil {
+				log.Warnf("zonegen update: %s", err)
+			}
+		}
+	}()
 
-	http.HandleFunc("/scriptdns/refresh", func(w http.ResponseWriter, r *http.Request) {
-		scriptdns.LoadRecordHandlers(database)
-		fmt.Fprint(w, "Refreshed")
-	})
+	log.Printf("Starting SCRIPT DNS server on %s", *dnsListenAddr)
+	scriptdns.Listen(*dnsListenAddr)
 
 	log.Infof("Starting RPC server on %s", *rpcListenAddr)
 	if err := http.ListenAndServe(*rpcListenAddr, nil); err != nil {

@@ -26,7 +26,7 @@ type Record struct {
 
 // RecordAdd adds a new record to a zone
 func RecordAdd(db *gorm.DB, record *Record) error {
-	if err := ZoneSetSerial(db, record.ZoneID); err != nil {
+	if err := ZoneIncrementSerial(db, record.ZoneID); err != nil {
 		return err
 	}
 
@@ -55,7 +55,7 @@ func RecordDelete(db *gorm.DB, recordID string) (bool, error) {
 	}
 
 	// Bump the zone serial
-	if err := ZoneSetSerial(db, r.ZoneID); err != nil {
+	if err := ZoneIncrementSerial(db, r.ZoneID); err != nil {
 		return false, err
 	}
 
@@ -76,7 +76,7 @@ func RecordUpdate(db *gorm.DB, updates *Record) error {
 		return err
 	}
 
-	if err := ZoneSetSerial(db, currentRecord.ZoneID); err != nil {
+	if err := ZoneIncrementSerial(db, currentRecord.ZoneID); err != nil {
 		return err
 	}
 

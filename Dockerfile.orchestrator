@@ -1,4 +1,0 @@
-FROM debian:bullseye
-RUN apt update && apt install -y openssh-client rsync ca-certificates
-COPY orchestrator /usr/bin/orchestrator
-ENTRYPOINT ["/usr/bin/orchestrator"]
