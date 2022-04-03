@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/getsentry/sentry-go"
 	"os"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	log "github.com/sirupsen/logrus"
@@ -74,7 +74,8 @@ func main() {
 	postgresDSN := fmt.Sprintf("host=%s user=api password=api dbname=api port=5432 sslmode=disable", dbHost)
 
 	if err := sentry.Init(sentry.ClientOptions{
-		Dsn: sentryDsn,
+		Dsn:     sentryDsn,
+		Release: version,
 	}); err != nil {
 		log.Fatalf("sentry.Init: %s", err)
 	}

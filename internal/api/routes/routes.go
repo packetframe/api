@@ -2,10 +2,10 @@ package routes
 
 import (
 	"fmt"
-	"github.com/getsentry/sentry-go"
 	"net/http"
 	"strings"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
