@@ -120,7 +120,7 @@ func Update(zonesDirectory, knotZonesFile string, database *gorm.DB) error {
 
 	if reloadRequired {
 		// Reloads the knot daemon to pick up the latest configuration
-		if err := exec.Command("/usr/sbin/knotc reload").Run(); err != nil {
+		if err := exec.Command("/usr/sbin/knotc", "reload").Run(); err != nil {
 			return err
 		}
 	}
