@@ -11,7 +11,6 @@ import (
 
 	"github.com/packetframe/api/internal/api/metrics"
 	"github.com/packetframe/api/internal/api/routes"
-	"github.com/packetframe/api/internal/api/rpc"
 	"github.com/packetframe/api/internal/api/validation"
 	"github.com/packetframe/api/internal/common/db"
 )
@@ -31,7 +30,6 @@ const (
 var (
 	dbHost        = os.Getenv("DB_HOST")
 	metricsListen = os.Getenv("METRICS_LISTEN")
-	rpcServer     = os.Getenv("RPC_SERVER")
 
 	smtpHost = os.Getenv("SMTP_HOST")
 	smtpUser = os.Getenv("SMTP_USER")
@@ -52,9 +50,6 @@ func main() {
 	if metricsListen == "" {
 		log.Fatal("METRICS_LISTEN must be set")
 	}
-	if rpcServer == "" {
-		log.Fatal("RPC_SERVER must be set")
-	}
 	if smtpHost == "" {
 		log.Fatal("SMTP_HOST must be set")
 	}
@@ -68,8 +63,6 @@ func main() {
 	routes.SMTPHost = smtpHost
 	routes.SMTPUser = smtpUser
 	routes.SMTPPass = smtpPass
-
-	rpc.Server = rpcServer
 
 	log.Infof("DB host %s", dbHost)
 	postgresDSN := fmt.Sprintf("host=%s user=api password=api dbname=api port=5432 sslmode=disable", dbHost)
