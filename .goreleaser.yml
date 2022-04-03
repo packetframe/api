@@ -25,7 +25,7 @@ changelog:
 nfpms:
   - id: edged
     package_name: edged
-    file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    file_name_template: "edged_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     vendor: Packetframe
     homepage: https://github.com/packetframe/api
     maintainer: Nate Sales <nate@packetframe.com>
