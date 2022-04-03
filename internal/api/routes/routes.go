@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"net/http"
 	"strings"
 
@@ -100,8 +101,8 @@ func response(c *fiber.Ctx, status int, message string, data map[string]interfac
 
 // internalServerError logs and returns a 503 Internal Server Error
 func internalServerError(c *fiber.Ctx, err error) error {
-	// TODO: Sentry log err
 	fmt.Printf("503 Internal Server Error ---------------------- %s ----------------------\n", err)
+	sentry.CaptureException(err)
 	return response(c, http.StatusInternalServerError, "Internal Server Error", nil)
 }
 

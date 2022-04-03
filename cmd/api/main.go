@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"os"
 	"time"
 
@@ -34,6 +35,8 @@ var (
 	smtpHost = os.Getenv("SMTP_HOST")
 	smtpUser = os.Getenv("SMTP_USER")
 	smtpPass = os.Getenv("SMTP_PASS")
+
+	sentryDsn = os.Getenv("SENTRY_DSN")
 )
 
 func main() {
@@ -59,6 +62,9 @@ func main() {
 	if smtpPass == "" {
 		log.Fatal("SMTP_PASS must be set")
 	}
+	if sentryDsn == "" {
+		log.Fatalf("SENTRY_DSN must be set")
+	}
 
 	routes.SMTPHost = smtpHost
 	routes.SMTPUser = smtpUser
@@ -66,6 +72,12 @@ func main() {
 
 	log.Infof("DB host %s", dbHost)
 	postgresDSN := fmt.Sprintf("host=%s user=api password=api dbname=api port=5432 sslmode=disable", dbHost)
+
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn: sentryDsn,
+	}); err != nil {
+		log.Fatalf("sentry.Init: %s", err)
+	}
 
 	if version == "dev" {
 		log.SetLevel(log.DebugLevel)
@@ -120,7 +132,8 @@ func main() {
 	go metrics.Collector(database, metricsUpdateInterval)
 	go metrics.Listen(metricsListen)
 
-	listenAddr := ":8080"
-	log.Printf("Starting API on %s", listenAddr)
-	log.Fatal(app.Listen(listenAddr))
+	startupMessage := fmt.Sprintf("Starting Packetframe API v%s (%s) on :8080", version, commit)
+	sentry.CaptureMessage(startupMessage)
+	log.Println(startupMessage)
+	log.Fatal(app.Listen(":8080"))
 }
