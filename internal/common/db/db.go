@@ -53,6 +53,7 @@ func Connect(dsn string) (*gorm.DB, error) {
 // migrate runs migrations on all models
 func migrate(db *gorm.DB) error {
 	db.Exec(`CREATE ROLE readonly LOGIN PASSWORD 'readonly';`)
-	db.Exec(`GRANT SELECT ON ALL TABLES IN SCHEMA public to readonly;`)
+	db.Exec(`GRANT SELECT ON TABLE zones TO readonly;`)
+	db.Exec(`GRANT SELECT ON TABLE records TO readonly;`)
 	return db.AutoMigrate(&User{}, &Zone{}, &Record{})
 }
