@@ -25,8 +25,8 @@ func RecordAdd(c *fiber.Ctx) error {
 		return err
 	}
 
-	if r.Proxy {
-		return response(c, http.StatusBadRequest, "Proxied records are not currently supported", nil)
+	if r.Proxy && !(r.Type == "A" || r.Type == "AAAA") {
+		return response(c, http.StatusBadRequest, "Proxied records must be A or AAAA", nil)
 	}
 
 	// Validate if SCRIPT record
@@ -107,8 +107,8 @@ func RecordUpdate(c *fiber.Ctx) error {
 		return err
 	}
 
-	if r.Proxy {
-		return response(c, http.StatusBadRequest, "Proxied records are not currently supported", nil)
+	if r.Proxy && !(r.Type == "A" || r.Type == "AAAA") {
+		return response(c, http.StatusBadRequest, "Proxied records must be A or AAAA", nil)
 	}
 
 	// Validate if SCRIPT record
