@@ -2,18 +2,20 @@ package caddy
 
 import (
 	"fmt"
-	"gorm.io/gorm"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
+
+	"gorm.io/gorm"
 
 	"github.com/packetframe/api/internal/common/db"
 	"github.com/packetframe/api/internal/common/util"
 )
 
 // Update writes a new Caddyfile with proxied record configurations
-func Update(database *gorm.DB, caddyFilePath, nodeId string) error {
-	var caddyPrefix = "# Caddyfile for Packetframe\n"
+func Update(database *gorm.DB, caddyFilePath, nodeId, certDir string) error {
+	var caddyPrefix string
 
 	zones, err := db.ZoneList(database)
 	if err != nil {
@@ -56,19 +58,28 @@ func Update(database *gorm.DB, caddyFilePath, nodeId string) error {
 
 	caddyFile := caddyPrefix
 	for domain, ips := range config {
+		// Check if we have a TLS certificate for this domain
+		tlsDirective := "internal"
+		if _, err := os.Stat(path.Join(certDir, domain+".cert")); err == nil {
+			tlsDirective = path.Join(certDir, domain+".cert") + " " + path.Join(certDir, domain+".key")
+		}
+
 		caddyFile += domain + ` {
-	tls /opt/packetframe/certs/` + domain + `.cert /opt/packetframe/certs/` + domain + `.key
-	reverse_proxy {
+    tls ` + tlsDirective + `
+    reverse_proxy /.well-known/acme-challenge {
+        to http://172.16.90.1:8081
+    }
+    reverse_proxy {
         to ` + strings.Join(ips, " ") + `
         lb_policy round_robin
-		header_up X-Packetframe-PoP "` + nodeId + `"
+        header_up X-Packetframe-PoP "` + nodeId + `"
         header_up Host ` + domain + `
         transport http {
             tls
             tls_insecure_skip_verify
             tls_server_name ` + domain + `
-			dial_timeout 5s
-			response_header_timeout 30s
+            dial_timeout 5s
+            response_header_timeout 30s
         }
     }
 }
@@ -81,11 +92,7 @@ func Update(database *gorm.DB, caddyFilePath, nodeId string) error {
 	}
 
 	fileHash, err := util.SHA256File(caddyFilePath)
-	if err != nil {
-		return err
-	}
-
-	if newHash != fileHash {
+	if err != nil || newHash != fileHash { // If unable to read Caddyfile or if hashes don't match
 		// Write the Caddyfile
 		if err := os.WriteFile(caddyFilePath, []byte(caddyFile), 0644); err != nil {
 			return err
