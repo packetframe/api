@@ -15,6 +15,14 @@ builds:
     goarch:
       - amd64
 
+  - id: acmed
+    dir: ./cmd/acmed
+    binary: acmed
+    goos:
+      - linux
+    goarch:
+      - amd64
+
 changelog:
   sort: asc
   filters:
@@ -54,6 +62,17 @@ dockers:
     build_flag_templates:
       - --platform=linux/amd64
       - --label=org.opencontainers.image.title=edged
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=AGPL-3.0-only
+
+  - ids: [ "acmed" ]
+    image_templates: [ "ghcr.io/packetframe/acmed:{{ .Version }}" ]
+    dockerfile: Dockerfile.acmed
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/amd64
+      - --label=org.opencontainers.image.title=acmed
       - --label=org.opencontainers.image.version={{ .Version }}
       - --label=org.opencontainers.image.revision={{ .FullCommit }}
       - --label=org.opencontainers.image.licenses=AGPL-3.0-only
