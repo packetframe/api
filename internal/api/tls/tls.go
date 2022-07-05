@@ -44,7 +44,7 @@ func proxiedDomains(database *gorm.DB) ([]string, error) {
 		}
 	}
 
-	return nil, nil
+	return domains, nil
 }
 
 var (
@@ -81,6 +81,7 @@ func Serve(host string, database *gorm.DB) {
 				sentry.CaptureException(err)
 				log.Warnf("Failed to get proxied domains: %v", err)
 			}
+			log.Debugf("Found proxied domains: %v", domains)
 			if err := certMagicConfig.ManageSync(context.TODO(), domains); err != nil {
 				sentry.CaptureException(err)
 				log.Warnf("Failed to sync certificates: %v", err)
