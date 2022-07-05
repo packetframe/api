@@ -7,6 +7,7 @@ import (
 
 	"github.com/packetframe/api/internal/api/validation"
 	"github.com/packetframe/api/internal/common/db"
+	"github.com/packetframe/api/internal/common/util"
 )
 
 // RecordAdd handles a POST request to add a DNS record
@@ -21,12 +22,18 @@ func RecordAdd(c *fiber.Ctx) error {
 	}
 
 	// Check if user is authorized for zone
-	if ok, err := checkUserAuthorizationByID(c, r.ZoneID); err != nil || !ok {
+	user, ok, err := checkUserAuthorizationByID(c, r.ZoneID)
+	if err != nil || !ok {
 		return err
 	}
 
-	if r.Proxy && !(r.Type == "A" || r.Type == "AAAA") {
-		return response(c, http.StatusBadRequest, "Proxied records must be A or AAAA", nil)
+	if r.Proxy {
+		if !(r.Type == "A" || r.Type == "AAAA") {
+			return response(c, http.StatusBadRequest, "Proxied records must be A or AAAA", nil)
+		}
+		if !util.StrSliceContains(user.Groups, db.GroupAdmin) {
+			return response(c, http.StatusForbidden, "You are not authorized to create proxied records. Please contact Packetframe support.", nil)
+		}
 	}
 
 	// Validate if SCRIPT record
@@ -49,7 +56,7 @@ func RecordList(c *fiber.Ctx) error {
 	zoneID := c.Params("id")
 
 	// Check if user is authorized for zone
-	if ok, err := checkUserAuthorizationByID(c, zoneID); err != nil || !ok {
+	if _, ok, err := checkUserAuthorizationByID(c, zoneID); err != nil || !ok {
 		return err
 	}
 
@@ -76,7 +83,7 @@ func RecordDelete(c *fiber.Ctx) error {
 	}
 
 	// Check if user is authorized for zone
-	if ok, err := checkUserAuthorizationByID(c, r.ZoneID); err != nil || !ok {
+	if _, ok, err := checkUserAuthorizationByID(c, r.ZoneID); err != nil || !ok {
 		return err
 	}
 
@@ -103,12 +110,18 @@ func RecordUpdate(c *fiber.Ctx) error {
 	}
 
 	// Check if user is authorized for zone
-	if ok, err := checkUserAuthorizationByID(c, r.ZoneID); err != nil || !ok {
+	user, ok, err := checkUserAuthorizationByID(c, r.ZoneID)
+	if err != nil || !ok {
 		return err
 	}
 
-	if r.Proxy && !(r.Type == "A" || r.Type == "AAAA") {
-		return response(c, http.StatusBadRequest, "Proxied records must be A or AAAA", nil)
+	if r.Proxy {
+		if !(r.Type == "A" || r.Type == "AAAA") {
+			return response(c, http.StatusBadRequest, "Proxied records must be A or AAAA", nil)
+		}
+		if !util.StrSliceContains(user.Groups, db.GroupAdmin) {
+			return response(c, http.StatusForbidden, "You are not authorized to create proxied records. Please contact Packetframe support.", nil)
+		}
 	}
 
 	// Validate if SCRIPT record

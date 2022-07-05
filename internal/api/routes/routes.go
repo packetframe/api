@@ -119,32 +119,32 @@ func Document() string {
 }
 
 // checkUserAuthorizationByID checks if a user is authorized for a zone given a zone ID
-func checkUserAuthorizationByID(c *fiber.Ctx, zoneId string) (bool, error) {
+func checkUserAuthorizationByID(c *fiber.Ctx, zoneId string) (*db.User, bool, error) {
 	// Find user
 	user, err := findUser(c)
 	if err != nil {
-		return false, internalServerError(c, err)
+		return nil, false, internalServerError(c, err)
 	}
 	if user == nil {
-		return false, response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
+		return nil, false, response(c, http.StatusUnauthorized, "Authentication credentials must be provided", nil)
 	}
 
 	// Check enabled group
 	if !util.StrSliceContains(user.Groups, db.GroupEnabled) {
-		return false, response(c, http.StatusForbidden, errUserDisabled, nil)
+		return user, false, response(c, http.StatusForbidden, errUserDisabled, nil)
 	}
 
 	// Allow admins access to all zones
 	if util.StrSliceContains(user.Groups, db.GroupAdmin) {
-		return true, nil
+		return user, true, nil
 	}
 
 	// Check if user is authorized for zone
 	if err := db.ZoneUserAuthorized(Database, zoneId, user.ID); err != nil {
-		return false, response(c, http.StatusForbidden, "Forbidden", nil)
+		return user, false, response(c, http.StatusForbidden, "Forbidden", nil)
 	}
 
-	return true, nil
+	return user, true, nil
 }
 
 // meta handles a GET request to get API metadata
