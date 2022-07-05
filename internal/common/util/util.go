@@ -1,8 +1,12 @@
 package util
 
 import (
+	"crypto/sha256"
 	"fmt"
+	"io"
 	"net/smtp"
+	"os"
+	"strings"
 )
 
 // StrSliceContains runs a linear search over a string array
@@ -29,4 +33,30 @@ Subject: %s
 			to, to, user, user, subject, body,
 		)),
 	)
+}
+
+// SHA256File returns the SHA256 hash of a file
+func SHA256File(file string) (string, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
+}
+
+// SHA256 returns the SHA256 hash of a string
+func SHA256(in string) (string, error) {
+	h := sha256.New()
+	if _, err := io.Copy(h, strings.NewReader(in)); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }

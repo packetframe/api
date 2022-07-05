@@ -10,18 +10,22 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 
+	"github.com/packetframe/api/internal/edged/caddy"
 	"github.com/packetframe/api/internal/edged/scriptdns"
 	"github.com/packetframe/api/internal/edged/zonegen"
 )
 
 var (
+	nodeId                = flag.String("node-id", "DEV", "Node ID")
 	dnsListenAddr         = flag.String("dns-listen", ":5354", "DNS listen address")
 	rpcListenAddr         = flag.String("rpc-listen", ":8083", "RPC listen address")
 	dbHost                = flag.String("db-host", "localhost", "Postgres database host")
 	zonesDirectory        = flag.String("zones-dir", "/opt/packetframe/dns/zones/", "Directory to store DNS zone files to")
 	knotZonesFile         = flag.String("knot-zones-file", "/opt/packetframe/dns/knot.zones.conf", "File to write DNS zone manifest to")
+	caddyFile             = flag.String("caddyfile", "", "Path to Caddyfile, disables Caddy functionality if empty")
 	scriptRefreshInterval = flag.String("script-refresh", "5s", "Script refresh interval")
 	zoneRefreshInterval   = flag.String("zone-refresh", "5s", "Zone refresh interval")
+	caddyRefreshInterval  = flag.String("caddy-refresh", "5s", "Caddy refresh interval")
 	verbose               = flag.Bool("verbose", false, "Enable verbose logging")
 )
 
@@ -64,6 +68,25 @@ func main() {
 			}
 		}
 	}()
+
+	if *caddyFile != "" {
+		log.Info("Caddy enabled")
+		caddyRefresh, err := time.ParseDuration(*caddyRefreshInterval)
+		if err != nil {
+			log.Fatal(err)
+		}
+		caddyRefreshTicker := time.NewTicker(caddyRefresh)
+		go func() {
+			for range caddyRefreshTicker.C {
+				log.Debug("Refreshing Caddy")
+				if err := caddy.Update(database, *caddyFile, *nodeId); err != nil {
+					log.Warnf("caddy update: %s", err)
+				}
+			}
+		}()
+	} else {
+		log.Info("Caddy disabled")
+	}
 
 	log.Printf("Starting SCRIPT DNS server on %s", *dnsListenAddr)
 	scriptdns.Listen(*dnsListenAddr)
