@@ -3,8 +3,7 @@ module github.com/packetframe/api
 go 1.17
 
 require (
-	github.com/caarlos0/env/v6 v6.9.1
-	github.com/fsnotify/fsnotify v1.5.1
+	github.com/caddyserver/certmagic v0.16.1
 	github.com/getsentry/sentry-go v0.13.0
 	github.com/go-playground/validator/v10 v10.10.1
 	github.com/gofiber/fiber/v2 v2.31.0
@@ -15,7 +14,6 @@ require (
 	github.com/stretchr/testify v1.7.0
 	go.kuoruan.net/v8go-polyfills v0.5.0
 	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
-	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/postgres v1.3.1
 	gorm.io/gorm v1.23.4
 	rogchap.com/v8go v0.7.0
@@ -40,8 +38,11 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/compress v1.15.1 // indirect
+	github.com/klauspost/cpuid/v2 v2.0.11 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/libdns/libdns v0.2.1 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
+	github.com/mholt/acmez v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.33.0 // indirect
@@ -49,6 +50,9 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.34.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
+	go.uber.org/atomic v1.7.0 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.21.0 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/net v0.0.0-20220401154927-543a649e0bdd // indirect
 	golang.org/x/sys v0.0.0-20220330033206-e17cdc41300f // indirect
