@@ -45,13 +45,6 @@ func writeZoneToFile(database *gorm.DB, zoneID, zonesDirectory string) error {
 		} else if record.Proxy {
 			zoneFile += fmt.Sprintf("%s 3600 IN A 66.248.235.2\n", record.Label)
 			zoneFile += fmt.Sprintf("%s 3600 IN AAAA 2602:809:3005::2\n", record.Label)
-
-			challengeLabel := "_acme-challenge." + record.Label
-			if record.Label == "@" {
-				challengeLabel = "_acme-challenge"
-			}
-			zoneFile += fmt.Sprintf("%s 3600 IN A 23.141.112.7\n", challengeLabel)
-			zoneFile += fmt.Sprintf("%s 3600 IN AAAA 2602:809:3009::7\n", challengeLabel)
 		} else {
 			zoneFile += fmt.Sprintf("%s %d IN %s %s\n", record.Label, record.TTL, record.Type, record.Value)
 		}
