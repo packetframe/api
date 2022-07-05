@@ -91,7 +91,7 @@ func Serve(host string, database *gorm.DB) {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("ok"))
+		_, _ = w.Write([]byte("ok"))
 	})
 
 	log.Infof("Starting ACME validation server on %s", host)
