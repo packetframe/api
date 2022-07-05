@@ -23,6 +23,7 @@ var (
 	zonesDirectory        = flag.String("zones-dir", "/opt/packetframe/dns/zones/", "Directory to store DNS zone files to")
 	knotZonesFile         = flag.String("knot-zones-file", "/opt/packetframe/dns/knot.zones.conf", "File to write DNS zone manifest to")
 	caddyFile             = flag.String("caddyfile", "", "Path to Caddyfile, disables Caddy functionality if empty")
+	certDir               = flag.String("cert-dir", "/opt/packetframe/certs/", "TLS certificate directory")
 	scriptRefreshInterval = flag.String("script-refresh", "5s", "Script refresh interval")
 	zoneRefreshInterval   = flag.String("zone-refresh", "5s", "Zone refresh interval")
 	caddyRefreshInterval  = flag.String("caddy-refresh", "5s", "Caddy refresh interval")
@@ -79,7 +80,7 @@ func main() {
 		go func() {
 			for range caddyRefreshTicker.C {
 				log.Debug("Refreshing Caddy")
-				if err := caddy.Update(database, *caddyFile, *nodeId); err != nil {
+				if err := caddy.Update(database, *caddyFile, *nodeId, *certDir); err != nil {
 					log.Warnf("caddy update: %s", err)
 				}
 			}
