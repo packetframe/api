@@ -43,8 +43,8 @@ func writeZoneToFile(database *gorm.DB, zoneID, zonesDirectory string) error {
 		if record.Type == "SCRIPT" {
 			zoneFile += fmt.Sprintf("%s 3600 IN NS script-ns.packetframe.com.\n", record.Label)
 		} else if record.Proxy {
-			zoneFile += fmt.Sprintf("%s 3600 IN A 66.248.234.7\n", record.Label)
-			zoneFile += fmt.Sprintf("%s 3600 IN AAAA 2602:809:3004::7\n", record.Label)
+			zoneFile += fmt.Sprintf("%s 3600 IN A 66.248.235.2\n", record.Label)
+			zoneFile += fmt.Sprintf("%s 3600 IN AAAA 2602:809:3005::2\n", record.Label)
 		} else {
 			zoneFile += fmt.Sprintf("%s %d IN %s %s\n", record.Label, record.TTL, record.Type, record.Value)
 		}
