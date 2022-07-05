@@ -1,4 +1,4 @@
 FROM debian:bullseye
 RUN apt update && apt install -y ca-certificates
-COPY edged /usr/bin/edged
-ENTRYPOINT ["/usr/bin/edged"]
+COPY acmed /usr/bin/acmed
+ENTRYPOINT ["/usr/bin/acmed"]
