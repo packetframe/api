@@ -150,6 +150,10 @@ func main() {
 					sentry.CaptureException(err)
 					log.Warnf("Failed to read key file for %s: %v", domain, err)
 				}
+				if string(certFile) == "" || string(keyFile) == "" {
+					log.Warnf("No certificate or key found for %s", domain)
+					continue
+				}
 				if err := db.CredentialAddOrUpdate(database, domain, string(certFile), string(keyFile)); err != nil {
 					sentry.CaptureException(err)
 					log.Warnf("Failed to add certificate for %s: %v", domain, err)

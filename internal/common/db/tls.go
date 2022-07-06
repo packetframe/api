@@ -3,6 +3,7 @@ package db
 import (
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -16,20 +17,20 @@ type Credential struct {
 
 // CredentialAddOrUpdate adds a new credential to the database
 func CredentialAddOrUpdate(db *gorm.DB, fqdn, cert, key string) error {
-	var cred Credential
-	res := db.FirstOrCreate(&cred, "fqdn = ?", fqdn)
-	if res.Error != nil {
-		return res.Error
-	}
+	log.Debugf("Attempting to add/update credential for %s", fqdn)
 
+	// Attempt to grab the credential
+	var cred Credential
+	if err := db.First(&cred, "fqdn = ?", fqdn).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return err
+		}
+	}
+	cred.FQDN = fqdn
 	cred.Cert = cert
 	cred.Key = key
-	res = db.Save(&cred)
-	if res.Error != nil {
-		return res.Error
-	}
 
-	return nil
+	return db.Save(&cred).Error
 }
 
 // CredentialList gets a list of credentials
