@@ -43,3 +43,18 @@ func CredentialList(db *gorm.DB) ([]Credential, error) {
 
 	return creds, nil
 }
+
+// CredentialDelete deletes a credential from the database
+func CredentialDelete(db *gorm.DB, fqdn string) error {
+	return db.Delete(&Credential{}, "fqdn = ?", fqdn).Error
+}
+
+// CredentialsContains checks if a FQDN is in the given list of credentials
+func CredentialsContains(credentials []Credential, fqdn string) bool {
+	for _, credential := range credentials {
+		if credential.FQDN == fqdn {
+			return true
+		}
+	}
+	return false
+}

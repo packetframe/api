@@ -53,6 +53,11 @@ func proxiedDomains(database *gorm.DB) ([]string, error) {
 	return domains, nil
 }
 
+// TODO: Delete credentials that are no longer needed.
+// Steps:
+// Find credentials on disk that don't have any proxied records and delete them
+// Delete credential rows from database that don't have a file on disk
+
 func main() {
 	dbHost := os.Getenv("DB_HOST")
 	sentryDsn := os.Getenv("SENTRY_DSN")
@@ -140,6 +145,8 @@ func main() {
 			}
 			for _, d := range dirs {
 				domain := strings.TrimPrefix(d, certDir+"/")
+
+				// Load the keypair
 				certFile, err := os.ReadFile(path.Join(certDir, domain, domain+".crt"))
 				if err != nil {
 					sentry.CaptureException(err)
@@ -150,10 +157,12 @@ func main() {
 					sentry.CaptureException(err)
 					log.Warnf("Failed to read key file for %s: %v", domain, err)
 				}
-				if string(certFile) == "" || string(keyFile) == "" {
-					log.Warnf("No certificate or key found for %s", domain)
+
+				// Skip empty domains
+				if domain == "" || string(certFile) == "" || string(keyFile) == "" {
 					continue
 				}
+
 				if err := db.CredentialAddOrUpdate(database, domain, string(certFile), string(keyFile)); err != nil {
 					sentry.CaptureException(err)
 					log.Warnf("Failed to add certificate for %s: %v", domain, err)
