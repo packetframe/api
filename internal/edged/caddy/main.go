@@ -101,14 +101,16 @@ func Update(database *gorm.DB, caddyFilePath, nodeId, certDir string) error {
 
 	caddyFile := caddyPrefix
 	for domain, ips := range config {
+		var tlsDirective string
+
 		// Check if we have a TLS certificate for this domain
-		tlsDirective := "internal"
 		if _, err := os.Stat(path.Join(certDir, domain+".cert")); err == nil {
-			tlsDirective = path.Join(certDir, domain+".cert") + " " + path.Join(certDir, domain+".key")
+			tlsDirective = "tls " + path.Join(certDir, domain+".cert") + " " + path.Join(certDir, domain+".key")
+			caddyFile += "http://"
 		}
 
 		caddyFile += domain + ` {
-    tls ` + tlsDirective + `
+    ` + tlsDirective + `
     reverse_proxy /.well-known/acme-challenge/* {
         to http://172.16.90.1:8081
     }
