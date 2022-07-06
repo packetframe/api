@@ -66,7 +66,7 @@ func Update(database *gorm.DB, caddyFilePath, nodeId, certDir string) error {
 
 		caddyFile += domain + ` {
     tls ` + tlsDirective + `
-    reverse_proxy /.well-known/acme-challenge {
+    reverse_proxy /.well-known/acme-challenge/* {
         to http://172.16.90.1:8081
     }
     reverse_proxy {
