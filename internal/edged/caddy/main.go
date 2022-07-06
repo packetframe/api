@@ -13,10 +13,53 @@ import (
 	"github.com/packetframe/api/internal/common/util"
 )
 
+// writeIfDiff writes contents to filename if the contents aren't already identical. Returns if the file was modified.
+func writeIfDiff(filename, contents string) (bool, error) {
+	newHash, err := util.SHA256(contents)
+	if err != nil {
+		return false, err
+	}
+
+	fileHash, err := util.SHA256File(filename)
+	if err != nil || newHash != fileHash { // If unable to read file or if hashes don't match
+		if err := os.WriteFile(filename, []byte(contents), 0644); err != nil {
+			return false, err
+		}
+		return true, nil
+
+	}
+	return false, nil
+}
+
 // Update writes a new Caddyfile with proxied record configurations
 func Update(database *gorm.DB, caddyFilePath, nodeId, certDir string) error {
 	var caddyPrefix string
 
+	// Write credentials
+	certReloadRequired := false
+	credentials, err := db.CredentialList(database)
+	if err != nil {
+		return err
+	}
+	for _, credential := range credentials {
+		modified, err := writeIfDiff(path.Join(certDir, credential.FQDN+".cert"), credential.Cert)
+		if err != nil {
+			return err
+		}
+		if modified {
+			certReloadRequired = true
+		}
+
+		modified, err = writeIfDiff(path.Join(certDir, credential.FQDN+".key"), credential.Key)
+		if err != nil {
+			return err
+		}
+		if modified {
+			certReloadRequired = true
+		}
+	}
+
+	// Write Caddyfile
 	zones, err := db.ZoneList(database)
 	if err != nil {
 		return err
@@ -86,19 +129,14 @@ func Update(database *gorm.DB, caddyFilePath, nodeId, certDir string) error {
 `
 	}
 
-	newHash, err := util.SHA256(caddyFile)
+	// Write Caddyfile
+	caddyfileModified, err := writeIfDiff(caddyFilePath, caddyFile)
 	if err != nil {
 		return err
 	}
 
-	fileHash, err := util.SHA256File(caddyFilePath)
-	if err != nil || newHash != fileHash { // If unable to read Caddyfile or if hashes don't match
-		// Write the Caddyfile
-		if err := os.WriteFile(caddyFilePath, []byte(caddyFile), 0644); err != nil {
-			return err
-		}
-
-		// Reload running caddy config
+	// Reload running caddy config
+	if caddyfileModified || certReloadRequired {
 		if err := exec.Command("caddy", "reload", "-config", caddyFile).Run(); err != nil {
 			return err
 		}

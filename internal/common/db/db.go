@@ -55,5 +55,6 @@ func migrate(db *gorm.DB) error {
 	db.Exec(`CREATE ROLE readonly LOGIN PASSWORD 'readonly';`)
 	db.Exec(`GRANT SELECT ON TABLE zones TO readonly;`)
 	db.Exec(`GRANT SELECT ON TABLE records TO readonly;`)
+	db.Exec(`GRANT SELECT ON TABLE credentials TO readonly;`)
 	return db.AutoMigrate(&User{}, &Zone{}, &Record{}, &Credential{})
 }
