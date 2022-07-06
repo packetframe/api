@@ -7,6 +7,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/getsentry/sentry-go"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
 	"github.com/packetframe/api/internal/common/db"
@@ -56,6 +58,24 @@ func Update(database *gorm.DB, caddyFilePath, nodeId, certDir string) error {
 		}
 		if modified {
 			certReloadRequired = true
+		}
+	}
+
+	// Delete credentials from disk that aren't referenced in the database
+	credFiles, err := os.ReadDir(certDir)
+	if err != nil {
+		sentry.CaptureException(err)
+		log.Warnf("Failed to get certificate files: %v", err)
+	}
+	for _, credFile := range credFiles {
+		domain := strings.TrimSuffix(strings.TrimSuffix(credFile.Name(), ".cert"), ".key")
+		log.Infof("Found credential file for %s", domain)
+		if !db.CredentialsContains(credentials, domain) {
+			log.Debugf("Deleting credential file %s for unreferenced domain %s", credFile.Name(), domain)
+			if err := os.Remove(path.Join(certDir, credFile.Name())); err != nil {
+				sentry.CaptureException(err)
+				log.Warnf("Failed to remove credential file: %v", err)
+			}
 		}
 	}
 
