@@ -137,7 +137,7 @@ func Update(database *gorm.DB, caddyFilePath, nodeId, certDir string) error {
 
 	// Reload running caddy config
 	if caddyfileModified || certReloadRequired {
-		if err := exec.Command("caddy", "reload", "-config", caddyFile).Run(); err != nil {
+		if err := exec.Command("caddy", "reload", "-config", caddyFile, "-force").Run(); err != nil {
 			return err
 		}
 	}
