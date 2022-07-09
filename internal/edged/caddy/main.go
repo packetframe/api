@@ -124,9 +124,12 @@ func Update(database *gorm.DB, caddyFilePath, nodeId, certDir string) error {
 		var tlsDirective string
 
 		// Check if we have a TLS certificate for this domain
-		if _, err := os.Stat(path.Join(certDir, domain+".cert")); err == nil {
-			tlsDirective = "tls " + path.Join(certDir, domain+".cert") + " " + path.Join(certDir, domain+".key")
+		if _, err := os.Stat(path.Join(certDir, domain+".cert")); err != nil {
+			log.Debugf("Unable to find cert for %s, falling back to HTTP", domain)
 			caddyFile += "http://"
+		} else {
+			log.Debugf("Using global cert for %s", domain)
+			tlsDirective = "tls " + path.Join(certDir, domain+".cert") + " " + path.Join(certDir, domain+".key")
 		}
 
 		caddyFile += domain + ` {
