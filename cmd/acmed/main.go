@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -163,8 +164,25 @@ func main() {
 				}
 			}
 
-			// TODO: Delete credential db rows that don't have a corresponding credential file on disk
-			// TODO: Delete credential files that don't have a proxied record anymore
+			// Delete credential rows for domains that don't have a file on disk
+			creds, err := db.CredentialList(database)
+			if err != nil {
+				sentry.CaptureException(err)
+				log.Warnf("Failed to get credentials: %v", err)
+			}
+			for _, cred := range creds {
+				// Check if cred exists on disk
+				cd := path.Join(certDir, cred.FQDN)
+				if _, err := os.Stat(cd); errors.Is(err, os.ErrNotExist) {
+					log.Debugf("%s doesn't exist, deleting credential for %s", cd, cred.FQDN)
+					if err := db.CredentialDelete(database, cred.FQDN); err != nil {
+						sentry.CaptureException(err)
+						log.Warnf("Failed to delete credential for %s: %v", cred.FQDN, err)
+					}
+				}
+			}
+
+			// TODO: Delete credential directories that don't have a proxied record anymore
 		}
 	}()
 
