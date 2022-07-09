@@ -37,6 +37,13 @@ func RecordList(db *gorm.DB, zone string) ([]Record, error) {
 	return records, err
 }
 
+// RecordListAll returns a list of all DNS records
+func RecordListAll(db *gorm.DB) ([]Record, error) {
+	var records []Record
+	err := db.Order("created_at").Find(&records).Error
+	return records, err
+}
+
 // RecordDelete deletes a DNS record from a zone
 func RecordDelete(db *gorm.DB, recordID string) (bool, error) {
 	// Find the record to get the zone ID
