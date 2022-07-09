@@ -4,6 +4,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"time"
 )
 
 // TestSetup sets up the test environment by opening a database connection, dropping all tables, and inserting test data
@@ -24,9 +26,21 @@ func TestSetup() (*gorm.DB, error) {
 	return db, nil
 }
 
+// Open opens a postgres database connection with a new logger
+func Open(dsn string) (*gorm.DB, error) {
+	return gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.New(
+			log.New(),
+			logger.Config{
+				SlowThreshold: time.Second,
+			},
+		),
+	})
+}
+
 // Connect opens a connection to the database and runs migrations
 func Connect(dsn string) (*gorm.DB, error) {
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := Open(dsn)
 	if err != nil {
 		return nil, err
 	}

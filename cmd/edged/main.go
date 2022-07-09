@@ -3,13 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gorm.io/gorm"
 	"net/http"
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"gorm.io/driver/postgres"
 
+	"github.com/packetframe/api/internal/common/db"
 	"github.com/packetframe/api/internal/edged/caddy"
 	"github.com/packetframe/api/internal/edged/scriptdns"
 	"github.com/packetframe/api/internal/edged/zonegen"
@@ -37,7 +36,7 @@ func main() {
 	}
 
 	log.Println("Connecting to database")
-	database, err := gorm.Open(postgres.Open(fmt.Sprintf("host=%s user=readonly password=readonly dbname=api port=5432 sslmode=disable", *dbHost)), &gorm.Config{})
+	database, err := db.Open(fmt.Sprintf("host=%s user=readonly password=readonly dbname=api port=5432 sslmode=disable", *dbHost))
 	if err != nil {
 		log.Fatal(err)
 	}
