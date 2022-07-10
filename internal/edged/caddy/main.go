@@ -132,22 +132,30 @@ func Update(database *gorm.DB, caddyFilePath, nodeId, certDir string) error {
 			tlsDirective = "tls " + path.Join(certDir, domain+".cert") + " " + path.Join(certDir, domain+".key")
 		}
 
+		var httpgateDirective string
+		if domain != "httpgate-broker.packetframe.com" {
+			httpgateDirective = "packetframe_httpgate https://httpgate-broker.packetframe.com always"
+		}
+
 		caddyFile += domain + ` {
     ` + tlsDirective + `
-    reverse_proxy /.well-known/acme-challenge/* {
-        to http://172.16.90.1:8081
+    route /.well-known/acme-challenge/* {
+        reverse_proxy http://172.16.90.1:8081
     }
-    reverse_proxy {
-        to ` + strings.Join(ips, " ") + `
-        lb_policy round_robin
-        header_up X-Packetframe-PoP "` + nodeId + `"
-        header_up Host ` + domain + `
-        transport http {
-            tls
-            tls_insecure_skip_verify
-            tls_server_name ` + domain + `
-            dial_timeout 5s
-            response_header_timeout 30s
+    route {
+        ` + httpgateDirective + `
+        reverse_proxy {
+            to ` + strings.Join(ips, " ") + `
+            lb_policy round_robin
+            header_up X-Packetframe-PoP "` + nodeId + `"
+            header_up Host ` + domain + `
+            transport http {
+                tls
+                tls_insecure_skip_verify
+                tls_server_name ` + domain + `
+                dial_timeout 5s
+                response_header_timeout 30s
+            }
         }
     }
 }
