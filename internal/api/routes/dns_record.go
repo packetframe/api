@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -9,6 +10,19 @@ import (
 	"github.com/packetframe/api/internal/common/db"
 	"github.com/packetframe/api/internal/common/util"
 )
+
+func checkProxyRecord(r db.Record, ctx *fiber.Ctx, userGroups []string) error {
+	if !util.StrSliceContains(userGroups, db.GroupAdmin) {
+		return response(ctx, http.StatusForbidden, "You are not authorized to create proxied records. Please contact Packetframe support.", nil)
+	}
+	if strings.Contains(r.Label, "*") {
+		return response(ctx, http.StatusBadRequest, "Proxied records cannot contain wildcards", nil)
+	}
+	if !(r.Type == "A" || r.Type == "AAAA") {
+		return response(ctx, http.StatusBadRequest, "Proxied records must be A or AAAA", nil)
+	}
+	return nil
+}
 
 // RecordAdd handles a POST request to add a DNS record
 func RecordAdd(c *fiber.Ctx) error {
@@ -28,11 +42,8 @@ func RecordAdd(c *fiber.Ctx) error {
 	}
 
 	if r.Proxy {
-		if !(r.Type == "A" || r.Type == "AAAA") {
-			return response(c, http.StatusBadRequest, "Proxied records must be A or AAAA", nil)
-		}
-		if !util.StrSliceContains(user.Groups, db.GroupAdmin) {
-			return response(c, http.StatusForbidden, "You are not authorized to create proxied records. Please contact Packetframe support.", nil)
+		if err := checkProxyRecord(r, c, user.Groups); err != nil {
+			return err
 		}
 	}
 
@@ -116,11 +127,8 @@ func RecordUpdate(c *fiber.Ctx) error {
 	}
 
 	if r.Proxy {
-		if !(r.Type == "A" || r.Type == "AAAA") {
-			return response(c, http.StatusBadRequest, "Proxied records must be A or AAAA", nil)
-		}
-		if !util.StrSliceContains(user.Groups, db.GroupAdmin) {
-			return response(c, http.StatusForbidden, "You are not authorized to create proxied records. Please contact Packetframe support.", nil)
+		if err := checkProxyRecord(r, c, user.Groups); err != nil {
+			return err
 		}
 	}
 
